@@ -143,23 +143,13 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"policy_reader.tasks.all"
-# 	],
-# 	"daily": [
-# 		"policy_reader.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"policy_reader.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"policy_reader.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"policy_reader.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"cron": {
+		"*/3 * * * *": [  # Every 3 minutes
+			"policy_reader.tasks.monitor_stuck_policy_documents"
+		]
+	}
+}
 
 # Testing
 # -------

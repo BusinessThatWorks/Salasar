@@ -1,0 +1,308 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "autoincrement",
+ "creation": "2025-08-01 07:59:23.913137",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "policy_information_section",
+  "title",
+  "policy_file",
+  "policy_type",
+  "status",
+  "section_break_processing",
+  "extracted_fields",
+  "processing_time",
+  "error_message",
+  "motor_fields_section",
+  "policy_number_motor",
+  "insured_name_motor",
+  "vehicle_number_motor",
+  "chassis_number_motor",
+  "engine_number_motor",
+  "policy_from_motor",
+  "policy_to_motor",
+  "premium_amount_motor",
+  "sum_insured_motor",
+  "make_model_motor",
+  "variant_motor",
+  "vehicle_class_motor",
+  "registration_number_motor",
+  "fuel_motor",
+  "seat_capacity_motor",
+  "column_break_motor",
+  "health_fields_section",
+  "policy_number_health",
+  "insured_name_health",
+  "sum_insured_health",
+  "policy_start_date_health",
+  "policy_end_date_health",
+  "customer_code_health",
+  "net_premium_health",
+  "policy_period_health",
+  "issuing_office_health",
+  "relationship_to_policyholder_health",
+  "date_of_birth_health"
+ ],
+ "fields": [
+  {
+   "fieldname": "policy_information_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Information"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "policy_file",
+   "fieldtype": "Attach",
+   "label": "Policy File",
+   "options": "file_types:pdf",
+   "reqd": 1
+  },
+  {
+   "fieldname": "policy_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Policy Type",
+   "options": "Motor\nHealth",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nProcessing\nCompleted\nFailed",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_processing",
+   "fieldtype": "Section Break",
+   "label": "Processing Results"
+  },
+  {
+   "fieldname": "extracted_fields",
+   "fieldtype": "JSON",
+   "label": "Extracted Fields"
+  },
+  {
+   "fieldname": "processing_time",
+   "fieldtype": "Float",
+   "label": "Processing Time (seconds)",
+   "precision": 2
+  },
+  {
+   "fieldname": "error_message",
+   "fieldtype": "Long Text",
+   "label": "Error Message"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "motor_fields_section",
+   "fieldtype": "Section Break",
+   "label": "Motor Policy Fields"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "policy_number_motor",
+   "fieldtype": "Data",
+   "label": "Policy Number"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "insured_name_motor",
+   "fieldtype": "Data",
+   "label": "Insured Name"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "vehicle_number_motor",
+   "fieldtype": "Data",
+   "label": "Vehicle Number"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "chassis_number_motor",
+   "fieldtype": "Data",
+   "label": "Chassis Number"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "engine_number_motor",
+   "fieldtype": "Data",
+   "label": "Engine Number"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "policy_from_motor",
+   "fieldtype": "Data",
+   "label": "From"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "policy_to_motor",
+   "fieldtype": "Data",
+   "label": "To"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "premium_amount_motor",
+   "fieldtype": "Data",
+   "label": "Premium Amount"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "sum_insured_motor",
+   "fieldtype": "Data",
+   "label": "Sum Insured"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "make_model_motor",
+   "fieldtype": "Data",
+   "label": "Make / Model"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "variant_motor",
+   "fieldtype": "Data",
+   "label": "Variant"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "vehicle_class_motor",
+   "fieldtype": "Data",
+   "label": "Vehicle Class"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "registration_number_motor",
+   "fieldtype": "Data",
+   "label": "Registration Number"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "fuel_motor",
+   "fieldtype": "Data",
+   "label": "Fuel"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "seat_capacity_motor",
+   "fieldtype": "Data",
+   "label": "Seat Capacity"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "column_break_motor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "health_fields_section",
+   "fieldtype": "Section Break",
+   "label": "Health Policy Fields"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "policy_number_health",
+   "fieldtype": "Data",
+   "label": "Policy Number"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "insured_name_health",
+   "fieldtype": "Data",
+   "label": "Insured Name"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "sum_insured_health",
+   "fieldtype": "Data",
+   "label": "Sum Insured"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "policy_start_date_health",
+   "fieldtype": "Data",
+   "label": "Policy Start Date"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "policy_end_date_health",
+   "fieldtype": "Data",
+   "label": "Policy End Date"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "customer_code_health",
+   "fieldtype": "Data",
+   "label": "Customer Code"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "net_premium_health",
+   "fieldtype": "Data",
+   "label": "Net Premium"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "policy_period_health",
+   "fieldtype": "Data",
+   "label": "Policy Period"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "issuing_office_health",
+   "fieldtype": "Data",
+   "label": "Issuing Office"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "relationship_to_policyholder_health",
+   "fieldtype": "Data",
+   "label": "Relationship to Policyholder"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "date_of_birth_health",
+   "fieldtype": "Data",
+   "label": "Date of Birth"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-01 08:03:44.547081",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "Policy Document",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
