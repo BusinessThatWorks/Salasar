@@ -23,6 +23,23 @@ class PolicyDocument(Document):
             return os.path.basename(self.policy_file).replace('.pdf', '').replace('.PDF', '')
         return "New Policy Document"
     
+    def get_policy_reader_settings(self):
+        """Get Policy Reader Settings with fallback to defaults"""
+        try:
+            settings = frappe.get_single("Policy Reader Settings")
+            return settings
+        except:
+            # Return object with default values if settings don't exist
+            class DefaultSettings:
+                anthropic_api_key = None
+                fast_mode = True
+                max_pages = 3
+                confidence_threshold = 0.3
+                enable_logging = True
+                timeout = 180
+                queue_type = "short"
+            return DefaultSettings()
+    
     @frappe.whitelist()
     def process_policy(self):
         """Enqueue policy processing as background job"""
@@ -36,22 +53,25 @@ class PolicyDocument(Document):
         if not self.validate_file_access():
             frappe.throw("File is not accessible for processing. Please check that the file is properly uploaded and accessible.")
         
+        # Get settings for background job configuration
+        settings = self.get_policy_reader_settings()
+        
         # Update status to Processing immediately
         self.status = "Processing"
         self.clear_individual_fields()
         self.save()
         frappe.db.commit()
         
-        # Enqueue background job using Frappe's built-in queue system with optimized settings
+        # Enqueue background job using settings configuration
         import time
         timestamp = int(time.time())
         
         frappe.enqueue(
             method="policy_reader.policy_reader.doctype.policy_document.policy_document.process_policy_background",
-            queue='short',  # Use short queue for jobs expected to complete in <5 minutes
-            timeout=180,    # Reduced timeout to 3 minutes
+            queue=settings.queue_type or 'short',
+            timeout=settings.timeout or 180,
             is_async=True,
-            job_name=f"policy_ocr_{self.name}_{timestamp}",  # Unique job name with timestamp
+            job_name=f"policy_reader_{self.name}_{timestamp}",
             doc_name=self.name
         )
         
@@ -72,16 +92,23 @@ class PolicyDocument(Document):
             
             from policy_ocr import PolicyProcessor, OCRConfig
             
-            api_key = frappe.conf.get('anthropic_api_key') or os.environ.get('ANTHROPIC_API_KEY')
+            # Get settings for processing configuration
+            settings = self.get_policy_reader_settings()
+            
+            # Get API key with priority: Settings → site_config → environment
+            api_key = (settings.anthropic_api_key or 
+                      frappe.conf.get('anthropic_api_key') or 
+                      os.environ.get('ANTHROPIC_API_KEY'))
+            
             if not api_key:
-                raise Exception("ANTHROPIC_API_KEY not configured. Add 'anthropic_api_key' to site_config.json or set ANTHROPIC_API_KEY environment variable")
+                raise Exception("Anthropic API key not configured. Please set it in Policy Reader Settings or add 'anthropic_api_key' to site_config.json")
             
             config = OCRConfig(
                 claude_api_key=api_key,
-                fast_mode=True,
-                max_pages=3,  # Reduced from 5 to 3 for faster processing
-                confidence_threshold=0.3,  # Reduced from 0.5 to 0.3 for faster extraction
-                enable_logging=True
+                fast_mode=bool(settings.fast_mode),
+                max_pages=int(settings.max_pages or 3),
+                confidence_threshold=float(settings.confidence_threshold or 0.3),
+                enable_logging=bool(settings.enable_logging)
             )
             
             processor = PolicyProcessor(config)

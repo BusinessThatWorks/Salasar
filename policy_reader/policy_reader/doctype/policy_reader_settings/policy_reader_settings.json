@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-04 06:47:24.288277",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "api_configuration_section",
+  "anthropic_api_key",
+  "processing_settings_section",
+  "fast_mode",
+  "max_pages",
+  "confidence_threshold",
+  "enable_logging",
+  "background_job_settings_section",
+  "timeout",
+  "queue_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "api_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "API Configuration"
+  },
+  {
+   "description": "Claude API key for document processing. Get your API key from https://console.anthropic.com/",
+   "fieldname": "anthropic_api_key",
+   "fieldtype": "Password",
+   "label": "Anthropic API Key"
+  },
+  {
+   "fieldname": "processing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Processing Settings"
+  },
+  {
+   "default": 1,
+   "description": "Enable fast processing mode for quicker document analysis",
+   "fieldname": "fast_mode",
+   "fieldtype": "Check",
+   "label": "Fast Mode"
+  },
+  {
+   "default": 3,
+   "description": "Maximum number of pages to process per document (1-10)",
+   "fieldname": "max_pages",
+   "fieldtype": "Int",
+   "label": "Max Pages"
+  },
+  {
+   "default": 0.3,
+   "description": "Processing confidence threshold (0.1-1.0). Lower values extract more fields but may include less accurate data",
+   "fieldname": "confidence_threshold",
+   "fieldtype": "Float",
+   "label": "Confidence Threshold"
+  },
+  {
+   "default": 1,
+   "description": "Enable detailed logging for processing operations",
+   "fieldname": "enable_logging",
+   "fieldtype": "Check",
+   "label": "Enable Logging"
+  },
+  {
+   "fieldname": "background_job_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Background Job Settings"
+  },
+  {
+   "default": 180,
+   "description": "Maximum time in seconds for processing jobs (60-600)",
+   "fieldname": "timeout",
+   "fieldtype": "Int",
+   "label": "Timeout (seconds)"
+  },
+  {
+   "default": "short",
+   "description": "Queue type for background processing: short (< 5 min), default (< 30 min), long (> 30 min)",
+   "fieldname": "queue_type",
+   "fieldtype": "Select",
+   "label": "Queue Type",
+   "options": "short\ndefault\nlong"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-08-04 06:47:24.288277",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "Policy Reader Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
