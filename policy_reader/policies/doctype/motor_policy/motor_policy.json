@@ -6,7 +6,22 @@
  "engine": "InnoDB",
  "field_order": [
   "policy_information_section",
-  "policy_number"
+  "policy_number",
+  "insured_name",
+  "vehicle_number",
+  "chassis_number",
+  "engine_number",
+  "column_break_vehicle",
+  "policy_from",
+  "policy_to",
+  "premium_amount",
+  "sum_insured",
+  "make_model",
+  "variant",
+  "vehicle_class",
+  "registration_number",
+  "fuel",
+  "seat_capacity"
  ],
  "fields": [
   {
@@ -18,6 +33,81 @@
    "fieldname": "policy_number",
    "fieldtype": "Data",
    "label": "Policy Number"
+  },
+  {
+   "fieldname": "insured_name",
+   "fieldtype": "Data",
+   "label": "Insured Name"
+  },
+  {
+   "fieldname": "vehicle_number",
+   "fieldtype": "Data",
+   "label": "Vehicle Number"
+  },
+  {
+   "fieldname": "chassis_number",
+   "fieldtype": "Data",
+   "label": "Chassis Number"
+  },
+  {
+   "fieldname": "engine_number",
+   "fieldtype": "Data",
+   "label": "Engine Number"
+  },
+  {
+   "fieldname": "column_break_vehicle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "policy_from",
+   "fieldtype": "Data",
+   "label": "From"
+  },
+  {
+   "fieldname": "policy_to",
+   "fieldtype": "Data",
+   "label": "To"
+  },
+  {
+   "fieldname": "premium_amount",
+   "fieldtype": "Currency",
+   "label": "Premium Amount"
+  },
+  {
+   "fieldname": "sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "make_model",
+   "fieldtype": "Data",
+   "label": "Make / Model"
+  },
+  {
+   "fieldname": "variant",
+   "fieldtype": "Data",
+   "label": "Variant"
+  },
+  {
+   "fieldname": "vehicle_class",
+   "fieldtype": "Data",
+   "label": "Vehicle Class"
+  },
+  {
+   "fieldname": "registration_number",
+   "fieldtype": "Data",
+   "label": "Registration Number"
+  },
+  {
+   "fieldname": "fuel",
+   "fieldtype": "Select",
+   "label": "Fuel",
+   "options": "Petrol\nDiesel\nCNG\nElectric\nHybrid"
+  },
+  {
+   "fieldname": "seat_capacity",
+   "fieldtype": "Int",
+   "label": "Seat Capacity"
   }
  ],
  "grid_page_length": 50,

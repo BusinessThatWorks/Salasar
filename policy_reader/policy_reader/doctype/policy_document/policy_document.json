@@ -11,6 +11,9 @@
   "policy_file",
   "policy_type",
   "status",
+  "policy_records_section",
+  "motor_policy",
+  "health_policy",
   "section_break_processing",
   "extracted_fields",
   "processing_time",
@@ -82,6 +85,27 @@
    "options": "Draft\nProcessing\nCompleted\nFailed",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "policy_records_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Records"
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Motor'",
+   "fieldname": "motor_policy",
+   "fieldtype": "Link",
+   "label": "Motor Policy",
+   "options": "Motor Policy",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.policy_type=='Health'",
+   "fieldname": "health_policy",
+   "fieldtype": "Link",
+   "label": "Health Policy",
+   "options": "Health Policy",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_processing",

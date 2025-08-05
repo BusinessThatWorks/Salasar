@@ -239,55 +239,82 @@ class PolicyDocument(Document):
             return {}
     
     def populate_individual_fields(self, extracted_data):
-        """Populate individual fields based on policy type and extracted data"""
+        """Create Motor or Health Policy record with extracted data"""
         if not extracted_data or not self.policy_type:
             return
         
-        # Clear all individual fields first
-        self.clear_individual_fields()
-        
         if self.policy_type.lower() == "motor":
-            # Map Motor policy fields
-            field_mapping = {
-                "Policy Number": "policy_number_motor",
-                "Insured Name": "insured_name_motor", 
-                "Vehicle Number": "vehicle_number_motor",
-                "Chassis Number": "chassis_number_motor",
-                "Engine Number": "engine_number_motor",
-                "From": "policy_from_motor",
-                "To": "policy_to_motor",
-                "Premium Amount": "premium_amount_motor",
-                "Sum Insured": "sum_insured_motor",
-                "Make / Model": "make_model_motor",
-                "Variant": "variant_motor",
-                "Vehicle Class": "vehicle_class_motor",
-                "Registration Number": "registration_number_motor",
-                "Fuel": "fuel_motor",
-                "Seat Capacity": "seat_capacity_motor"
-            }
+            self.create_motor_policy_record(extracted_data)
         elif self.policy_type.lower() == "health":
-            # Map Health policy fields
-            field_mapping = {
-                "Policy Number": "policy_number_health",
-                "Insured Name": "insured_name_health",
-                "Sum Insured": "sum_insured_health", 
-                "Policy Start Date": "policy_start_date_health",
-                "Policy End Date": "policy_end_date_health",
-                "Customer Code": "customer_code_health",
-                "Net Premium": "net_premium_health",
-                "Policy Period": "policy_period_health",
-                "Issuing Office": "issuing_office_health",
-                "Relationship to Policyholder": "relationship_to_policyholder_health",
-                "Date of Birth": "date_of_birth_health"
-            }
-        else:
-            return
+            self.create_health_policy_record(extracted_data)
+    
+    def create_motor_policy_record(self, extracted_data):
+        """Create Motor Policy record with extracted data"""
+        # Map extracted fields to Motor Policy DocType fields
+        field_mapping = {
+            "Policy Number": "policy_number",
+            "Insured Name": "insured_name", 
+            "Vehicle Number": "vehicle_number",
+            "Chassis Number": "chassis_number",
+            "Engine Number": "engine_number",
+            "From": "policy_from",
+            "To": "policy_to",
+            "Premium Amount": "premium_amount",
+            "Sum Insured": "sum_insured",
+            "Make / Model": "make_model",
+            "Variant": "variant",
+            "Vehicle Class": "vehicle_class",
+            "Registration Number": "registration_number",
+            "Fuel": "fuel",
+            "Seat Capacity": "seat_capacity"
+        }
+        
+        # Create Motor Policy record
+        motor_policy = frappe.new_doc("Motor Policy")
         
         # Populate fields with extracted data
-        for extracted_field, doctype_field in field_mapping.items():
+        for extracted_field, motor_field in field_mapping.items():
             value = extracted_data.get(extracted_field)
             if value:
-                setattr(self, doctype_field, value)
+                setattr(motor_policy, motor_field, value)
+        
+        # Save the Motor Policy record
+        motor_policy.insert()
+        
+        # Link to Policy Document
+        self.motor_policy = motor_policy.name
+    
+    def create_health_policy_record(self, extracted_data):
+        """Create Health Policy record with extracted data"""
+        # Map extracted fields to Health Policy DocType fields
+        field_mapping = {
+            "Policy Number": "policy_number",
+            "Insured Name": "insured_name",
+            "Sum Insured": "sum_insured", 
+            "Policy Start Date": "policy_start_date",
+            "Policy End Date": "policy_end_date",
+            "Customer Code": "customer_code",
+            "Net Premium": "net_premium",
+            "Policy Period": "policy_period",
+            "Issuing Office": "issuing_office",
+            "Relationship to Policyholder": "relationship_to_policyholder",
+            "Date of Birth": "date_of_birth"
+        }
+        
+        # Create Health Policy record
+        health_policy = frappe.new_doc("Health Policy")
+        
+        # Populate fields with extracted data
+        for extracted_field, health_field in field_mapping.items():
+            value = extracted_data.get(extracted_field)
+            if value:
+                setattr(health_policy, health_field, value)
+        
+        # Save the Health Policy record
+        health_policy.insert()
+        
+        # Link to Policy Document
+        self.health_policy = health_policy.name
     
     def clear_individual_fields(self):
         """Clear all individual policy fields"""
