@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "policy_information_section",
+  "policy_document",
+  "policy_file",
   "policy_number",
   "insured_name",
   "vehicle_number",
@@ -28,6 +30,19 @@
    "fieldname": "policy_information_section",
    "fieldtype": "Section Break",
    "label": "Policy Information"
+  },
+  {
+   "fieldname": "policy_document",
+   "fieldtype": "Link",
+   "label": "Policy Document",
+   "options": "Policy Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "policy_file",
+   "fieldtype": "Attach",
+   "label": "Policy File",
+   "options": "file_types:pdf"
   },
   {
    "fieldname": "policy_number",

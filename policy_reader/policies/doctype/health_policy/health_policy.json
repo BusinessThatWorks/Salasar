@@ -6,9 +6,13 @@
  "engine": "InnoDB",
  "field_order": [
   "policy_information_section",
+  "policy_document",
+  "policy_file",
   "policy_number",
   "insured_name",
   "sum_insured",
+  "insured_name_2",
+  "nominee_name",
   "column_break_health",
   "policy_start_date",
   "policy_end_date",
@@ -17,13 +21,27 @@
   "policy_period",
   "issuing_office",
   "relationship_to_policyholder",
-  "date_of_birth"
+  "date_of_birth",
+  "insured_code"
  ],
  "fields": [
   {
    "fieldname": "policy_information_section",
    "fieldtype": "Section Break",
    "label": "Policy Information"
+  },
+  {
+   "fieldname": "policy_document",
+   "fieldtype": "Link",
+   "label": "Policy Document",
+   "options": "Policy Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "policy_file",
+   "fieldtype": "Attach",
+   "label": "Policy File",
+   "options": "file_types:pdf"
   },
   {
    "fieldname": "policy_number",
@@ -60,6 +78,11 @@
    "label": "Customer Code"
   },
   {
+   "fieldname": "insured_code",
+   "fieldtype": "Data",
+   "label": "Insured Code"
+  },
+  {
    "fieldname": "net_premium",
    "fieldtype": "Currency",
    "label": "Net Premium"
@@ -84,12 +107,22 @@
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth"
+  },
+  {
+   "fieldname": "insured_name_2",
+   "fieldtype": "Data",
+   "label": "Insured Name 2"
+  },
+  {
+   "fieldname": "nominee_name",
+   "fieldtype": "Data",
+   "label": "Nominee Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-05 21:48:12.149133",
+ "modified": "2025-08-05 22:13:49.048942",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",

@@ -271,6 +271,10 @@ class PolicyDocument(Document):
         # Create Motor Policy record
         motor_policy = frappe.new_doc("Motor Policy")
         
+        # Set bidirectional link and copy PDF file
+        motor_policy.policy_document = self.name
+        motor_policy.policy_file = self.policy_file
+        
         # Populate fields with extracted data
         for extracted_field, motor_field in field_mapping.items():
             value = extracted_data.get(extracted_field)
@@ -302,6 +306,10 @@ class PolicyDocument(Document):
         
         # Create Health Policy record
         health_policy = frappe.new_doc("Health Policy")
+        
+        # Set bidirectional link and copy PDF file
+        health_policy.policy_document = self.name
+        health_policy.policy_file = self.policy_file
         
         # Populate fields with extracted data
         for extracted_field, health_field in field_mapping.items():
