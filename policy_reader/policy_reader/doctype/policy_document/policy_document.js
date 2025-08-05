@@ -10,6 +10,9 @@ frappe.ui.form.on('Policy Document', {
         // Set up real-time event listener for background processing updates
         frm.trigger('setup_realtime_listener');
         
+        // Check and display API key status
+        frm.trigger('check_api_key_status');
+        
         // Add Process Now button
         if (frm.doc.policy_file && frm.doc.policy_type && frm.doc.status !== 'Processing') {
             frm.add_custom_button(__('Process Now'), function() {
@@ -347,6 +350,31 @@ frappe.ui.form.on('Policy Document', {
                 console.error('Error adding field state indicators:', e);
             }
         }
+    },
+    
+    check_api_key_status: function(frm) {
+        // Check API key status and display in dashboard
+        frappe.call({
+            method: 'policy_reader.policy_reader.doctype.policy_document.policy_document.check_api_key_status',
+            callback: function(r) {
+                if (r.message) {
+                    let status = r.message;
+                    let color = status.configured ? 'green' : 'red';
+                    let icon = status.configured ? '✓' : '✗';
+                    let message = `${icon} API Key: ${status.message}`;
+                    
+                    // Remove existing API key status
+                    $('.api-key-status').remove();
+                    
+                    // Add to dashboard
+                    frm.dashboard.add_comment(message, color, true);
+                    
+                    // Also add a small indicator near the form title
+                    let indicator = $(`<span class="api-key-status" style="margin-left: 10px; color: ${color === 'green' ? '#28a745' : '#dc3545'}; font-size: 12px;">${message}</span>`);
+                    $('.form-layout .title-area h1').append(indicator);
+                }
+            }
+        });
     }
 });
 

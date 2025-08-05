@@ -25,7 +25,7 @@
   {
    "description": "Claude API key for document processing. Get your API key from https://console.anthropic.com/",
    "fieldname": "anthropic_api_key",
-   "fieldtype": "Password",
+   "fieldtype": "Data",
    "label": "Anthropic API Key"
   },
   {

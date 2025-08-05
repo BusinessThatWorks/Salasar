@@ -312,6 +312,55 @@ class PolicyDocument(Document):
         for field in motor_fields + health_fields:
             setattr(self, field, None)
 
+# API Key status checking method
+@frappe.whitelist()
+def check_api_key_status():
+    """Check if Anthropic API key is configured and return status"""
+    try:
+        # Try to get a dummy PolicyDocument instance to use its settings method
+        class DummyDoc:
+            def get_policy_reader_settings(self):
+                try:
+                    settings = frappe.get_single("Policy Reader Settings")
+                    return settings
+                except:
+                    class DefaultSettings:
+                        anthropic_api_key = None
+                    return DefaultSettings()
+        
+        dummy = DummyDoc()
+        settings = dummy.get_policy_reader_settings()
+        
+        # Get API key with priority: Settings → site_config → environment
+        api_key = (settings.anthropic_api_key or 
+                  frappe.conf.get('anthropic_api_key') or 
+                  os.environ.get('ANTHROPIC_API_KEY'))
+        
+        if not api_key:
+            return {
+                "configured": False,
+                "message": "Not configured - Please set in Policy Reader Settings"
+            }
+        
+        # Check if API key looks valid (starts with expected format)
+        if api_key.startswith('sk-ant-'):
+            key_preview = api_key[:10] + "..." + api_key[-4:]
+            return {
+                "configured": True,
+                "message": f"Configured ({key_preview})"
+            }
+        else:
+            return {
+                "configured": False,
+                "message": "Invalid format - API key should start with 'sk-ant-'"
+            }
+            
+    except Exception as e:
+        return {
+            "configured": False,
+            "message": f"Error checking API key: {str(e)}"
+        }
+
 # Background job method - must be module level for frappe.enqueue
 @frappe.whitelist()
 def process_policy_background(doc_name):
