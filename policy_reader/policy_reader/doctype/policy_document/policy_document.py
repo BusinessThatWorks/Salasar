@@ -315,29 +315,6 @@ class PolicyDocument(Document):
         
         # Link to Policy Document
         self.health_policy = health_policy.name
-    
-    def clear_individual_fields(self):
-        """Clear all individual policy fields"""
-        # Motor fields
-        motor_fields = [
-            "policy_number_motor", "insured_name_motor", "vehicle_number_motor",
-            "chassis_number_motor", "engine_number_motor", "policy_from_motor",
-            "policy_to_motor", "premium_amount_motor", "sum_insured_motor",
-            "make_model_motor", "variant_motor", "vehicle_class_motor",
-            "registration_number_motor", "fuel_motor", "seat_capacity_motor"
-        ]
-        
-        # Health fields  
-        health_fields = [
-            "policy_number_health", "insured_name_health", "sum_insured_health",
-            "policy_start_date_health", "policy_end_date_health", "customer_code_health",
-            "net_premium_health", "policy_period_health", "issuing_office_health",
-            "relationship_to_policyholder_health", "date_of_birth_health"
-        ]
-        
-        # Clear all fields
-        for field in motor_fields + health_fields:
-            setattr(self, field, None)
 
 # API Key status checking method
 @frappe.whitelist()
