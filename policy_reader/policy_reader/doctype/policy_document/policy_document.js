@@ -3,8 +3,7 @@
 
 frappe.ui.form.on('Policy Document', {
     refresh: function(frm) {
-        // Clear any stale field displays and processing indicators first
-        frm.trigger('clear_extracted_fields_display');
+        // Clear any processing indicators first
         frm.trigger('cleanup_all_processing_indicators');
         
         // Set up real-time event listener for background processing updates
@@ -27,10 +26,7 @@ frappe.ui.form.on('Policy Document', {
             // It will only show when user explicitly starts processing
         }
         
-        // Display extracted fields ONLY if status is Completed AND fields exist
-        if (frm.doc.status === 'Completed' && frm.doc.extracted_fields) {
-            frm.trigger('display_extracted_fields');
-        }
+        // Extracted fields display removed per user request
         
         // Add field state indicators for manual vs extracted data
         frm.trigger('add_field_state_indicators');
@@ -95,51 +91,6 @@ frappe.ui.form.on('Policy Document', {
         }
     },
     
-    clear_extracted_fields_display: function(frm) {
-        // Remove any existing extracted fields display
-        $('.extracted-fields-display').remove();
-    },
-    
-    display_extracted_fields: function(frm) {
-        if (!frm.doc.extracted_fields) return;
-        
-        try {
-            let fields = JSON.parse(frm.doc.extracted_fields);
-            let html = '<div class="extracted-fields-display" style="margin-top: 10px;">';
-            html += '<h5>Extracted Fields:</h5>';
-            html += '<div class="row">';
-            
-            Object.keys(fields).forEach(key => {
-                let value = fields[key] || 'Not found';
-                let status_color = fields[key] ? '#28a745' : '#dc3545';
-                let status_icon = fields[key] ? '✓' : '✗';
-                
-                html += `
-                    <div class="col-md-6 mb-2">
-                        <div class="card" style="border-left: 3px solid ${status_color};">
-                            <div class="card-body p-2">
-                                <strong>${key}:</strong><br>
-                                <span style="color: ${status_color};">
-                                    ${status_icon} ${value}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div></div>';
-            
-            // Remove existing display if any
-            $('.extracted-fields-display').remove();
-            
-            // Insert after extracted_fields
-            $(frm.fields_dict.extracted_fields.wrapper).after(html);
-            
-        } catch (e) {
-            console.error('Error displaying extracted fields:', e);
-        }
-    },
     
     setup_realtime_listener: function(frm) {
         // Set up real-time event listener for policy processing completion
