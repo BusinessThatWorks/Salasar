@@ -58,7 +58,6 @@ class PolicyDocument(Document):
         
         # Update status to Processing immediately
         self.status = "Processing"
-        self.clear_individual_fields()
         self.save()
         frappe.db.commit()
         
