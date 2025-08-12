@@ -81,40 +81,13 @@ frappe.ui.form.on('Policy Document', {
             frm.set_value('title', title);
         }
         
-        // Auto-trigger processing when both file and policy type are set
-        if (frm.doc.policy_file && frm.doc.policy_type && frm.doc.status === 'Draft') {
-            frm.trigger('auto_process_policy');
-        }
+        // Refresh the form to show Process Policy button if both file and type are set
+        frm.refresh();
     },
     
     policy_type: function(frm) {
-        // Auto-trigger processing when both file and policy type are set
-        if (frm.doc.policy_file && frm.doc.policy_type && frm.doc.status === 'Draft') {
-            frm.trigger('auto_process_policy');
-        }
-    },
-    
-    auto_process_policy: function(frm) {
-        // Automatically start processing when PDF and policy type are set
-        if (frm.doc.policy_file && frm.doc.policy_type && frm.doc.status === 'Draft') {
-            frappe.confirm(
-                __('Do you want to automatically process this policy document?'),
-                function() {
-                    frm.call('process_policy').then(r => {
-                        if (r.message && r.message.success) {
-                            frappe.show_alert({
-                                message: __(r.message.message),
-                                indicator: 'blue'
-                            });
-                            frm.reload_doc();
-                        }
-                    });
-                },
-                function() {
-                    // User declined, do nothing
-                }
-            );
-        }
+        // Refresh the form to show Process Policy button if both file and type are set  
+        frm.refresh();
     },
     
     

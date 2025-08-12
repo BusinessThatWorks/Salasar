@@ -94,35 +94,30 @@ class PolicyDocument(Document):
             
             file_path = self.get_full_file_path()
             
-            from policy_ocr import PolicyProcessor, OCRConfig
+            from document_reader import OCRReader
             
             # Get settings for processing configuration
             settings = self.get_policy_reader_settings()
             
-            # Get API key with priority: Settings → site_config → environment
-            api_key = (settings.anthropic_api_key or 
-                      frappe.conf.get('anthropic_api_key') or 
-                      os.environ.get('ANTHROPIC_API_KEY'))
-            
-            if not api_key:
-                raise Exception("Anthropic API key not configured. Please set it in Policy Reader Settings or add 'anthropic_api_key' to site_config.json")
-            
-            config = OCRConfig(
-                claude_api_key=api_key,
-                fast_mode=bool(settings.fast_mode),
-                max_pages=int(settings.max_pages or 3),
-                confidence_threshold=float(settings.confidence_threshold or 0.3),
-                enable_logging=bool(settings.enable_logging)
-            )
-            
-            processor = PolicyProcessor(config)
-            
             start_time = time.time()
             
-            result = processor.process_policy(
-                file_path=file_path,
-                policy_type=self.policy_type.lower()
+            # Step 1: Extract text using OCR
+            ocr_reader = OCRReader(
+                language='en',
+                confidence_threshold=float(settings.confidence_threshold or 0.3),
+                image_resolution_scale=2.0,
+                image_quality=80
             )
+            
+            # Limit pages if configured
+            page_range = None
+            if hasattr(settings, 'max_pages') and settings.max_pages:
+                page_range = (1, int(settings.max_pages))
+            
+            extracted_text = ocr_reader.process_pdf(file_path, page_range=page_range)
+            
+            # Step 2: Extract structured fields using Claude API
+            result = self.extract_fields_with_claude(extracted_text, self.policy_type.lower(), settings)
             
             end_time = time.time()
             processing_time = round(end_time - start_time, 2)
@@ -202,6 +197,97 @@ class PolicyDocument(Document):
             frappe.logger().error(f"File validation failed for {self.policy_file}: {str(e)}")
             return False
     
+    def extract_fields_with_claude(self, extracted_text, policy_type, settings):
+        """Extract structured fields from text using Claude API"""
+        try:
+            # Get API key with priority: Settings → site_config → environment
+            api_key = (settings.anthropic_api_key or 
+                      frappe.conf.get('anthropic_api_key') or 
+                      os.environ.get('ANTHROPIC_API_KEY'))
+            
+            if not api_key:
+                raise Exception("Anthropic API key not configured. Please set it in Policy Reader Settings or add 'anthropic_api_key' to site_config.json")
+            
+            # Get field mapping for the policy type
+            from policy_reader.utils import get_field_mapping_for_policy_type
+            field_mapping = get_field_mapping_for_policy_type(policy_type)
+            
+            # Build prompt for Claude
+            fields_list = list(field_mapping.keys())
+            prompt = self.build_extraction_prompt(extracted_text, policy_type, fields_list)
+            
+            # Call Claude API using Frappe HTTP utilities
+            from frappe.integrations.utils import make_post_request
+            
+            headers = {
+                'Content-Type': 'application/json',
+                'X-API-Key': api_key,
+                'anthropic-version': '2023-06-01'
+            }
+            
+            payload = {
+                'model': 'claude-3-haiku-20240307' if settings.fast_mode else 'claude-3-sonnet-20240229',
+                'max_tokens': 4000,
+                'messages': [
+                    {
+                        'role': 'user',
+                        'content': prompt
+                    }
+                ]
+            }
+            
+            response = make_post_request(
+                'https://api.anthropic.com/v1/messages',
+                headers=headers,
+                data=frappe.as_json(payload)
+            )
+            
+            if response and response.get('content'):
+                content = response['content'][0]['text']
+                
+                # Parse the JSON response from Claude using Frappe utilities
+                try:
+                    extracted_fields = frappe.parse_json(content)
+                    return {
+                        "success": True,
+                        "extracted_fields": extracted_fields
+                    }
+                except (ValueError, TypeError) as e:
+                    return {
+                        "success": False,
+                        "error": f"Failed to parse Claude response as JSON: {str(e)}"
+                    }
+            else:
+                error_msg = "Claude API request failed"
+                if response:
+                    error_msg = f"Claude API error: {response.get('error', 'Unknown error')}"
+                return {
+                    "success": False,
+                    "error": error_msg
+                }
+                
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Field extraction failed: {str(e)}"
+            }
+    
+    def build_extraction_prompt(self, text, policy_type, fields_list):
+        """Build prompt for Claude to extract specific fields"""
+        prompt = f"""You are an expert at extracting information from {policy_type} insurance policy documents.
+
+Extract the following fields from the policy document text below. Return ONLY a JSON object with the field names as keys and extracted values as values. If a field is not found, use null as the value.
+
+Fields to extract:
+{', '.join(fields_list)}
+
+Document text:
+{text[:8000]}  # Limit text length for token efficiency
+
+Return your response as a valid JSON object only, no additional text or explanation."""
+        
+        return prompt
+    
     def get_full_file_path(self):
         """Get absolute path to the uploaded file using Frappe's file management"""
         if not self.policy_file:
@@ -245,12 +331,21 @@ class PolicyDocument(Document):
     def populate_individual_fields(self, extracted_data):
         """Create Motor or Health Policy record with extracted data"""
         if not extracted_data or not self.policy_type:
+            frappe.logger().warning(f"Cannot create policy record - extracted_data: {bool(extracted_data)}, policy_type: {self.policy_type}")
             return
         
+        frappe.logger().info(f"Creating {self.policy_type} policy record from extracted data for document {self.name}")
+        
+        policy_created = False
         if self.policy_type.lower() == "motor":
-            self.create_motor_policy_record(extracted_data)
+            policy_created = self.create_motor_policy_record(extracted_data)
         elif self.policy_type.lower() == "health":
-            self.create_health_policy_record(extracted_data)
+            policy_created = self.create_health_policy_record(extracted_data)
+        
+        if policy_created:
+            frappe.logger().info(f"Successfully created {self.policy_type} policy record for document {self.name}")
+        else:
+            frappe.logger().error(f"Failed to create {self.policy_type} policy record for document {self.name}")
     
     def create_motor_policy_record(self, extracted_data):
         """Create Motor Policy record with extracted data"""
@@ -258,13 +353,21 @@ class PolicyDocument(Document):
         from policy_reader.utils import get_field_mapping_for_policy_type
         field_mapping = get_field_mapping_for_policy_type("motor")
         
+        frappe.logger().info(f"Starting Motor Policy creation for {self.name} with {len(extracted_data)} extracted fields")
+        frappe.logger().info(f"Field mapping: {field_mapping}")
+        
         try:
             # Create Motor Policy record
             motor_policy = frappe.new_doc("Motor Policy")
+            frappe.logger().info(f"Created new Motor Policy document")
             
             # Set bidirectional link and copy PDF file
             motor_policy.policy_document = self.name
             motor_policy.policy_file = self.policy_file
+            frappe.logger().info(f"Set policy_document link to {self.name} and copied policy_file")
+            
+            # Track successful field mappings
+            mapped_fields = 0
             
             # Populate fields with extracted data using Frappe utilities
             for extracted_field, motor_field in field_mapping.items():
@@ -274,19 +377,35 @@ class PolicyDocument(Document):
                     converted_value = self._convert_field_value(motor_field, value, "Motor Policy")
                     if converted_value is not None:
                         setattr(motor_policy, motor_field, converted_value)
+                        mapped_fields += 1
+                        frappe.logger().info(f"Mapped {extracted_field} -> {motor_field}: {converted_value}")
+                    else:
+                        frappe.logger().warning(f"Field conversion failed for {extracted_field} -> {motor_field}: {value}")
+                else:
+                    frappe.logger().info(f"No value found for {extracted_field}")
+            
+            frappe.logger().info(f"Successfully mapped {mapped_fields} fields to Motor Policy")
             
             # Save the Motor Policy record
             motor_policy.insert()
+            frappe.logger().info(f"Motor Policy record created successfully with name: {motor_policy.name}")
             
             # Link to Policy Document
             self.motor_policy = motor_policy.name
+            frappe.logger().info(f"Linked Motor Policy {motor_policy.name} to Policy Document {self.name}")
+            
+            return True
             
         except Exception as e:
             # Use Frappe error handling - log but don't fail entire processing
-            frappe.log_error(f"Failed to create Motor Policy record: {str(e)}", "Motor Policy Creation Error")
+            error_msg = f"Failed to create Motor Policy record for {self.name}: {str(e)}"
+            frappe.log_error(error_msg, "Motor Policy Creation Error")
+            frappe.logger().error(error_msg)
+            
             # Still save extracted fields JSON even if policy record creation fails
             frappe.msgprint(f"Policy extracted successfully but failed to create Motor Policy record: {str(e)}", 
                           title="Partial Processing Error", indicator="orange")
+            return False
     
     def create_health_policy_record(self, extracted_data):
         """Create Health Policy record with extracted data"""
@@ -294,13 +413,21 @@ class PolicyDocument(Document):
         from policy_reader.utils import get_field_mapping_for_policy_type
         field_mapping = get_field_mapping_for_policy_type("health")
         
+        frappe.logger().info(f"Starting Health Policy creation for {self.name} with {len(extracted_data)} extracted fields")
+        frappe.logger().info(f"Field mapping: {field_mapping}")
+        
         try:
             # Create Health Policy record
             health_policy = frappe.new_doc("Health Policy")
+            frappe.logger().info(f"Created new Health Policy document")
             
             # Set bidirectional link and copy PDF file
             health_policy.policy_document = self.name
             health_policy.policy_file = self.policy_file
+            frappe.logger().info(f"Set policy_document link to {self.name} and copied policy_file")
+            
+            # Track successful field mappings
+            mapped_fields = 0
             
             # Populate fields with extracted data using Frappe utilities
             for extracted_field, health_field in field_mapping.items():
@@ -310,19 +437,35 @@ class PolicyDocument(Document):
                     converted_value = self._convert_field_value(health_field, value, "Health Policy")
                     if converted_value is not None:
                         setattr(health_policy, health_field, converted_value)
+                        mapped_fields += 1
+                        frappe.logger().info(f"Mapped {extracted_field} -> {health_field}: {converted_value}")
+                    else:
+                        frappe.logger().warning(f"Field conversion failed for {extracted_field} -> {health_field}: {value}")
+                else:
+                    frappe.logger().info(f"No value found for {extracted_field}")
+            
+            frappe.logger().info(f"Successfully mapped {mapped_fields} fields to Health Policy")
             
             # Save the Health Policy record
             health_policy.insert()
+            frappe.logger().info(f"Health Policy record created successfully with name: {health_policy.name}")
             
             # Link to Policy Document
             self.health_policy = health_policy.name
+            frappe.logger().info(f"Linked Health Policy {health_policy.name} to Policy Document {self.name}")
+            
+            return True
             
         except Exception as e:
             # Use Frappe error handling - log but don't fail entire processing
-            frappe.log_error(f"Failed to create Health Policy record: {str(e)}", "Health Policy Creation Error")
+            error_msg = f"Failed to create Health Policy record for {self.name}: {str(e)}"
+            frappe.log_error(error_msg, "Health Policy Creation Error")
+            frappe.logger().error(error_msg)
+            
             # Still save extracted fields JSON even if policy record creation fails
             frappe.msgprint(f"Policy extracted successfully but failed to create Health Policy record: {str(e)}", 
                           title="Partial Processing Error", indicator="orange")
+            return False
     
     def _convert_field_value(self, fieldname, value, doctype_name):
         """Convert extracted field value to appropriate type using Frappe utilities"""
