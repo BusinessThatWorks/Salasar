@@ -316,21 +316,135 @@ class PolicyDocument(Document):
                 "error": f"Field extraction failed: {str(e)}"
             }
     
+    def get_field_format_specification(self, field_label, fieldname, field_meta):
+        """Get format specification for a specific field based on its type"""
+        if not field_meta:
+            return f"- {field_label}: Text format"
+        
+        fieldtype = field_meta.fieldtype
+        
+        # Date fields
+        if fieldtype in ["Date", "Datetime"]:
+            return f"- {field_label}: Date in DD/MM/YYYY format only (remove 'FROM', 'UNTIL', 'VALID TILL', times, extra text)"
+        
+        # Currency fields  
+        elif fieldtype in ["Currency", "Float"]:
+            return f"- {field_label}: Numeric value only (remove currency symbols like '₹', 'Rs.', commas, '/-')"
+        
+        # Integer fields
+        elif fieldtype == "Int":
+            return f"- {field_label}: Integer number only (remove descriptive text like 'seater', 'capacity')"
+        
+        # Select fields
+        elif fieldtype == "Select" and field_meta.options:
+            options_list = [opt.strip() for opt in field_meta.options.split('\n') if opt.strip()]
+            return f"- {field_label}: Exact match from [{', '.join(options_list)}] (case-insensitive matching)"
+        
+        # Data fields with special cases
+        elif fieldtype == "Data":
+            # Special handling for known date-like fields that should be Data type
+            if any(date_keyword in fieldname.lower() for date_keyword in ['from', 'to', 'date', 'period']):
+                if 'from' in fieldname.lower() or 'to' in fieldname.lower():
+                    return f"- {field_label}: Date in DD/MM/YYYY format (clean from 'FROM 15/03/2024' to '15/03/2024')"
+                else:
+                    return f"- {field_label}: Clean text format (remove unnecessary prefixes/suffixes)"
+            # Vehicle/Registration numbers
+            elif any(vehicle_keyword in fieldname.lower() for vehicle_keyword in ['vehicle', 'registration', 'chassis', 'engine']):
+                return f"- {field_label}: Alphanumeric format (clean registration/ID format)"
+            else:
+                return f"- {field_label}: Clean text format (core information only)"
+        
+        # Default fallback
+        else:
+            return f"- {field_label}: Text format"
+    
+    def build_field_format_specifications(self, policy_type, field_mapping):
+        """Build complete field format specifications string for the prompt"""
+        try:
+            # Get DocType metadata
+            if policy_type.lower() == "motor":
+                doctype_name = "Motor Policy"
+            elif policy_type.lower() == "health":  
+                doctype_name = "Health Policy"
+            else:
+                return "- All fields: Clean text format"
+            
+            meta = frappe.get_meta(doctype_name)
+            format_specs = []
+            
+            # Build format specification for each field
+            for field_label, fieldname in field_mapping.items():
+                field_meta = meta.get_field(fieldname)
+                spec = self.get_field_format_specification(field_label, fieldname, field_meta)
+                format_specs.append(spec)
+            
+            return '\n'.join(format_specs)
+            
+        except Exception as e:
+            frappe.logger().warning(f"Could not build field format specifications: {str(e)}")
+            return "- All fields: Extract clean, core information only"
+    
     def build_extraction_prompt(self, text, policy_type, fields_list):
-        """Build prompt for Claude to extract specific fields"""
-        prompt = f"""You are an expert at extracting information from {policy_type} insurance policy documents.
+        """Build enhanced prompt for Claude to extract specific fields with format specifications"""
+        try:
+            # Get field mapping to build format specifications
+            from policy_reader.utils import get_field_mapping_for_policy_type
+            field_mapping = get_field_mapping_for_policy_type(policy_type)
+            
+            # Build format specifications
+            format_specs = self.build_field_format_specifications(policy_type, field_mapping)
+            
+            # Create enhanced prompt with specific format requirements
+            prompt = f"""You are an expert at extracting information from {policy_type} insurance policy documents.
 
-Extract the following fields from the policy document text below. Return ONLY a JSON object with the field names as keys and extracted values as values. If a field is not found, use null as the value.
+Extract the following fields with EXACT formats as specified below:
+
+FIELD FORMATS:
+{format_specs}
+
+EXTRACTION RULES:
+- Extract ONLY the core data, remove prefixes/suffixes like "UNTIL", "FROM", "VALID TILL", "Rs.", "₹"
+- For dates: Use DD/MM/YYYY or DD/MM/YY format only, remove time and extra text
+- For currency: Extract numbers only, no currency symbols or formatting
+- For select fields: Use exact option matches (case-insensitive)
+- For numbers: Extract digits only, remove descriptive text
+- If field not found, use null
+
+EXTRACTION EXAMPLES:
+- "FROM 15/03/2024" → "15/03/2024"
+- "UNTIL MIDNIGHT 30/07/24" → "30/07/24" 
+- "VALID TILL 31/12/2024" → "31/12/2024"
+- "Rs. 25,000/-" → "25000"
+- "₹50,000.00" → "50000"
+- "5 seater capacity" → "5"
+- "DIESEL fuel type" → "Diesel"
+- "DL-01-AA-1234 (Vehicle)" → "DL-01-AA-1234"
 
 Fields to extract:
 {', '.join(fields_list)}
 
 Document text:
-{text[:8000]}  # Limit text length for token efficiency
+{text[:8000]}
 
 Return your response as a valid JSON object only, no additional text or explanation."""
-        
-        return prompt
+            
+            return prompt
+            
+        except Exception as e:
+            # Fallback to simpler prompt if enhanced version fails
+            frappe.logger().error(f"Enhanced prompt building failed: {str(e)}, using fallback")
+            return f"""You are an expert at extracting information from {policy_type} insurance policy documents.
+
+Extract the following fields from the document text. Return clean, formatted data:
+- For dates: Use DD/MM/YYYY format only (remove extra text like "UNTIL MIDNIGHT")
+- For numbers: Extract digits only (remove currency symbols, extra text)
+- Return ONLY a JSON object with field names as keys and extracted values as values.
+
+Fields to extract: {', '.join(fields_list)}
+
+Document text: {text[:8000]}
+
+Return valid JSON only, no additional text."""
     
     def get_full_file_path(self):
         """Get absolute path to the uploaded file using Frappe's file management"""

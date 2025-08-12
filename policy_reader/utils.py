@@ -74,41 +74,43 @@ def get_field_mapping_for_policy_type(policy_type):
 def get_hardcoded_motor_mapping():
 	"""Fallback hardcoded motor policy field mapping"""
 	return {
-		"Policy Number": "policy_number",
-		"Insured Name": "insured_name", 
-		"Vehicle Number": "vehicle_number",
-		"Chassis Number": "chassis_number",
-		"Engine Number": "engine_number",
+		# Match the exact field names that Claude extracts
+		"PolicyNumber": "policy_number",
+		"InsuredName": "insured_name", 
+		"VehicleNumber": "vehicle_number",
+		"ChassisNumber": "chassis_number",
+		"EngineNumber": "engine_number",
 		"From": "policy_from",
 		"To": "policy_to",
-		"Premium Amount": "premium_amount",
-		"Sum Insured": "sum_insured",
-		"Make / Model": "make_model",
+		"PremiumAmount": "premium_amount",
+		"SumInsured": "sum_insured",
+		"MakeModel": "make_model",
 		"Variant": "variant",
-		"Vehicle Class": "vehicle_class",
-		"Registration Number": "registration_number",
+		"VehicleClass": "vehicle_class",
+		"RegistrationNumber": "registration_number",
 		"Fuel": "fuel",
-		"Seat Capacity": "seat_capacity"
+		"SeatCapacity": "seat_capacity"
 	}
 
 
 def get_hardcoded_health_mapping():
 	"""Fallback hardcoded health policy field mapping"""
 	return {
-		"Policy Number": "policy_number",
-		"Insured Name": "insured_name",
-		"Sum Insured": "sum_insured", 
-		"Policy Start Date": "policy_start_date",
-		"Policy End Date": "policy_end_date",
-		"Customer Code": "customer_code",
-		"Net Premium": "net_premium",
-		"Policy Period": "policy_period",
-		"Issuing Office": "issuing_office",
-		"Relationship to Policyholder": "relationship_to_policyholder",
-		"Date of Birth": "date_of_birth",
-		"Insured Name 2": "insured_name_2",
-		"Nominee Name": "nominee_name",
-		"Insured Code": "insured_code"
+		# Match the exact field names that Claude extracts
+		"PolicyNumber": "policy_number",
+		"InsuredName": "insured_name",
+		"SumInsured": "sum_insured", 
+		"PolicyStartDate": "policy_start_date",
+		"PolicyEndDate": "policy_end_date",
+		"CustomerCode": "customer_code",
+		"NetPremium": "net_premium",
+		"PolicyPeriod": "policy_period",
+		"IssuingOffice": "issuing_office",
+		"RelationshipToPolicyholder": "relationship_to_policyholder",
+		"DateOfBirth": "date_of_birth",
+		"InsuredName2": "insured_name_2",
+		"NomineeName": "nominee_name",
+		"InsuredCode": "insured_code"
 	}
 
 
