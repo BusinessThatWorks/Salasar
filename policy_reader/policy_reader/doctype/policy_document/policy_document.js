@@ -19,6 +19,32 @@ frappe.ui.form.on('Policy Document', {
             }, __('Actions'));
         }
         
+        // Add Reset Status button for stuck documents using Frappe patterns
+        if (frm.doc.status === 'Processing') {
+            frm.add_custom_button(__('Reset Status'), function() {
+                frappe.confirm(
+                    __('Are you sure you want to reset the processing status? This will allow you to retry processing.'),
+                    function() {
+                        frm.call('reset_processing_status').then(r => {
+                            if (r.message && r.message.success) {
+                                frappe.show_alert({
+                                    message: __(r.message.message),
+                                    indicator: 'blue'
+                                });
+                                frm.reload_doc();
+                            }
+                        }).catch(err => {
+                            frappe.msgprint({
+                                title: __('Reset Failed'),
+                                message: __('Failed to reset status: {0}', [err.message]),
+                                indicator: 'red'
+                            });
+                        });
+                    }
+                );
+            }, __('Actions'));
+        }
+        
         // Show processing status in dashboard (but not the persistent indicator)
         if (frm.doc.status === 'Processing') {
             frm.dashboard.add_comment(__('Processing in progress...'), 'blue', true);

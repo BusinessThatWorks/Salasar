@@ -6,6 +6,7 @@ import json
 import os
 import time
 from frappe.model.document import Document
+from frappe.utils import getdate, cstr, flt, cint
 
 
 class PolicyDocument(Document):
@@ -83,6 +84,10 @@ class PolicyDocument(Document):
     def process_policy_internal(self):
         """Internal method for actual policy processing (runs in background)"""
         try:
+            # Check for timeout before starting processing
+            if self.check_processing_timeout():
+                return  # Document was timed out, exit early
+                
             # Validate file accessibility before processing
             if not self.validate_file_access():
                 raise Exception("File is not accessible for processing. Please ensure the file is uploaded and accessible.")
@@ -249,79 +254,162 @@ class PolicyDocument(Document):
     
     def create_motor_policy_record(self, extracted_data):
         """Create Motor Policy record with extracted data"""
-        # Map extracted fields to Motor Policy DocType fields
-        field_mapping = {
-            "Policy Number": "policy_number",
-            "Insured Name": "insured_name", 
-            "Vehicle Number": "vehicle_number",
-            "Chassis Number": "chassis_number",
-            "Engine Number": "engine_number",
-            "From": "policy_from",
-            "To": "policy_to",
-            "Premium Amount": "premium_amount",
-            "Sum Insured": "sum_insured",
-            "Make / Model": "make_model",
-            "Variant": "variant",
-            "Vehicle Class": "vehicle_class",
-            "Registration Number": "registration_number",
-            "Fuel": "fuel",
-            "Seat Capacity": "seat_capacity"
-        }
+        # Get field mapping from cache (with fallback to hardcoded)
+        from policy_reader.utils import get_field_mapping_for_policy_type
+        field_mapping = get_field_mapping_for_policy_type("motor")
         
-        # Create Motor Policy record
-        motor_policy = frappe.new_doc("Motor Policy")
-        
-        # Set bidirectional link and copy PDF file
-        motor_policy.policy_document = self.name
-        motor_policy.policy_file = self.policy_file
-        
-        # Populate fields with extracted data
-        for extracted_field, motor_field in field_mapping.items():
-            value = extracted_data.get(extracted_field)
-            if value:
-                setattr(motor_policy, motor_field, value)
-        
-        # Save the Motor Policy record
-        motor_policy.insert()
-        
-        # Link to Policy Document
-        self.motor_policy = motor_policy.name
+        try:
+            # Create Motor Policy record
+            motor_policy = frappe.new_doc("Motor Policy")
+            
+            # Set bidirectional link and copy PDF file
+            motor_policy.policy_document = self.name
+            motor_policy.policy_file = self.policy_file
+            
+            # Populate fields with extracted data using Frappe utilities
+            for extracted_field, motor_field in field_mapping.items():
+                value = extracted_data.get(extracted_field)
+                if value:
+                    # Use Frappe utilities for safe type conversion
+                    converted_value = self._convert_field_value(motor_field, value, "Motor Policy")
+                    if converted_value is not None:
+                        setattr(motor_policy, motor_field, converted_value)
+            
+            # Save the Motor Policy record
+            motor_policy.insert()
+            
+            # Link to Policy Document
+            self.motor_policy = motor_policy.name
+            
+        except Exception as e:
+            # Use Frappe error handling - log but don't fail entire processing
+            frappe.log_error(f"Failed to create Motor Policy record: {str(e)}", "Motor Policy Creation Error")
+            # Still save extracted fields JSON even if policy record creation fails
+            frappe.msgprint(f"Policy extracted successfully but failed to create Motor Policy record: {str(e)}", 
+                          title="Partial Processing Error", indicator="orange")
     
     def create_health_policy_record(self, extracted_data):
         """Create Health Policy record with extracted data"""
-        # Map extracted fields to Health Policy DocType fields
-        field_mapping = {
-            "Policy Number": "policy_number",
-            "Insured Name": "insured_name",
-            "Sum Insured": "sum_insured", 
-            "Policy Start Date": "policy_start_date",
-            "Policy End Date": "policy_end_date",
-            "Customer Code": "customer_code",
-            "Net Premium": "net_premium",
-            "Policy Period": "policy_period",
-            "Issuing Office": "issuing_office",
-            "Relationship to Policyholder": "relationship_to_policyholder",
-            "Date of Birth": "date_of_birth"
-        }
+        # Get field mapping from cache (with fallback to hardcoded)
+        from policy_reader.utils import get_field_mapping_for_policy_type
+        field_mapping = get_field_mapping_for_policy_type("health")
         
-        # Create Health Policy record
-        health_policy = frappe.new_doc("Health Policy")
-        
-        # Set bidirectional link and copy PDF file
-        health_policy.policy_document = self.name
-        health_policy.policy_file = self.policy_file
-        
-        # Populate fields with extracted data
-        for extracted_field, health_field in field_mapping.items():
-            value = extracted_data.get(extracted_field)
-            if value:
-                setattr(health_policy, health_field, value)
-        
-        # Save the Health Policy record
-        health_policy.insert()
-        
-        # Link to Policy Document
-        self.health_policy = health_policy.name
+        try:
+            # Create Health Policy record
+            health_policy = frappe.new_doc("Health Policy")
+            
+            # Set bidirectional link and copy PDF file
+            health_policy.policy_document = self.name
+            health_policy.policy_file = self.policy_file
+            
+            # Populate fields with extracted data using Frappe utilities
+            for extracted_field, health_field in field_mapping.items():
+                value = extracted_data.get(extracted_field)
+                if value:
+                    # Use Frappe utilities for safe type conversion
+                    converted_value = self._convert_field_value(health_field, value, "Health Policy")
+                    if converted_value is not None:
+                        setattr(health_policy, health_field, converted_value)
+            
+            # Save the Health Policy record
+            health_policy.insert()
+            
+            # Link to Policy Document
+            self.health_policy = health_policy.name
+            
+        except Exception as e:
+            # Use Frappe error handling - log but don't fail entire processing
+            frappe.log_error(f"Failed to create Health Policy record: {str(e)}", "Health Policy Creation Error")
+            # Still save extracted fields JSON even if policy record creation fails
+            frappe.msgprint(f"Policy extracted successfully but failed to create Health Policy record: {str(e)}", 
+                          title="Partial Processing Error", indicator="orange")
+    
+    def _convert_field_value(self, fieldname, value, doctype_name):
+        """Convert extracted field value to appropriate type using Frappe utilities"""
+        try:
+            # Get field metadata to determine proper conversion
+            meta = frappe.get_meta(doctype_name)
+            field = meta.get_field(fieldname)
+            
+            if not field:
+                frappe.log_error(f"Field {fieldname} not found in {doctype_name}", "Field Conversion Warning")
+                return cstr(value)  # Default to string
+            
+            fieldtype = field.fieldtype
+            
+            # Use Frappe utilities for type conversion
+            if fieldtype == "Date":
+                # Use Frappe's safe date parsing
+                try:
+                    return getdate(value)
+                except Exception as e:
+                    frappe.log_error(f"Date conversion failed for {fieldname}: {value} - {str(e)}", "Date Conversion Error")
+                    return None  # Skip this field
+                    
+            elif fieldtype in ["Currency", "Float"]:
+                # Use Frappe's safe float conversion
+                return flt(value)
+                
+            elif fieldtype == "Int":
+                # Use Frappe's safe integer conversion
+                return cint(value)
+                
+            elif fieldtype in ["Data", "Text", "Long Text", "Select"]:
+                # Use Frappe's safe string conversion
+                return cstr(value)
+                
+            else:
+                # Default to string conversion
+                return cstr(value)
+                
+        except Exception as e:
+            frappe.log_error(f"Field conversion error for {fieldname} in {doctype_name}: {str(e)}", "Field Conversion Error")
+            return None  # Skip problematic fields instead of failing
+    
+    @frappe.whitelist()
+    def reset_processing_status(self):
+        """Reset processing status for stuck documents using Frappe patterns"""
+        try:
+            if self.status == "Processing":
+                self.status = "Draft"
+                self.error_message = "Processing was reset by user"
+                self.save()
+                
+                # Use Frappe's message system for user feedback
+                frappe.msgprint("Processing status has been reset. You can now retry processing.", 
+                              title="Status Reset", indicator="blue")
+                
+                return {"success": True, "message": "Status reset successfully"}
+            else:
+                # Use Frappe's throw for validation errors
+                frappe.throw(f"Cannot reset status. Current status is '{self.status}', only 'Processing' status can be reset.")
+                
+        except Exception as e:
+            # Use Frappe error logging
+            frappe.log_error(f"Failed to reset processing status for {self.name}: {str(e)}", "Status Reset Error")
+            frappe.throw(f"Failed to reset status: {str(e)}")
+    
+    def check_processing_timeout(self):
+        """Check if document has been stuck in processing for too long"""
+        if self.status == "Processing" and self.modified:
+            # Use Frappe's time utilities for proper date handling
+            from frappe.utils import time_diff, now_datetime
+            
+            # time_diff returns difference in seconds, convert to minutes
+            seconds_elapsed = time_diff(now_datetime(), self.modified).total_seconds()
+            minutes_elapsed = int(seconds_elapsed / 60)
+            
+            # If processing for more than 10 minutes, consider it stuck
+            if minutes_elapsed > 10:
+                self.status = "Failed"
+                self.error_message = f"Processing timed out after {minutes_elapsed} minutes. Please try again or check if the API is accessible."
+                self.save()
+                
+                # Use Frappe's logging for timeout events
+                frappe.log_error(f"Document {self.name} processing timed out after {minutes_elapsed} minutes", "Processing Timeout")
+                
+                return True
+        return False
 
 # API Key status checking method
 @frappe.whitelist()

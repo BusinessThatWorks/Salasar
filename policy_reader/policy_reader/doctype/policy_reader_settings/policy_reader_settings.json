@@ -12,6 +12,12 @@
   "max_pages",
   "confidence_threshold",
   "enable_logging",
+  "field_mapping_section",
+  "motor_policy_fields",
+  "health_policy_fields",
+  "column_break_field_mapping",
+  "last_field_sync",
+  "refresh_field_mappings",
   "background_job_settings_section",
   "timeout",
   "queue_type"
@@ -60,6 +66,42 @@
    "fieldname": "enable_logging",
    "fieldtype": "Check",
    "label": "Enable Logging"
+  },
+  {
+   "fieldname": "field_mapping_section",
+   "fieldtype": "Section Break",
+   "label": "Field Mappings Cache"
+  },
+  {
+   "description": "Cached field mappings for Motor Policy DocType (label → fieldname)",
+   "fieldname": "motor_policy_fields",
+   "fieldtype": "JSON",
+   "label": "Motor Policy Fields",
+   "read_only": 1
+  },
+  {
+   "description": "Cached field mappings for Health Policy DocType (label → fieldname)",
+   "fieldname": "health_policy_fields",
+   "fieldtype": "JSON",
+   "label": "Health Policy Fields",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_field_mapping",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Last time field mappings were synchronized with DocType definitions",
+   "fieldname": "last_field_sync",
+   "fieldtype": "Datetime",
+   "label": "Last Field Sync",
+   "read_only": 1
+  },
+  {
+   "description": "Refresh field mappings from Motor Policy and Health Policy DocTypes",
+   "fieldname": "refresh_field_mappings",
+   "fieldtype": "Button",
+   "label": "Refresh Field Mappings"
   },
   {
    "fieldname": "background_job_settings_section",
