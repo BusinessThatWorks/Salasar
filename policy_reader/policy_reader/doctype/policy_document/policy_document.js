@@ -45,6 +45,14 @@ frappe.ui.form.on('Policy Document', {
             }, __('Actions'));
         }
         
+        // Add Create Policy Record button when conditions are met
+        if (frm.trigger('should_show_create_policy_button')) {
+            let policy_type = frm.doc.policy_type;
+            frm.add_custom_button(__('Create {0} Policy', [policy_type]), function() {
+                frm.trigger('create_policy_record');
+            }, __('Actions'));
+        }
+        
         // Show processing status in dashboard (but not the persistent indicator)
         if (frm.doc.status === 'Processing') {
             frm.dashboard.add_comment(__('Processing in progress...'), 'blue', true);
@@ -300,6 +308,76 @@ frappe.ui.form.on('Policy Document', {
                 console.error('Error adding field state indicators:', e);
             }
         }
+    },
+    
+    should_show_create_policy_button: function(frm) {
+        // Show button when:
+        // - Status is "Completed" (fields extracted)
+        // - Policy type is selected  
+        // - Extracted fields exist
+        // - No existing policy record linked for the selected type
+        
+        if (frm.doc.status !== 'Completed') {
+            return false;
+        }
+        
+        if (!frm.doc.policy_type) {
+            return false;
+        }
+        
+        if (!frm.doc.extracted_fields) {
+            return false;
+        }
+        
+        // Check if policy record already exists based on policy type
+        if (frm.doc.policy_type.toLowerCase() === 'motor') {
+            return !frm.doc.motor_policy; // Show button if no motor policy linked
+        } else if (frm.doc.policy_type.toLowerCase() === 'health') {
+            return !frm.doc.health_policy; // Show button if no health policy linked
+        }
+        
+        return false;
+    },
+    
+    create_policy_record: function(frm) {
+        let policy_type = frm.doc.policy_type;
+        
+        frappe.confirm(
+            __('Create a new {0} Policy record from the extracted fields?<br><br>This will create a new policy record using the data extracted from the uploaded document.', [policy_type]),
+            function() {
+                // Show loading indicator
+                frappe.show_alert({
+                    message: __('Creating {0} Policy record...', [policy_type]),
+                    indicator: 'blue'
+                });
+                
+                frm.call('create_policy_record').then(r => {
+                    if (r.message && r.message.success) {
+                        frappe.show_alert({
+                            message: __(r.message.message + ': {0}', [r.message.policy_name]),
+                            indicator: 'green'
+                        });
+                        // Reload document to show the new policy link
+                        frm.reload_doc();
+                    } else {
+                        frappe.msgprint({
+                            title: __('Policy Creation Failed'),
+                            message: r.message ? r.message.message : __('Unknown error occurred'),
+                            indicator: 'red'
+                        });
+                    }
+                }).catch(err => {
+                    frappe.msgprint({
+                        title: __('Policy Creation Error'),
+                        message: __('Failed to create policy record: {0}', [err.message]),
+                        indicator: 'red'
+                    });
+                });
+            },
+            function() {
+                // User cancelled - no action needed
+            }
+        );
     },
     
     check_api_key_status: function(frm) {
