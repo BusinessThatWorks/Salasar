@@ -17,7 +17,12 @@
   "section_break_processing",
   "extracted_fields",
   "processing_time",
-  "error_message"
+  "error_message",
+  "section_break_confidence",
+  "ocr_confidence",
+  "manual_review_recommended",
+  "enhancement_applied",
+  "confidence_data"
  ],
  "fields": [
   {
@@ -98,6 +103,38 @@
    "fieldname": "error_message",
    "fieldtype": "Long Text",
    "label": "Error Message"
+  },
+  {
+   "fieldname": "section_break_confidence",
+   "fieldtype": "Section Break",
+   "label": "OCR Confidence Metrics"
+  },
+  {
+   "fieldname": "ocr_confidence",
+   "fieldtype": "Percent",
+   "label": "OCR Confidence Score",
+   "precision": 1,
+   "read_only": 1
+  },
+  {
+   "default": 0,
+   "fieldname": "manual_review_recommended",
+   "fieldtype": "Check",
+   "label": "Manual Review Recommended",
+   "read_only": 1
+  },
+  {
+   "default": 0,
+   "fieldname": "enhancement_applied",
+   "fieldtype": "Check",
+   "label": "Image Enhancement Applied",
+   "read_only": 1
+  },
+  {
+   "fieldname": "confidence_data",
+   "fieldtype": "JSON",
+   "label": "Detailed Confidence Data",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

@@ -94,45 +94,67 @@ class PolicyDocument(Document):
             
             file_path = self.get_full_file_path()
             
-            from document_reader import OCRReader
+            from document_reader import extract_text_with_confidence
             
             # Get settings for processing configuration
             settings = self.get_policy_reader_settings()
             
             start_time = time.time()
             
-            # Step 1: Extract text using OCR
-            ocr_reader = OCRReader(
+            # Step 1: Extract text using enhanced OCR with confidence scoring
+            # Use enhanced extraction with confidence scoring
+            result = extract_text_with_confidence(
+                file_path,
                 language='en',
-                confidence_threshold=float(settings.confidence_threshold or 0.3),
-                image_resolution_scale=2.0,
-                image_quality=80
+                enable_enhancement=True,
+                enhancement_method="auto"
             )
             
-            # Limit pages if configured
-            page_range = None
-            if hasattr(settings, 'max_pages') and settings.max_pages:
-                page_range = (1, int(settings.max_pages))
-            
-            extracted_text = ocr_reader.process_pdf(file_path, page_range=page_range)
+            extracted_text = result.get('text', '')
+            confidence_data = result.get('confidence_data', {})
             
             # Step 2: Extract structured fields using Claude API
-            result = self.extract_fields_with_claude(extracted_text, self.policy_type.lower(), settings)
+            claude_result = self.extract_fields_with_claude(extracted_text, self.policy_type.lower(), settings)
             
             end_time = time.time()
             processing_time = round(end_time - start_time, 2)
             
-            if result.get("success"):
+            if claude_result.get("success"):
+                # Extract confidence metrics with error handling
+                try:
+                    avg_confidence = confidence_data.get('average_confidence', 0.0)
+                    enhancement_applied = any(
+                        m.get('enhancement_applied', False) 
+                        for m in confidence_data.get('enhancement_metrics', [])
+                    )
+                    
+                    # Determine if manual review is recommended (confidence < 70%)
+                    manual_review_recommended = avg_confidence < 0.7
+                except Exception as confidence_error:
+                    frappe.logger().warning(f"Error extracting confidence metrics: {str(confidence_error)}")
+                    # Fallback values
+                    avg_confidence = 0.0
+                    enhancement_applied = False
+                    manual_review_recommended = True  # Default to recommending review if we can't determine confidence
+                
                 self.status = "Completed"
-                self.extracted_fields = frappe.as_json(result.get("extracted_fields", {}))
+                self.extracted_fields = frappe.as_json(claude_result.get("extracted_fields", {}))
                 self.processing_time = processing_time
                 self.error_message = ""
                 
+                # Store confidence metrics
+                # The document reader returns confidence as decimal (0.72 = 72%)
+                # Frappe Percent field expects percentage value (72 for 72%)
+                self.ocr_confidence = float(avg_confidence) * 100
+                self.manual_review_recommended = 1 if manual_review_recommended else 0
+                self.enhancement_applied = 1 if enhancement_applied else 0
+                self.confidence_data = frappe.as_json(confidence_data)
+                
                 # Populate individual fields based on policy type
-                self.populate_individual_fields(result.get("extracted_fields", {}))
+                self.populate_individual_fields(claude_result.get("extracted_fields", {}))
             else:
                 self.status = "Failed"
-                self.error_message = result.get("error", "Unknown error occurred")
+                self.error_message = claude_result.get("error", "Unknown error occurred")
                 
                 frappe.log_error(f"Policy OCR processing failed for {self.name}: {self.error_message}", "Policy OCR Processing Error")
             
@@ -140,13 +162,24 @@ class PolicyDocument(Document):
             frappe.db.commit()
             
             # Notify user via real-time updates
+            notification_message = "Processing completed successfully"
+            if self.status == "Completed" and hasattr(self, 'ocr_confidence'):
+                confidence_pct = int(self.ocr_confidence)  # Already stored as percentage
+                notification_message = f"Processing completed successfully (OCR confidence: {confidence_pct}%)"
+                if self.manual_review_recommended:
+                    notification_message += " - Manual review recommended"
+            elif self.status != "Completed":
+                notification_message = self.error_message
+                
             frappe.publish_realtime(
                 event="policy_processing_complete",
                 message={
                     "doc_name": self.name,
                     "status": self.status,
-                    "message": "Processing completed successfully" if self.status == "Completed" else self.error_message,
-                    "processing_time": processing_time if hasattr(self, 'processing_time') else 0
+                    "message": notification_message,
+                    "processing_time": processing_time if hasattr(self, 'processing_time') else 0,
+                    "ocr_confidence": getattr(self, 'ocr_confidence', 0),  # Already stored as percentage
+                    "manual_review_recommended": getattr(self, 'manual_review_recommended', 0)
                 },
                 user=self.owner
             )
