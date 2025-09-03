@@ -7,6 +7,9 @@ import os
 import time
 from frappe.model.document import Document
 from frappe.utils import getdate, cstr, flt, cint
+from policy_reader.policy_reader.services.processing_service import ProcessingService
+from policy_reader.policy_reader.services.runpod_service import RunPodService  
+from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
 
 
 class PolicyDocument(Document):
@@ -215,43 +218,13 @@ class PolicyDocument(Document):
     
     def choose_processing_method(self, settings):
         """Choose between RunPod and local processing based on health and configuration"""
-        try:
-            # Check if RunPod is configured and healthy
-            if (settings.runpod_pod_id and 
-                settings.runpod_port and 
-                settings.runpod_api_secret and
-                settings.runpod_health_status == "healthy"):
-                
-                # Check if response time is acceptable (<5 seconds)
-                if settings.runpod_response_time < 5:
-                    frappe.logger().info(f"Using RunPod API for processing (response time: {settings.runpod_response_time:.2f}s)")
-                    return "runpod"
-                else:
-                    frappe.logger().warning(f"RunPod responding slowly ({settings.runpod_response_time:.2f}s), using local processing")
-                    return "local"
-            
-            # Fallback to local processing
-            frappe.logger().info("RunPod unavailable, using local processing")
-            return "local"
-            
-        except Exception as e:
-            frappe.log_error(f"Error choosing processing method: {str(e)}", "Processing Method Selection Error")
-            return "local"  # Default to local on error
+        processing_service = ProcessingService(self)
+        return processing_service.choose_processing_method(settings)
     
     def get_recommended_processing_method(self, settings):
         """Get the recommended processing method for display purposes (doesn't actually process)"""
-        try:
-            # Check if RunPod is configured and healthy
-            if (settings.runpod_pod_id and 
-                settings.runpod_port and 
-                settings.runpod_api_secret and
-                settings.runpod_health_status == "healthy" and
-                settings.runpod_response_time < 5):
-                return "runpod"
-            else:
-                return "local"
-        except Exception as e:
-            return "local"
+        processing_service = ProcessingService(self)
+        return processing_service.get_recommended_processing_method(settings)
     
     def set_initial_processing_method(self, settings):
         """Set the initial processing method based on RunPod health"""
@@ -265,368 +238,38 @@ class PolicyDocument(Document):
     
     def extract_text_with_runpod(self, file_path, settings):
         """Extract text using RunPod API"""
-        try:
-            import requests
-            
-            # Get RunPod extract URL
-            extract_url = settings.get_runpod_extract_url()
-            if not extract_url:
-                return {"success": False, "error": "RunPod URL not configured"}
-            
-            # Prepare file for upload
-            with open(file_path, 'rb') as file:
-                files = {'file': file}
-                headers = {'Authorization': f'Bearer {settings.runpod_api_secret}'}
-                
-                # Build prompt based on policy type
-                prompt = f"Extract text from this {self.policy_type.lower()} insurance policy document. Focus on policy details, insured information, dates, amounts, and vehicle details (if applicable)."
-                
-                data = {'prompt': prompt}
-                
-                # Make request to RunPod API
-                start_time = time.time()
-                response = requests.post(
-                    extract_url, 
-                    files=files, 
-                    data=data, 
-                    headers=headers, 
-                    timeout=settings.timeout or 180
-                )
-                response_time = time.time() - start_time
-                
-                if response.status_code == 200:
-                    try:
-                        result = response.json()
-                        extracted_text = result.get('text', '')
-                        
-                        if extracted_text:
-                            # Return in compatible format with local processing
-                            return {
-                                "success": True,
-                                "text": extracted_text,
-                                "confidence_data": {
-                                    "average_confidence": 0.85,  # RunPod typically high confidence
-                                    "enhancement_applied": False,
-                                    "processing_method": "runpod",
-                                    "response_time": response_time
-                                }
-                            }
-                        else:
-                            return {"success": False, "error": "No text extracted from RunPod API"}
-                            
-                    except ValueError:
-                        # Response is not JSON
-                        return {"success": False, "error": f"Invalid JSON response from RunPod API: {response.text}"}
-                else:
-                    return {"success": False, "error": f"RunPod API error: HTTP {response.status_code} - {response.text}"}
-                    
-        except requests.exceptions.Timeout:
-            return {"success": False, "error": "RunPod API request timed out"}
-        except requests.exceptions.ConnectionError:
-            return {"success": False, "error": "Cannot connect to RunPod API"}
-        except Exception as e:
-            frappe.log_error(f"RunPod API processing error: {str(e)}", "RunPod Processing Error")
-            return {"success": False, "error": f"RunPod API error: {str(e)}"}
+        processing_service = ProcessingService(self)
+        return processing_service.extract_text_with_runpod(file_path, self.policy_type, settings)
     
     def extract_text_with_local(self, file_path, settings):
         """Extract text using local document_reader library (fallback method)"""
-        try:
-            from document_reader import extract_text_with_confidence
-            
-            # Use enhanced extraction with confidence scoring
-            result = extract_text_with_confidence(
-                file_path,
-                language='en',
-                enable_enhancement=True,
-                enhancement_method="auto"
-            )
-            
-            # Add processing method info
-            if 'confidence_data' in result:
-                result['confidence_data']['processing_method'] = 'local'
-            
-            return result
-            
-        except ImportError:
-            return {"success": False, "error": "Local document_reader library not available"}
-        except Exception as e:
-            frappe.log_error(f"Local OCR processing error: {str(e)}", "Local OCR Error")
-            return {"success": False, "error": f"Local OCR error: {str(e)}"}
+        processing_service = ProcessingService(self)
+        return processing_service.extract_text_with_local(file_path, settings)
     
     def validate_file_access(self):
         """Validate that the file is accessible for processing"""
-        try:
-            if not self.policy_file:
-                return False
-            
-            # Try to get the file document
-            file_doc = frappe.get_doc("File", {"file_url": self.policy_file})
-            
-            # Check if file exists on disk
-            file_path = file_doc.get_full_path()
-            if not os.path.exists(file_path):
-                frappe.logger().error(f"File does not exist on disk: {file_path}")
-                return False
-            
-            # Check if file is readable
-            if not os.access(file_path, os.R_OK):
-                frappe.logger().error(f"File is not readable: {file_path}")
-                return False
-            
-            return True
-            
-        except Exception as e:
-            frappe.logger().error(f"File validation failed for {self.policy_file}: {str(e)}")
-            return False
+        processing_service = ProcessingService(self)
+        return processing_service.validate_file_access(self.policy_file)
     
     def extract_fields_with_claude(self, extracted_text, policy_type, settings):
         """Extract structured fields from text using Claude API"""
-        try:
-            # Get API key with priority: Settings → site_config → environment
-            api_key = (settings.anthropic_api_key or 
-                      frappe.conf.get('anthropic_api_key') or 
-                      os.environ.get('ANTHROPIC_API_KEY'))
-            
-            if not api_key:
-                raise Exception("Anthropic API key not configured. Please set it in Policy Reader Settings or add 'anthropic_api_key' to site_config.json")
-            
-            # Get field mapping for the policy type
-            from policy_reader.utils import get_field_mapping_for_policy_type
-            field_mapping = get_field_mapping_for_policy_type(policy_type)
-            
-            # Build prompt for Claude
-            fields_list = list(field_mapping.keys())
-            prompt = self.build_extraction_prompt(extracted_text, policy_type, fields_list)
-            
-            # Call Claude API using Frappe HTTP utilities
-            from frappe.integrations.utils import make_post_request
-            
-            headers = {
-                'Content-Type': 'application/json',
-                'X-API-Key': api_key,
-                'anthropic-version': '2023-06-01'
-            }
-            
-            payload = {
-                'model': 'claude-3-haiku-20240307' if settings.fast_mode else 'claude-3-sonnet-20240229',
-                'max_tokens': 4000,
-                'messages': [
-                    {
-                        'role': 'user',
-                        'content': prompt
-                    }
-                ]
-            }
-            
-            # Log the request for debugging
-            frappe.logger().info(f"Sending Claude API request: {payload}")
-            
-            response = make_post_request(
-                'https://api.anthropic.com/v1/messages',
-                headers=headers,
-                data=frappe.as_json(payload)
-            )
-            
-            # Log the response for debugging
-            frappe.logger().info(f"Claude API response type: {type(response)}")
-            frappe.logger().info(f"Claude API response: {response}")
-            
-            # Handle different response formats from make_post_request
-            if response:
-                # Check if response is a dict with content
-                if isinstance(response, dict) and response.get('content'):
-                    content = response['content'][0]['text']
-                    frappe.logger().info(f"Extracted content from response: {content[:200]}...")
-                    
-                    # Parse the JSON response from Claude using Frappe utilities
-                    try:
-                        extracted_fields = frappe.parse_json(content)
-                        frappe.logger().info(f"Successfully parsed extracted fields: {extracted_fields}")
-                        return {
-                            "success": True,
-                            "extracted_fields": extracted_fields
-                        }
-                    except (ValueError, TypeError) as e:
-                        frappe.logger().error(f"JSON parsing error: {str(e)}")
-                        return {
-                            "success": False,
-                            "error": f"Failed to parse Claude response as JSON: {str(e)}"
-                        }
-                
-                # Check if response has error information
-                elif isinstance(response, dict) and response.get('error'):
-                    error_msg = f"Claude API error: {response.get('error', 'Unknown error')}"
-                    frappe.logger().error(error_msg)
-                    return {
-                        "success": False,
-                        "error": error_msg
-                    }
-                
-                # Check if response is a string (might be direct content)
-                elif isinstance(response, str):
-                    frappe.logger().info(f"Received string response: {response[:200]}...")
-                    try:
-                        extracted_fields = frappe.parse_json(response)
-                        return {
-                            "success": True,
-                            "extracted_fields": extracted_fields
-                        }
-                    except (ValueError, TypeError) as e:
-                        return {
-                            "success": False,
-                            "error": f"Failed to parse string response as JSON: {str(e)}"
-                        }
-                
-                else:
-                    error_msg = f"Unexpected Claude API response format: {type(response)}"
-                    frappe.logger().error(error_msg)
-                    return {
-                        "success": False,
-                        "error": error_msg
-                    }
-            else:
-                error_msg = "Claude API request returned no response"
-                frappe.logger().error(error_msg)
-                return {
-                    "success": False,
-                    "error": error_msg
-                }
-                
-        except Exception as e:
-            return {
-                "success": False,
-                "error": f"Field extraction failed: {str(e)}"
-            }
+        field_mapping_service = FieldMappingService()
+        return field_mapping_service.extract_fields_with_claude(extracted_text, policy_type, settings)
     
     def get_field_format_specification(self, field_label, fieldname, field_meta):
         """Get format specification for a specific field based on its type"""
-        if not field_meta:
-            return f"- {field_label}: Text format"
-        
-        fieldtype = field_meta.fieldtype
-        
-        # Date fields
-        if fieldtype in ["Date", "Datetime"]:
-            return f"- {field_label}: Date in DD/MM/YYYY format only (remove 'FROM', 'UNTIL', 'VALID TILL', times, extra text)"
-        
-        # Currency fields  
-        elif fieldtype in ["Currency", "Float"]:
-            return f"- {field_label}: Numeric value only (remove currency symbols like '₹', 'Rs.', commas, '/-')"
-        
-        # Integer fields
-        elif fieldtype == "Int":
-            return f"- {field_label}: Integer number only (remove descriptive text like 'seater', 'capacity')"
-        
-        # Select fields
-        elif fieldtype == "Select" and field_meta.options:
-            options_list = [opt.strip() for opt in field_meta.options.split('\n') if opt.strip()]
-            return f"- {field_label}: Exact match from [{', '.join(options_list)}] (case-insensitive matching)"
-        
-        # Data fields with special cases
-        elif fieldtype == "Data":
-            # Special handling for known date-like fields that should be Data type
-            if any(date_keyword in fieldname.lower() for date_keyword in ['from', 'to', 'date', 'period']):
-                if 'from' in fieldname.lower() or 'to' in fieldname.lower():
-                    return f"- {field_label}: Date in DD/MM/YYYY format (clean from 'FROM 15/03/2024' to '15/03/2024')"
-                else:
-                    return f"- {field_label}: Clean text format (remove unnecessary prefixes/suffixes)"
-            # Vehicle/Registration numbers
-            elif any(vehicle_keyword in fieldname.lower() for vehicle_keyword in ['vehicle', 'registration', 'chassis', 'engine']):
-                return f"- {field_label}: Alphanumeric format (clean registration/ID format)"
-            else:
-                return f"- {field_label}: Clean text format (core information only)"
-        
-        # Default fallback
-        else:
-            return f"- {field_label}: Text format"
+        field_mapping_service = FieldMappingService()
+        return field_mapping_service.get_field_format_specification(field_label, fieldname, field_meta)
     
     def build_field_format_specifications(self, policy_type, field_mapping):
         """Build complete field format specifications string for the prompt"""
-        try:
-            # Get DocType metadata
-            if policy_type.lower() == "motor":
-                doctype_name = "Motor Policy"
-            elif policy_type.lower() == "health":  
-                doctype_name = "Health Policy"
-            else:
-                return "- All fields: Clean text format"
-            
-            meta = frappe.get_meta(doctype_name)
-            format_specs = []
-            
-            # Build format specification for each field
-            for field_label, fieldname in field_mapping.items():
-                field_meta = meta.get_field(fieldname)
-                spec = self.get_field_format_specification(field_label, fieldname, field_meta)
-                format_specs.append(spec)
-            
-            return '\n'.join(format_specs)
-            
-        except Exception as e:
-            frappe.logger().warning(f"Could not build field format specifications: {str(e)}")
-            return "- All fields: Extract clean, core information only"
+        field_mapping_service = FieldMappingService()
+        return field_mapping_service.build_field_format_specifications(policy_type, field_mapping)
     
     def build_extraction_prompt(self, text, policy_type, fields_list):
         """Build enhanced prompt for Claude to extract specific fields with format specifications"""
-        try:
-            # Get field mapping to build format specifications
-            from policy_reader.utils import get_field_mapping_for_policy_type
-            field_mapping = get_field_mapping_for_policy_type(policy_type)
-            
-            # Build format specifications
-            format_specs = self.build_field_format_specifications(policy_type, field_mapping)
-            
-            # Create enhanced prompt with specific format requirements
-            prompt = f"""You are an expert at extracting information from {policy_type} insurance policy documents.
-
-Extract the following fields with EXACT formats as specified below:
-
-FIELD FORMATS:
-{format_specs}
-
-EXTRACTION RULES:
-- Extract ONLY the core data, remove prefixes/suffixes like "UNTIL", "FROM", "VALID TILL", "Rs.", "₹"
-- For dates: Use DD/MM/YYYY or DD/MM/YY format only, remove time and extra text
-- For currency: Extract numbers only, no currency symbols or formatting
-- For select fields: Use exact option matches (case-insensitive)
-- For numbers: Extract digits only, remove descriptive text
-- If field not found, use null
-
-EXTRACTION EXAMPLES:
-- "FROM 15/03/2024" → "15/03/2024"
-- "UNTIL MIDNIGHT 30/07/24" → "30/07/24" 
-- "VALID TILL 31/12/2024" → "31/12/2024"
-- "Rs. 25,000/-" → "25000"
-- "₹50,000.00" → "50000"
-- "5 seater capacity" → "5"
-- "DIESEL fuel type" → "Diesel"
-- "DL-01-AA-1234 (Vehicle)" → "DL-01-AA-1234"
-
-Fields to extract:
-{', '.join(fields_list)}
-
-Document text:
-{text[:8000]}
-
-Return your response as a valid JSON object only, no additional text or explanation."""
-            
-            return prompt
-            
-        except Exception as e:
-            # Fallback to simpler prompt if enhanced version fails
-            frappe.logger().error(f"Enhanced prompt building failed: {str(e)}, using fallback")
-            return f"""You are an expert at extracting information from {policy_type} insurance policy documents.
-
-Extract the following fields from the document text. Return clean, formatted data:
-- For dates: Use DD/MM/YYYY format only (remove extra text like "UNTIL MIDNIGHT")
-- For numbers: Extract digits only (remove currency symbols, extra text)
-- Return ONLY a JSON object with field names as keys and extracted values as values.
-
-Fields to extract: {', '.join(fields_list)}
-
-Document text: {text[:8000]}
-
-Return valid JSON only, no additional text."""
+        field_mapping_service = FieldMappingService()
+        return field_mapping_service.build_extraction_prompt(text, policy_type, fields_list)
     
     def get_full_file_path(self):
         """Get absolute path to the uploaded file using Frappe's file management"""
