@@ -265,3 +265,24 @@ class PolicyReaderSettings(Document):
 		except Exception as e:
 			frappe.log_error(f"Error getting cached field mapping for {policy_type}: {str(e)}", "Field Mapping Cache Error")
 			return {}
+
+@frappe.whitelist()
+def get_runpod_health_info():
+	"""Get RunPod health information for JavaScript"""
+	try:
+		settings = frappe.get_single("Policy Reader Settings")
+		
+		return {
+			"status": settings.runpod_health_status or "unknown",
+			"response_time": settings.runpod_response_time or 0.0,
+			"last_check": settings.runpod_last_health_check,
+			"configured": bool(settings.runpod_pod_id and settings.runpod_port and settings.runpod_api_secret)
+		}
+	except Exception as e:
+		frappe.log_error(f"Error getting RunPod health info: {str(e)}", "RunPod Health Info Error")
+		return {
+			"status": "error",
+			"response_time": 0.0,
+			"last_check": None,
+			"configured": False
+		}

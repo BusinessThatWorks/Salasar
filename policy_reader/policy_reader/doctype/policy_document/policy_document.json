@@ -100,13 +100,12 @@
       "precision": 2
     },
     {
-      "default": "local",
+      "default": "runpod",
       "description": "Method used for text extraction (RunPod API or Local OCR)",
       "fieldname": "processing_method",
       "fieldtype": "Select",
       "label": "Processing Method",
-      "options": "local\nrunpod",
-      "read_only": 1
+      "options": "local\nrunpod"
     },
     {
       "fieldname": "error_message",

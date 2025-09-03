@@ -238,6 +238,31 @@ class PolicyDocument(Document):
             frappe.log_error(f"Error choosing processing method: {str(e)}", "Processing Method Selection Error")
             return "local"  # Default to local on error
     
+    def get_recommended_processing_method(self, settings):
+        """Get the recommended processing method for display purposes (doesn't actually process)"""
+        try:
+            # Check if RunPod is configured and healthy
+            if (settings.runpod_pod_id and 
+                settings.runpod_port and 
+                settings.runpod_api_secret and
+                settings.runpod_health_status == "healthy" and
+                settings.runpod_response_time < 5):
+                return "runpod"
+            else:
+                return "local"
+        except Exception as e:
+            return "local"
+    
+    def set_initial_processing_method(self, settings):
+        """Set the initial processing method based on RunPod health"""
+        try:
+            recommended = self.get_recommended_processing_method(settings)
+            self.processing_method = recommended
+            return recommended
+        except Exception as e:
+            self.processing_method = "local"
+            return "local"
+    
     def extract_text_with_runpod(self, file_path, settings):
         """Extract text using RunPod API"""
         try:

@@ -76,8 +76,8 @@ frappe.ui.form.on("Policy Document", {
 			// It will only show when user explicitly starts processing
 		}
 
-		// Show processing method if available
-		if (frm.doc.processing_method) {
+		// Show processing method if available (but don't duplicate with health status)
+		if (frm.doc.processing_method && !$(".runpod-health-status").length) {
 			let method_text = frm.doc.processing_method === "runpod" ? "RunPod API" : "Local OCR";
 			let method_color = frm.doc.processing_method === "runpod" ? "green" : "blue";
 			frm.dashboard.add_comment(
@@ -86,6 +86,9 @@ frappe.ui.form.on("Policy Document", {
 				true
 			);
 		}
+
+		// Show RunPod health status to inform processing method choice
+		frm.trigger("check_runpod_health_status");
 
 		// Extracted fields display removed per user request
 
@@ -452,6 +455,88 @@ frappe.ui.form.on("Policy Document", {
 						}; font-size: 12px;">${message}</span>`
 					);
 					$(".form-layout .title-area h1").append(indicator);
+				}
+			},
+		});
+	},
+
+	check_runpod_health_status: function (frm) {
+		// Check RunPod health status and show recommendations
+		frappe.call({
+			method: "policy_reader.policy_reader.doctype.policy_reader_settings.policy_reader_settings.get_runpod_health_info",
+			callback: function (r) {
+				if (r.message) {
+					let health = r.message;
+
+					// Remove existing health status display
+					$(".runpod-health-status").remove();
+
+					// Create clean health status display
+					let healthHtml = "";
+					let methodRecommendation = "";
+
+					if (health.status === "healthy" && health.response_time < 5) {
+						healthHtml = `
+							<div class="runpod-health-status" style="margin: 10px 0; padding: 12px; border-radius: 6px; background: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
+								<div style="font-weight: 600; margin-bottom: 5px;">✅ RunPod API Status: Healthy</div>
+								<div style="font-size: 13px; color: #0f5132;">Response time: ${health.response_time.toFixed(
+									2
+								)}s | 🚀 Recommended for processing</div>
+							</div>
+						`;
+						methodRecommendation = "runpod";
+
+						// Auto-set to runpod if not already set
+						if (!frm.doc.processing_method || frm.doc.processing_method === "local") {
+							frm.set_value("processing_method", "runpod");
+						}
+					} else if (health.status === "healthy" && health.response_time >= 5) {
+						healthHtml = `
+							<div class="runpod-health-status" style="margin: 10px 0; padding: 12px; border-radius: 6px; background: #fff3cd; border: 1px solid #ffeaa7; color: #856404;">
+								<div style="font-weight: 600; margin-bottom: 5px;">⚠️ RunPod API Status: Slow</div>
+								<div style="font-size: 13px; color: #856404;">Response time: ${health.response_time.toFixed(
+									2
+								)}s | 💻 Local processing recommended</div>
+							</div>
+						`;
+						methodRecommendation = "local";
+
+						// Auto-set to local if RunPod is slow
+						if (frm.doc.processing_method === "runpod") {
+							frm.set_value("processing_method", "local");
+						}
+					} else {
+						healthHtml = `
+							<div class="runpod-health-status" style="margin: 10px 0; padding: 12px; border-radius: 6px; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
+								<div style="font-weight: 600; margin-bottom: 5px;">❌ RunPod API Status: ${
+									health.status || "Unavailable"
+								}</div>
+								<div style="font-size: 13px; color: #721c24;">💻 Local processing only available</div>
+							</div>
+						`;
+						methodRecommendation = "local";
+
+						// Auto-set to local if RunPod is unhealthy
+						if (frm.doc.processing_method === "runpod") {
+							frm.set_value("processing_method", "local");
+						}
+					}
+
+					// Add health status after the policy information section
+					let policyInfoSection = frm
+						.get_field("policy_type")
+						.$wrapper.closest(".form-section");
+					if (policyInfoSection.length) {
+						policyInfoSection.after(healthHtml);
+					}
+
+					// Update processing method field with recommendation
+					if (
+						methodRecommendation &&
+						frm.doc.processing_method !== methodRecommendation
+					) {
+						frm.set_value("processing_method", methodRecommendation);
+					}
 				}
 			},
 		});
