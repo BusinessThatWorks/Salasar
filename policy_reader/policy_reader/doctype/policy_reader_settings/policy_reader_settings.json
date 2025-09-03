@@ -7,6 +7,16 @@
  "field_order": [
   "api_configuration_section",
   "anthropic_api_key",
+  "runpod_configuration_section",
+  "runpod_pod_id",
+  "runpod_port",
+  "runpod_api_secret",
+  "runpod_endpoint",
+  "runpod_health_status",
+  "runpod_last_health_check",
+  "runpod_response_time",
+  "runpod_health_details",
+  "test_runpod_connection",
   "processing_settings_section",
   "fast_mode",
   "max_pages",
@@ -33,6 +43,73 @@
    "fieldname": "anthropic_api_key",
    "fieldtype": "Data",
    "label": "Anthropic API Key"
+  },
+  {
+   "fieldname": "runpod_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "RunPod Configuration"
+  },
+  {
+   "description": "RunPod pod ID (e.g., 'newh9pbsqw7csx' from URL)",
+   "fieldname": "runpod_pod_id",
+   "fieldtype": "Data",
+   "label": "RunPod Pod ID"
+  },
+  {
+   "default": 8000,
+   "description": "RunPod port number (e.g., 8000)",
+   "fieldname": "runpod_port",
+   "fieldtype": "Int",
+   "label": "RunPod Port"
+  },
+  {
+   "description": "RunPod API secret for authentication (e.g., 'doc-reader-1123')",
+   "fieldname": "runpod_api_secret",
+   "fieldtype": "Data",
+   "label": "RunPod API Secret"
+  },
+  {
+   "default": "/extract",
+   "description": "RunPod API endpoint (default: /extract)",
+   "fieldname": "runpod_endpoint",
+   "fieldtype": "Data",
+   "label": "RunPod Endpoint"
+  },
+  {
+   "default": "unknown",
+   "description": "Current health status of RunPod API",
+   "fieldname": "runpod_health_status",
+   "fieldtype": "Select",
+   "label": "RunPod Health Status",
+   "options": "unknown\nhealthy\nunhealthy\nerror",
+   "read_only": 1
+  },
+  {
+   "description": "Last time health check was performed",
+   "fieldname": "runpod_last_health_check",
+   "fieldtype": "Datetime",
+   "label": "Last Health Check",
+   "read_only": 1
+  },
+  {
+   "description": "Response time in seconds from last health check",
+   "fieldname": "runpod_response_time",
+   "fieldtype": "Float",
+   "label": "Response Time (s)",
+   "read_only": 1
+  },
+  {
+   "description": "Detailed health check information",
+   "fieldname": "runpod_health_details",
+   "fieldtype": "JSON",
+   "label": "Health Details",
+   "read_only": 1
+  },
+  {
+   "description": "Test RunPod API connection and health",
+   "fieldname": "test_runpod_connection",
+   "fieldtype": "Button",
+   "label": "Test RunPod Connection"
   },
   {
    "fieldname": "processing_settings_section",

@@ -1,167 +1,176 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "autoincrement",
- "creation": "2025-08-01 07:59:23.913137",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "policy_information_section",
-  "title",
-  "policy_file",
-  "policy_type",
-  "status",
-  "policy_records_section",
-  "motor_policy",
-  "health_policy",
-  "section_break_processing",
-  "extracted_fields",
-  "processing_time",
-  "error_message",
-  "section_break_confidence",
-  "ocr_confidence",
-  "manual_review_recommended",
-  "enhancement_applied",
-  "confidence_data"
- ],
- "fields": [
-  {
-   "fieldname": "policy_information_section",
-   "fieldtype": "Section Break",
-   "label": "Policy Information"
-  },
-  {
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Title",
-   "reqd": 1
-  },
-  {
-   "fieldname": "policy_file",
-   "fieldtype": "Attach",
-   "label": "Policy File",
-   "options": "file_types:pdf",
-   "reqd": 1
-  },
-  {
-   "fieldname": "policy_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Policy Type",
-   "options": "Motor\nHealth",
-   "reqd": 1
-  },
-  {
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Draft\nProcessing\nCompleted\nFailed",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
-   "fieldname": "policy_records_section",
-   "fieldtype": "Section Break",
-   "label": "Policy Records"
-  },
-  {
-   "depends_on": "eval:doc.policy_type=='Motor'",
-   "fieldname": "motor_policy",
-   "fieldtype": "Link",
-   "label": "Motor Policy",
-   "options": "Motor Policy",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.policy_type=='Health'",
-   "fieldname": "health_policy",
-   "fieldtype": "Link",
-   "label": "Health Policy",
-   "options": "Health Policy",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_processing",
-   "fieldtype": "Section Break",
-   "label": "Processing Results"
-  },
-  {
-   "fieldname": "extracted_fields",
-   "fieldtype": "JSON",
-   "label": "Extracted Fields"
-  },
-  {
-   "fieldname": "processing_time",
-   "fieldtype": "Float",
-   "label": "Processing Time (seconds)",
-   "precision": 2
-  },
-  {
-   "fieldname": "error_message",
-   "fieldtype": "Long Text",
-   "label": "Error Message"
-  },
-  {
-   "fieldname": "section_break_confidence",
-   "fieldtype": "Section Break",
-   "label": "OCR Confidence Metrics"
-  },
-  {
-   "fieldname": "ocr_confidence",
-   "fieldtype": "Percent",
-   "label": "OCR Confidence Score",
-   "precision": 1,
-   "read_only": 1
-  },
-  {
-   "default": 0,
-   "fieldname": "manual_review_recommended",
-   "fieldtype": "Check",
-   "label": "Manual Review Recommended",
-   "read_only": 1
-  },
-  {
-   "default": 0,
-   "fieldname": "enhancement_applied",
-   "fieldtype": "Check",
-   "label": "Image Enhancement Applied",
-   "read_only": 1
-  },
-  {
-   "fieldname": "confidence_data",
-   "fieldtype": "JSON",
-   "label": "Detailed Confidence Data",
-   "read_only": 1
-  }
- ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-08-01 08:03:44.547081",
- "modified_by": "Administrator",
- "module": "Policy Reader",
- "name": "Policy Document",
- "naming_rule": "Autoincrement",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "sort_field": "creation",
- "sort_order": "DESC",
- "states": []
+  "actions": [],
+  "allow_rename": 1,
+  "autoname": "autoincrement",
+  "creation": "2025-08-01 07:59:23.913137",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "policy_information_section",
+    "title",
+    "policy_file",
+    "policy_type",
+    "status",
+    "policy_records_section",
+    "motor_policy",
+    "health_policy",
+    "section_break_processing",
+    "extracted_fields",
+    "processing_time",
+    "error_message",
+    "section_break_confidence",
+    "ocr_confidence",
+    "manual_review_recommended",
+    "enhancement_applied",
+    "confidence_data"
+  ],
+  "fields": [
+    {
+      "fieldname": "policy_information_section",
+      "fieldtype": "Section Break",
+      "label": "Policy Information"
+    },
+    {
+      "fieldname": "title",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Title",
+      "reqd": 1
+    },
+    {
+      "fieldname": "policy_file",
+      "fieldtype": "Attach",
+      "label": "Policy File",
+      "options": "file_types:pdf",
+      "reqd": 1
+    },
+    {
+      "fieldname": "policy_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Policy Type",
+      "options": "Motor\nHealth",
+      "reqd": 1
+    },
+    {
+      "default": "Draft",
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "Draft\nProcessing\nCompleted\nFailed",
+      "read_only": 1,
+      "reqd": 1
+    },
+    {
+      "fieldname": "policy_records_section",
+      "fieldtype": "Section Break",
+      "label": "Policy Records"
+    },
+    {
+      "depends_on": "eval:doc.policy_type=='Motor'",
+      "fieldname": "motor_policy",
+      "fieldtype": "Link",
+      "label": "Motor Policy",
+      "options": "Motor Policy",
+      "read_only": 1
+    },
+    {
+      "depends_on": "eval:doc.policy_type=='Health'",
+      "fieldname": "health_policy",
+      "fieldtype": "Link",
+      "label": "Health Policy",
+      "options": "Health Policy",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_break_processing",
+      "fieldtype": "Section Break",
+      "label": "Processing Results"
+    },
+    {
+      "fieldname": "extracted_fields",
+      "fieldtype": "JSON",
+      "label": "Extracted Fields"
+    },
+    {
+      "fieldname": "processing_time",
+      "fieldtype": "Float",
+      "label": "Processing Time (seconds)",
+      "precision": 2
+    },
+    {
+      "default": "local",
+      "description": "Method used for text extraction (RunPod API or Local OCR)",
+      "fieldname": "processing_method",
+      "fieldtype": "Select",
+      "label": "Processing Method",
+      "options": "local\nrunpod",
+      "read_only": 1
+    },
+    {
+      "fieldname": "error_message",
+      "fieldtype": "Long Text",
+      "label": "Error Message"
+    },
+    {
+      "fieldname": "section_break_confidence",
+      "fieldtype": "Section Break",
+      "label": "OCR Confidence Metrics"
+    },
+    {
+      "fieldname": "ocr_confidence",
+      "fieldtype": "Percent",
+      "label": "OCR Confidence Score",
+      "precision": 1,
+      "read_only": 1
+    },
+    {
+      "default": 0,
+      "fieldname": "manual_review_recommended",
+      "fieldtype": "Check",
+      "label": "Manual Review Recommended",
+      "read_only": 1
+    },
+    {
+      "default": 0,
+      "fieldname": "enhancement_applied",
+      "fieldtype": "Check",
+      "label": "Image Enhancement Applied",
+      "read_only": 1
+    },
+    {
+      "fieldname": "confidence_data",
+      "fieldtype": "JSON",
+      "label": "Detailed Confidence Data",
+      "read_only": 1
+    }
+  ],
+  "grid_page_length": 50,
+  "index_web_pages_for_search": 1,
+  "links": [],
+  "modified": "2025-08-01 08:03:44.547081",
+  "modified_by": "Administrator",
+  "module": "Policy Reader",
+  "name": "Policy Document",
+  "naming_rule": "Autoincrement",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "row_format": "Dynamic",
+  "sort_field": "creation",
+  "sort_order": "DESC",
+  "states": []
 }

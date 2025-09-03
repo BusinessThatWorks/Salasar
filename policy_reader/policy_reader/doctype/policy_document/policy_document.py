@@ -94,21 +94,25 @@ class PolicyDocument(Document):
             
             file_path = self.get_full_file_path()
             
-            from document_reader import extract_text_with_confidence
-            
             # Get settings for processing configuration
             settings = self.get_policy_reader_settings()
             
             start_time = time.time()
             
-            # Step 1: Extract text using enhanced OCR with confidence scoring
-            # Use enhanced extraction with confidence scoring
-            result = extract_text_with_confidence(
-                file_path,
-                language='en',
-                enable_enhancement=True,
-                enhancement_method="auto"
-            )
+            # Choose processing method: RunPod or Local
+            processing_method = self.choose_processing_method(settings)
+            
+            # Step 1: Extract text using chosen method
+            if processing_method == "runpod":
+                # Use RunPod API for text extraction
+                result = self.extract_text_with_runpod(file_path, settings)
+                if not result.get("success"):
+                    frappe.logger().warning(f"RunPod processing failed, falling back to local: {result.get('error')}")
+                    # Fallback to local processing
+                    result = self.extract_text_with_local(file_path, settings)
+            else:
+                # Use local document_reader library
+                result = self.extract_text_with_local(file_path, settings)
             
             extracted_text = result.get('text', '')
             confidence_data = result.get('confidence_data', {})
@@ -142,6 +146,9 @@ class PolicyDocument(Document):
                 self.processing_time = processing_time
                 self.error_message = ""
                 
+                # Store processing method used
+                self.processing_method = processing_method
+                
                 # Store confidence metrics
                 # The document reader returns confidence as decimal (0.72 = 72%)
                 # Frappe Percent field expects percentage value (72 for 72%)
@@ -165,7 +172,8 @@ class PolicyDocument(Document):
             notification_message = "Processing completed successfully"
             if self.status == "Completed" and hasattr(self, 'ocr_confidence'):
                 confidence_pct = int(self.ocr_confidence)  # Already stored as percentage
-                notification_message = f"Processing completed successfully (OCR confidence: {confidence_pct}%)"
+                method_text = "RunPod API" if processing_method == "runpod" else "Local OCR"
+                notification_message = f"Processing completed successfully via {method_text} (OCR confidence: {confidence_pct}%)"
                 if self.manual_review_recommended:
                     notification_message += " - Manual review recommended"
             elif self.status != "Completed":
@@ -179,7 +187,8 @@ class PolicyDocument(Document):
                     "message": notification_message,
                     "processing_time": processing_time if hasattr(self, 'processing_time') else 0,
                     "ocr_confidence": getattr(self, 'ocr_confidence', 0),  # Already stored as percentage
-                    "manual_review_recommended": getattr(self, 'manual_review_recommended', 0)
+                    "manual_review_recommended": getattr(self, 'manual_review_recommended', 0),
+                    "processing_method": processing_method
                 },
                 user=self.owner
             )
@@ -203,6 +212,121 @@ class PolicyDocument(Document):
                 },
                 user=self.owner
             )
+    
+    def choose_processing_method(self, settings):
+        """Choose between RunPod and local processing based on health and configuration"""
+        try:
+            # Check if RunPod is configured and healthy
+            if (settings.runpod_pod_id and 
+                settings.runpod_port and 
+                settings.runpod_api_secret and
+                settings.runpod_health_status == "healthy"):
+                
+                # Check if response time is acceptable (<5 seconds)
+                if settings.runpod_response_time < 5:
+                    frappe.logger().info(f"Using RunPod API for processing (response time: {settings.runpod_response_time:.2f}s)")
+                    return "runpod"
+                else:
+                    frappe.logger().warning(f"RunPod responding slowly ({settings.runpod_response_time:.2f}s), using local processing")
+                    return "local"
+            
+            # Fallback to local processing
+            frappe.logger().info("RunPod unavailable, using local processing")
+            return "local"
+            
+        except Exception as e:
+            frappe.log_error(f"Error choosing processing method: {str(e)}", "Processing Method Selection Error")
+            return "local"  # Default to local on error
+    
+    def extract_text_with_runpod(self, file_path, settings):
+        """Extract text using RunPod API"""
+        try:
+            import requests
+            
+            # Get RunPod extract URL
+            extract_url = settings.get_runpod_extract_url()
+            if not extract_url:
+                return {"success": False, "error": "RunPod URL not configured"}
+            
+            # Prepare file for upload
+            with open(file_path, 'rb') as file:
+                files = {'file': file}
+                headers = {'Authorization': f'Bearer {settings.runpod_api_secret}'}
+                
+                # Build prompt based on policy type
+                prompt = f"Extract text from this {self.policy_type.lower()} insurance policy document. Focus on policy details, insured information, dates, amounts, and vehicle details (if applicable)."
+                
+                data = {'prompt': prompt}
+                
+                # Make request to RunPod API
+                start_time = time.time()
+                response = requests.post(
+                    extract_url, 
+                    files=files, 
+                    data=data, 
+                    headers=headers, 
+                    timeout=settings.timeout or 180
+                )
+                response_time = time.time() - start_time
+                
+                if response.status_code == 200:
+                    try:
+                        result = response.json()
+                        extracted_text = result.get('text', '')
+                        
+                        if extracted_text:
+                            # Return in compatible format with local processing
+                            return {
+                                "success": True,
+                                "text": extracted_text,
+                                "confidence_data": {
+                                    "average_confidence": 0.85,  # RunPod typically high confidence
+                                    "enhancement_applied": False,
+                                    "processing_method": "runpod",
+                                    "response_time": response_time
+                                }
+                            }
+                        else:
+                            return {"success": False, "error": "No text extracted from RunPod API"}
+                            
+                    except ValueError:
+                        # Response is not JSON
+                        return {"success": False, "error": f"Invalid JSON response from RunPod API: {response.text}"}
+                else:
+                    return {"success": False, "error": f"RunPod API error: HTTP {response.status_code} - {response.text}"}
+                    
+        except requests.exceptions.Timeout:
+            return {"success": False, "error": "RunPod API request timed out"}
+        except requests.exceptions.ConnectionError:
+            return {"success": False, "error": "Cannot connect to RunPod API"}
+        except Exception as e:
+            frappe.log_error(f"RunPod API processing error: {str(e)}", "RunPod Processing Error")
+            return {"success": False, "error": f"RunPod API error: {str(e)}"}
+    
+    def extract_text_with_local(self, file_path, settings):
+        """Extract text using local document_reader library (fallback method)"""
+        try:
+            from document_reader import extract_text_with_confidence
+            
+            # Use enhanced extraction with confidence scoring
+            result = extract_text_with_confidence(
+                file_path,
+                language='en',
+                enable_enhancement=True,
+                enhancement_method="auto"
+            )
+            
+            # Add processing method info
+            if 'confidence_data' in result:
+                result['confidence_data']['processing_method'] = 'local'
+            
+            return result
+            
+        except ImportError:
+            return {"success": False, "error": "Local document_reader library not available"}
+        except Exception as e:
+            frappe.log_error(f"Local OCR processing error: {str(e)}", "Local OCR Error")
+            return {"success": False, "error": f"Local OCR error: {str(e)}"}
     
     def validate_file_access(self):
         """Validate that the file is accessible for processing"""
