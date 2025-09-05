@@ -101,8 +101,7 @@ frappe.ui.form.on("Policy Document", {
 		// Show RunPod health status to inform processing method choice
 		frm.trigger("check_runpod_health_status");
 
-		// Check insurer and template status
-		frm.trigger("check_insurer_template_status");
+		// Policy type changed - no special handling needed
 
 		// Extracted fields display removed per user request
 
@@ -560,9 +559,6 @@ frappe.ui.form.on("Policy Document", {
 		// Policy type changed - no special handling needed
 	},
 
-	insurer: function (frm) {
-		// Insurer changed - no special handling needed
-	},
 
 	ai_extract_fields: function (frm) {
 		// Rerun AI extraction on the OCR text

@@ -10,7 +10,6 @@
     "title",
     "policy_file",
     "policy_type",
-    "insurer",
     "status",
     "section_break_processing",
     "extracted_fields",
@@ -51,13 +50,6 @@
       "label": "Policy Type",
       "options": "Motor\nHealth",
       "reqd": 1
-    },
-    {
-      "description": "Insurance company (optional - will use default template if not selected)",
-      "fieldname": "insurer",
-      "fieldtype": "Link",
-      "label": "Insurer",
-      "options": "Insurer Configuration"
     },
     {
       "default": "Draft",
