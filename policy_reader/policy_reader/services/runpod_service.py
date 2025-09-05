@@ -53,6 +53,10 @@ class RunPodService:
         endpoint = self.settings.runpod_endpoint or "/extract"
         return f"{base_url}{endpoint}"
     
+    def get_ocr_url(self):
+        """Get RunPod OCR-only URL"""
+        return self.settings.get_runpod_ocr_url()
+    
     def check_health(self):
         """Perform health check on RunPod API"""
         try:
@@ -104,27 +108,25 @@ class RunPodService:
             }
     
     def extract_document_text(self, file_path, policy_type, timeout=None):
-        """Extract text from document using RunPod API"""
+        """Extract OCR text from document using RunPod API (OCR only, no field extraction)"""
         try:
             if not self.is_healthy():
                 return {"success": False, "error": "RunPod API is not available"}
             
-            extract_url = self.get_extract_url()
+            ocr_url = self.get_ocr_url()
             
             # Prepare file for upload
             with open(file_path, 'rb') as file:
                 files = {'file': file}
                 headers = {'Authorization': f'Bearer {self.settings.runpod_api_secret}'}
                 
-                # Build prompt based on policy type
-                prompt = f"Extract text from this {policy_type.lower()} insurance policy document. Focus on policy details, insured information, dates, amounts, and vehicle details (if applicable)."
+                # OCR endpoint doesn't need prompt - just extract raw text
+                data = {}
                 
-                data = {'prompt': prompt}
-                
-                # Make request to RunPod API
+                # Make request to RunPod OCR API
                 start_time = time.time()
                 response = requests.post(
-                    extract_url, 
+                    ocr_url, 
                     files=files, 
                     data=data, 
                     headers=headers, 
@@ -145,26 +147,26 @@ class RunPodService:
                                 "confidence_data": {
                                     "average_confidence": 0.85,  # RunPod typically high confidence
                                     "enhancement_applied": False,
-                                    "processing_method": "runpod",
+                                    "processing_method": "runpod_ocr",
                                     "response_time": response_time
                                 }
                             }
                         else:
-                            return {"success": False, "error": "No text extracted from RunPod API"}
+                            return {"success": False, "error": "No text extracted from RunPod OCR API"}
                             
                     except ValueError:
                         # Response is not JSON
-                        return {"success": False, "error": f"Invalid JSON response from RunPod API: {response.text}"}
+                        return {"success": False, "error": f"Invalid JSON response from RunPod OCR API: {response.text}"}
                 else:
-                    return {"success": False, "error": f"RunPod API error: HTTP {response.status_code} - {response.text}"}
+                    return {"success": False, "error": f"RunPod OCR API error: HTTP {response.status_code} - {response.text}"}
                     
         except requests.exceptions.Timeout:
-            return {"success": False, "error": "RunPod API request timed out"}
+            return {"success": False, "error": "RunPod OCR API request timed out"}
         except requests.exceptions.ConnectionError:
-            return {"success": False, "error": "Cannot connect to RunPod API"}
+            return {"success": False, "error": "Cannot connect to RunPod OCR API"}
         except Exception as e:
-            frappe.log_error(f"RunPod document extraction error: {str(e)}", "RunPod Extraction Error")
-            return {"success": False, "error": f"RunPod API error: {str(e)}"}
+            frappe.log_error(f"RunPod OCR extraction error: {str(e)}", "RunPod OCR Error")
+            return {"success": False, "error": f"RunPod OCR API error: {str(e)}"}
     
     def update_health_status(self, health_result):
         """Update the health status in settings"""

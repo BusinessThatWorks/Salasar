@@ -47,6 +47,10 @@ class PolicyReaderSettings(Document):
 			if not (0.1 <= self.confidence_threshold <= 1.0):
 				frappe.throw("Confidence Threshold must be between 0.1 and 1.0")
 		
+		if self.text_truncation_limit:
+			if not (1000 <= self.text_truncation_limit <= 100000):
+				frappe.throw("Text Truncation Limit must be between 1,000 and 100,000 characters")
+		
 		if self.timeout:
 			if not (60 <= self.timeout <= 600):
 				frappe.throw("Timeout must be between 60 and 600 seconds")
@@ -182,6 +186,15 @@ class PolicyReaderSettings(Document):
 		endpoint = self.runpod_endpoint or "/extract"
 		return f"{base_url}{endpoint}"
 	
+	def get_runpod_ocr_url(self):
+		"""Get RunPod OCR-only API URL"""
+		base_url = self.get_runpod_base_url()
+		if not base_url:
+			return None
+		# Use OCR endpoint if configured, otherwise use the configured endpoint
+		endpoint = self.runpod_endpoint or "/ocr"
+		return f"{base_url}{endpoint}"
+	
 	def is_runpod_available(self):
 		"""Check if RunPod is configured and healthy"""
 		return (self.runpod_pod_id and 
@@ -218,6 +231,56 @@ class PolicyReaderSettings(Document):
 			frappe.log_error(f"Field mapping refresh failed: {str(e)}", "Field Mapping Refresh Error")
 			frappe.throw(f"Failed to refresh field mappings: {str(e)}")
 	
+	@frappe.whitelist()
+	def refresh_extraction_prompts(self):
+		"""Refresh extraction prompts from Motor Policy and Health Policy DocTypes"""
+		try:
+			# Build dynamic extraction prompts
+			sample_text = "Sample policy document text for prompt generation"
+			motor_prompt = self._build_motor_extraction_prompt(sample_text)
+			health_prompt = self._build_health_extraction_prompt(sample_text)
+			
+			# Update cached prompts
+			self.motor_extraction_prompt = motor_prompt
+			self.health_extraction_prompt = health_prompt
+			self.last_prompt_sync = now()
+			
+			# Save the document
+			self.save()
+			
+			frappe.msgprint(f"Extraction prompts refreshed successfully. Motor prompt: {len(motor_prompt)} chars, Health prompt: {len(health_prompt)} chars.",
+							title="Extraction Prompts Refreshed", indicator="green")
+			
+			return {
+				"success": True,
+				"motor_prompt_length": len(motor_prompt),
+				"health_prompt_length": len(health_prompt)
+			}
+			
+		except Exception as e:
+			frappe.log_error(f"Extraction prompt refresh failed: {str(e)}", "Extraction Prompt Refresh Error")
+			frappe.throw(f"Failed to refresh extraction prompts: {str(e)}")
+	
+	def get_cached_extraction_prompt(self, policy_type, extracted_text):
+		"""Get cached extraction prompt or build dynamically if not cached"""
+		try:
+			truncation_limit = self.text_truncation_limit or 50000
+			if policy_type.lower() == "motor":
+				if self.motor_extraction_prompt:
+					# Replace the sample text with actual extracted text
+					return self.motor_extraction_prompt.replace("Sample policy document text for prompt generation", extracted_text[:truncation_limit])
+			elif policy_type.lower() == "health":
+				if self.health_extraction_prompt:
+					# Replace the sample text with actual extracted text
+					return self.health_extraction_prompt.replace("Sample policy document text for prompt generation", extracted_text[:truncation_limit])
+			
+			# Fallback to dynamic generation if not cached
+			return self.build_dynamic_extraction_prompt(policy_type, extracted_text)
+			
+		except Exception as e:
+			frappe.log_error(f"Error getting cached extraction prompt for {policy_type}: {str(e)}", "Cached Prompt Error")
+			return self.build_dynamic_extraction_prompt(policy_type, extracted_text)
+	
 	def build_field_mapping_from_doctype(self, doctype_name):
 		"""Build field mapping from DocType definition"""
 		try:
@@ -235,13 +298,19 @@ class PolicyReaderSettings(Document):
 				"Section Break", "Column Break", "Tab Break", "HTML", "Heading", "Button"
 			}
 			
-			# Build mapping from field labels to fieldnames
+			# Build mapping from field labels to fieldnames (with aliases)
 			for field in doctype_doc.fields:
 				if (field.fieldname not in skip_fields and 
 					field.fieldtype not in skip_fieldtypes and 
 					field.label):
 					
+					# Add primary field label
 					field_mapping[field.label] = field.fieldname
+					
+					# Add common aliases for natural language variations
+					aliases = self._get_field_aliases(field.fieldname, field.label)
+					for alias in aliases:
+						field_mapping[alias] = field.fieldname
 			
 			return field_mapping
 			
@@ -265,6 +334,289 @@ class PolicyReaderSettings(Document):
 		except Exception as e:
 			frappe.log_error(f"Error getting cached field mapping for {policy_type}: {str(e)}", "Field Mapping Cache Error")
 			return {}
+	
+	def build_dynamic_extraction_prompt(self, policy_type, extracted_text):
+		"""Build dynamic extraction prompt based on DocType fields"""
+		try:
+			if policy_type.lower() == "motor":
+				return self._build_motor_extraction_prompt(extracted_text)
+			elif policy_type.lower() == "health":
+				return self._build_health_extraction_prompt(extracted_text)
+			else:
+				return self._build_generic_extraction_prompt(policy_type, extracted_text)
+				
+		except Exception as e:
+			frappe.log_error(f"Error building dynamic extraction prompt for {policy_type}: {str(e)}", "Dynamic Prompt Error")
+			return self._build_fallback_prompt(policy_type, extracted_text)
+	
+	def _build_motor_extraction_prompt(self, extracted_text):
+		"""Build dynamic motor policy extraction prompt from DocType fields"""
+		try:
+			# Get Motor Policy DocType metadata
+			meta = frappe.get_meta("Motor Policy")
+			
+			# Group fields by category
+			policy_fields = []
+			financial_fields = []
+			vehicle_fields = []
+			business_fields = []
+			
+			# Skip these system/layout fields
+			skip_fields = {
+				"policy_document", "policy_file", "naming_series", "owner", "creation", 
+				"modified", "modified_by", "docstatus", "idx", "name"
+			}
+			
+			skip_fieldtypes = {
+				"Section Break", "Column Break", "Tab Break", "HTML", "Heading", "Button"
+			}
+			
+			# Categorize fields based on fieldname patterns
+			for field in meta.fields:
+				if (field.fieldname not in skip_fields and 
+					field.fieldtype not in skip_fieldtypes and 
+					field.label):
+					
+					field_info = self._build_field_prompt_info(field)
+					
+					# Categorize by field patterns
+					if any(keyword in field.fieldname.lower() for keyword in ['policy', 'date']):
+						policy_fields.append(field_info)
+					elif any(keyword in field.fieldname.lower() for keyword in ['premium', 'sum', 'gst', 'ncb', 'amount']):
+						financial_fields.append(field_info)
+					elif any(keyword in field.fieldname.lower() for keyword in ['vehicle', 'make', 'model', 'engine', 'chassis', 'fuel', 'cc', 'rto']):
+						vehicle_fields.append(field_info)
+					elif any(keyword in field.fieldname.lower() for keyword in ['customer', 'payment', 'bank', 'branch']):
+						business_fields.append(field_info)
+					else:
+						policy_fields.append(field_info)  # Default to policy fields
+			
+			# Build categorized prompt
+			prompt_sections = []
+			
+			if policy_fields:
+				prompt_sections.append("POLICY INFORMATION:\n" + "\n".join(policy_fields))
+			
+			if financial_fields:
+				prompt_sections.append("FINANCIAL DETAILS:\n" + "\n".join(financial_fields))
+			
+			if vehicle_fields:
+				prompt_sections.append("VEHICLE INFORMATION:\n" + "\n".join(vehicle_fields))
+			
+			if business_fields:
+				prompt_sections.append("BUSINESS INFORMATION:\n" + "\n".join(business_fields))
+			
+			# Get truncation limit from settings
+			truncation_limit = self.text_truncation_limit or 50000
+			
+			# Build complete prompt
+			prompt = f"""Extract these motor insurance policy fields as JSON:
+
+{chr(10).join(prompt_sections)}
+
+EXTRACTION RULES:
+- Dates: DD/MM/YYYY format only (clean "FROM 15/03/2024" to "15/03/2024")
+- Currency: Extract digits only (remove ₹, Rs., commas, /-)
+- Numbers: Digits only (remove descriptive text like "seater")
+- Text: Clean format (remove extra prefixes/suffixes)
+- Select: Match exact options (case-insensitive)
+- Missing fields: null
+
+EXAMPLES:
+- "FROM 15/03/2024" → "15/03/2024"
+- "Rs. 25,000/-" → "25000"
+- "5 seater capacity" → "5"
+- "DL-01-AA-1234 (Vehicle)" → "DL-01-AA-1234"
+
+Document: {extracted_text[:truncation_limit]}
+
+Return only valid JSON:"""
+			
+			return prompt
+			
+		except Exception as e:
+			frappe.log_error(f"Error building motor extraction prompt: {str(e)}", "Motor Prompt Build Error")
+			return self._build_fallback_prompt("motor", extracted_text)
+	
+	def _build_health_extraction_prompt(self, extracted_text):
+		"""Build dynamic health policy extraction prompt from DocType fields"""
+		try:
+			# Get Health Policy DocType metadata
+			meta = frappe.get_meta("Health Policy")
+			
+			# Group fields by category
+			policy_fields = []
+			personal_fields = []
+			financial_fields = []
+			
+			# Skip these system/layout fields
+			skip_fields = {
+				"policy_document", "policy_file", "naming_series", "owner", "creation", 
+				"modified", "modified_by", "docstatus", "idx", "name"
+			}
+			
+			skip_fieldtypes = {
+				"Section Break", "Column Break", "Tab Break", "HTML", "Heading", "Button"
+			}
+			
+			# Categorize fields based on fieldname patterns
+			for field in meta.fields:
+				if (field.fieldname not in skip_fields and 
+					field.fieldtype not in skip_fieldtypes and 
+					field.label):
+					
+					field_info = self._build_field_prompt_info(field)
+					
+					# Categorize by field patterns
+					if any(keyword in field.fieldname.lower() for keyword in ['policy', 'date', 'period']):
+						policy_fields.append(field_info)
+					elif any(keyword in field.fieldname.lower() for keyword in ['insured', 'name', 'birth', 'relationship', 'nominee']):
+						personal_fields.append(field_info)
+					elif any(keyword in field.fieldname.lower() for keyword in ['premium', 'sum', 'gst', 'amount']):
+						financial_fields.append(field_info)
+					else:
+						policy_fields.append(field_info)  # Default to policy fields
+			
+			# Build categorized prompt
+			prompt_sections = []
+			
+			if policy_fields:
+				prompt_sections.append("POLICY INFORMATION:\n" + "\n".join(policy_fields))
+			
+			if personal_fields:
+				prompt_sections.append("PERSONAL INFORMATION:\n" + "\n".join(personal_fields))
+			
+			if financial_fields:
+				prompt_sections.append("FINANCIAL DETAILS:\n" + "\n".join(financial_fields))
+			
+			# Get truncation limit from settings
+			truncation_limit = self.text_truncation_limit or 50000
+			
+			# Build complete prompt
+			prompt = f"""Extract these health insurance policy fields as JSON:
+
+{chr(10).join(prompt_sections)}
+
+EXTRACTION RULES:
+- Dates: DD/MM/YYYY format only
+- Currency: Extract digits only (remove currency symbols)
+- Text: Clean format (core information only)
+- Missing fields: null
+
+Document: {extracted_text[:truncation_limit]}
+
+Return only valid JSON:"""
+			
+			return prompt
+			
+		except Exception as e:
+			frappe.log_error(f"Error building health extraction prompt: {str(e)}", "Health Prompt Build Error")
+			return self._build_fallback_prompt("health", extracted_text)
+	
+	def _build_field_prompt_info(self, field):
+		"""Build prompt information for a specific field using natural field labels"""
+		# Use the natural field label as the extraction field name
+		field_name = field.label.strip()
+		
+		# Build field description with format hints
+		if field.fieldtype == "Date":
+			return f"- {field_name}: Date in DD/MM/YYYY format"
+		elif field.fieldtype in ["Currency", "Float"]:
+			return f"- {field_name}: Numeric amount (digits only)"
+		elif field.fieldtype == "Int":
+			return f"- {field_name}: Integer number"
+		elif field.fieldtype == "Select" and field.options:
+			options_list = [opt.strip() for opt in field.options.split('\n') if opt.strip()]
+			return f"- {field_name}: Select from [{', '.join(options_list)}]"
+		else:
+			return f"- {field_name}: Text format"
+	
+	
+	def _build_generic_extraction_prompt(self, policy_type, extracted_text):
+		"""Build generic extraction prompt for unknown policy types"""
+		truncation_limit = self.text_truncation_limit or 50000
+		return f"""Extract relevant information from this {policy_type} insurance policy document.
+		
+Return clean, structured data as JSON format.
+- Dates: DD/MM/YYYY format
+- Numbers: Digits only
+- Text: Clean format
+
+Document: {extracted_text[:truncation_limit]}
+
+Return only valid JSON:"""
+	
+	def _build_fallback_prompt(self, policy_type, extracted_text):
+		"""Build simple fallback prompt if dynamic generation fails"""
+		truncation_limit = self.text_truncation_limit or 50000
+		return f"""Extract information from this {policy_type} insurance policy document.
+		
+Document: {extracted_text[:truncation_limit]}
+
+Return data as valid JSON:"""
+	
+	def _get_field_aliases(self, fieldname, field_label):
+		"""Get common aliases for field names to handle natural language variations"""
+		aliases = []
+		
+		# Common field name variations based on fieldname and label patterns
+		field_aliases = {
+			# Policy fields
+			'policy_no': ['Policy Number', 'PolicyNumber', 'Policy Num', 'PolicyNo'],
+			'policy_type': ['PolicyType'],
+			'policy_issuance_date': ['Policy Issuance Date', 'Issuance Date', 'PolicyIssuanceDate'],
+			'policy_start_date': ['Policy Start Date', 'Start Date', 'PolicyStartDate', 'From Date'],
+			'policy_expiry_date': ['Policy Expiry Date', 'Expiry Date', 'PolicyExpiryDate', 'To Date', 'End Date'],
+			
+			# Vehicle fields
+			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No'],
+			'make': ['Make', 'Vehicle Make'],
+			'model': ['Model', 'Vehicle Model'],
+			'variant': ['Variant', 'Vehicle Variant'],
+			'year_of_man': ['Year of Manufacture', 'Manufacturing Year', 'YearOfManufacture', 'Year', 'Model Year'],
+			
+			# Engine/Chassis fields (handle the typo in DocType)
+			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No'],
+			'engine_no': ['Engine Number', 'EngineNumber', 'Engine No', 'EngineNo'],
+			'cc': ['CC', 'Engine Capacity', 'Cubic Capacity'],
+			'fuel': ['Fuel', 'Fuel Type', 'FuelType'],
+			
+			# Financial fields
+			'sum_insured': ['Sum Insured', 'SumInsured', 'Insured Amount', 'Coverage Amount'],
+			'net_od_premium': ['Net Premium', 'NetPremium', 'Net OD Premium', 'NetODPremium', 'OD Premium'],
+			'tp_premium': ['TP Premium', 'TPPremium', 'Third Party Premium'],
+			'gst': ['GST', 'Tax', 'Service Tax'],
+			'ncb': ['NCB', 'No Claim Bonus'],
+			
+			# Registration fields
+			'rto_code': ['RTO Code', 'RTOCode', 'RTO'],
+			'vehicle_category': ['Vehicle Category', 'VehicleCategory', 'Vehicle Class', 'Category'],
+			'passenger_gvw': ['Passenger GVW', 'PassengerGVW', 'GVW'],
+			
+			# Health policy fields
+			'policy_number': ['Policy Number', 'PolicyNumber', 'Policy No'],
+			'insured_name': ['Insured Name', 'InsuredName', 'Name of Insured'],
+			'policy_start_date': ['Policy Start Date', 'Start Date', 'From Date'],
+			'policy_end_date': ['Policy End Date', 'End Date', 'To Date', 'Expiry Date'],
+			'customer_code': ['Customer Code', 'CustomerCode'],
+			'net_premium': ['Net Premium', 'NetPremium', 'Premium Amount'],
+			'policy_period': ['Policy Period', 'PolicyPeriod', 'Period'],
+			'issuing_office': ['Issuing Office', 'IssuingOffice', 'Office'],
+			'relationship_to_policyholder': ['Relationship', 'Relation', 'RelationshipToPolicyholder'],
+			'date_of_birth': ['Date of Birth', 'DateOfBirth', 'DOB', 'Birth Date'],
+			'insured_name_2': ['Insured Name 2', 'Second Insured', 'InsuredName2'],
+			'nominee_name': ['Nominee Name', 'NomineeName', 'Nominee'],
+			'insured_code': ['Insured Code', 'InsuredCode']
+		}
+		
+		# Get aliases for this specific field
+		if fieldname in field_aliases:
+			aliases = field_aliases[fieldname]
+		
+		# Don't add the original label as an alias if it's already the primary key
+		aliases = [alias for alias in aliases if alias != field_label]
+		
+		return aliases
 
 @frappe.whitelist()
 def get_runpod_health_info():

@@ -23,6 +23,17 @@ frappe.ui.form.on("Policy Document", {
 			);
 		}
 
+		// Add AI-Extract button for completed documents
+		if (frm.doc.status === "Completed" && frm.doc.extracted_fields) {
+			frm.add_custom_button(
+				__("AI-Extract"),
+				function () {
+					frm.trigger("ai_extract_fields");
+				},
+				__("Actions")
+			);
+		}
+
 		// Add Reset Status button for stuck documents using Frappe patterns
 		if (frm.doc.status === "Processing") {
 			frm.add_custom_button(
@@ -89,6 +100,9 @@ frappe.ui.form.on("Policy Document", {
 
 		// Show RunPod health status to inform processing method choice
 		frm.trigger("check_runpod_health_status");
+
+		// Check insurer and template status
+		frm.trigger("check_insurer_template_status");
 
 		// Extracted fields display removed per user request
 
@@ -540,6 +554,54 @@ frappe.ui.form.on("Policy Document", {
 				}
 			},
 		});
+	},
+
+	policy_type: function (frm) {
+		// Policy type changed - no special handling needed
+	},
+
+	insurer: function (frm) {
+		// Insurer changed - no special handling needed
+	},
+
+	ai_extract_fields: function (frm) {
+		// Rerun AI extraction on the OCR text
+		if (!frm.doc.extracted_fields) {
+			frappe.msgprint(__("No extracted fields found. Please process the document first."));
+			return;
+		}
+
+		frappe.confirm(
+			__("This will rerun the AI extraction on the OCR text. Continue?"),
+			function () {
+				// Show loading indicator
+				frm.dashboard.add_comment(__("🤖 Rerunning AI extraction..."), "blue", true);
+
+				frm.call("ai_extract_fields_from_ocr")
+					.then((r) => {
+						if (r.message && r.message.success) {
+							frappe.show_alert({
+								message: __("AI extraction completed successfully!"),
+								indicator: "green",
+							});
+							frm.reload_doc();
+						} else {
+							frappe.msgprint({
+								title: __("AI Extraction Failed"),
+								message: r.message?.message || __("Failed to extract fields"),
+								indicator: "red",
+							});
+						}
+					})
+					.catch((err) => {
+						frappe.msgprint({
+							title: __("AI Extraction Error"),
+							message: __("Error: {0}", [err.message]),
+							indicator: "red",
+						});
+					});
+			}
+		);
 	},
 });
 

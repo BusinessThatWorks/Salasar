@@ -42,23 +42,13 @@ def refresh_field_mappings_if_policy_doctype(doc, method):
 
 def get_field_mapping_for_policy_type(policy_type):
 	"""Get field mapping for a policy type with fallback to hardcoded mappings"""
-	from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
-	field_mapping_service = FieldMappingService()
-	return field_mapping_service.get_field_mapping_for_policy_type(policy_type)
+	from policy_reader.policy_reader.services.extraction_service import ExtractionService
+	extraction_service = ExtractionService()
+	return extraction_service.get_field_mapping_for_policy_type(policy_type)
 
 
-def get_hardcoded_motor_mapping():
-	"""Fallback hardcoded motor policy field mapping"""
-	from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
-	field_mapping_service = FieldMappingService()
-	return field_mapping_service.get_hardcoded_motor_mapping()
 
 
-def get_hardcoded_health_mapping():
-	"""Fallback hardcoded health policy field mapping"""
-	from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
-	field_mapping_service = FieldMappingService()
-	return field_mapping_service.get_hardcoded_health_mapping()
 
 
 def initialize_field_mappings():

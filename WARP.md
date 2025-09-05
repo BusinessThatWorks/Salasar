@@ -9,15 +9,18 @@ Policy Reader is a **Frappe ERPNext application** that processes insurance polic
 ### Core Components
 
 **DocTypes (Database Models):**
+
 - **Policy Document** - Main entity storing uploaded PDFs, processing status, and extracted fields
 - **Policy Reader Settings** - System configuration including API keys, RunPod settings, and processing parameters
 
 **Service Layer:**
+
 - **ProcessingService** - Orchestrates document processing, choosing between RunPod API and local OCR
 - **RunPodService** - Manages RunPod API integration with health checking and failover
-- **FieldMappingService** - Handles field extraction from text using Claude API and manages field mappings
+- **ExtractionService** - Handles field extraction from text using Claude API with prompts from Policy Reader Settings
 
 **Background Processing:**
+
 - Async processing via `frappe.enqueue()` with real-time status updates
 - Scheduled tasks for monitoring stuck documents and RunPod health
 - Comprehensive error handling with automatic retries
@@ -100,8 +103,9 @@ echo '{"anthropic_api_key": "sk-ant-..."}' >> sites/[site]/site_config.json
 ### Frappe Framework Usage
 
 **Always use Frappe's built-in utilities:**
+
 - **File handling**: `frappe.get_doc("File", file_name)`, `file_doc.get_full_path()`
-- **Configuration**: `frappe.conf.get()`, `frappe.get_single()`  
+- **Configuration**: `frappe.conf.get()`, `frappe.get_single()`
 - **Database**: `frappe.get_doc()`, `frappe.get_all()`, `frappe.db.commit()`
 - **Error handling**: `frappe.throw()`, `frappe.log_error()`
 - **JSON operations**: `frappe.parse_json()`, `frappe.as_json()`
@@ -155,21 +159,23 @@ ANTHROPIC_API_KEY="sk-ant-..."        # Claude API for field extraction
 
 # RunPod Configuration (optional)
 RUNPOD_POD_ID="pod-id"               # RunPod instance ID
-RUNPOD_PORT="8000"                   # RunPod service port  
+RUNPOD_PORT="8000"                   # RunPod service port
 RUNPOD_API_SECRET="secret"           # RunPod API authentication
 ```
 
 ### Settings Configuration
 
 Access **Policy Reader Settings** via Frappe UI for:
+
 - Anthropic API key management
-- RunPod endpoint configuration  
+- RunPod endpoint configuration
 - Processing parameters (timeout, confidence threshold, max pages)
 - Field mapping synchronization
 
 ### Scheduled Tasks
 
 The system runs automated maintenance tasks:
+
 - **Every 3 minutes**: Monitor and retry stuck policy documents
 - **Every 10 minutes**: Check RunPod API health status
 
@@ -208,33 +214,40 @@ This codebase represents a production-ready Frappe application with sophisticate
 ### Motor Policy DocType - SAIBA ERP Integration
 
 **Changes Made:**
+
 - **Updated Motor Policy DocType structure** with 37 fields organized into 4 sections for SAIBA ERP compatibility
 - **Added 21 new fields** including customer codes, business information, and enhanced vehicle data
 - **Updated field mapping service** to handle new field structure with proper data type mappings
 - **Successfully migrated database** using `bench migrate` - all new fields are live
 
 **New Field Categories:**
+
 1. **Business Information (7 fields)** - Manual entry fields for ERP integration:
+
    - Customer Code, PolicyBiz Type, Insurer Branch Code, New/Renewal
    - Payment Mode, Bank Name, Payment Transaction No
 
 2. **Enhanced Policy Information (11 fields)** - OCR extracted with proper datetime/numeric types:
+
    - Policy dates, financial amounts (Sum Insured, Net/OD Premium, TP Premium, GST, NCB)
 
 3. **Detailed Vehicle Information (16 fields)** - Complete vehicle specification capture:
    - Make/Model (separate fields), Year of Manufacture, Engine details, RTO Code, Vehicle Category
 
 **Data Source Mapping:**
+
 - **Manual Entry**: Business codes and payment information (not in policy copy)
 - **OCR Extracted**: All policy and vehicle details from document processing
 
 **Migration Status:**
+
 - ✅ DocType structure updated and migrated to database
 - ✅ Field mapping service updated for new structure
 - ✅ Backward compatibility maintained
 - ⚠️ **Missing**: Customer information fields (Name, Address, Contact details) - need to be added
 
 **Usage:**
+
 - OCR processing automatically populates extractable fields
 - Users manually enter business/administrative information
 - Ready for SAIBA ERP API integration (future development)

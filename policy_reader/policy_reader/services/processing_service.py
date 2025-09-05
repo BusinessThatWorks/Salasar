@@ -54,79 +54,20 @@ class ProcessingService:
             return "local"
     
     def extract_text_with_runpod(self, file_path, policy_type, settings):
-        """Extract text using RunPod API"""
+        """Extract OCR text using RunPod API (OCR only, field extraction happens locally)"""
         try:
-            import requests
+            # Use RunPodService for OCR-only extraction
+            from policy_reader.policy_reader.services.runpod_service import RunPodService
+            runpod_service = RunPodService(settings)
+            result = runpod_service.extract_document_text(file_path, policy_type)
             
-            # Get RunPod extract URL
-            extract_url = settings.get_runpod_extract_url()
-            if not extract_url:
-                return {"success": False, "error": "RunPod URL not configured"}
+            frappe.logger().info(f"RunPod OCR result: {result.get('success')}, text length: {len(result.get('text', ''))}")
             
-            frappe.logger().info(f"RunPod extract URL: {extract_url}")
-            
-            # Prepare file for upload - IMPORTANT: Keep file handle open during request
-            files = {'file': open(file_path, 'rb')}
-            headers = {'Authorization': f'Bearer {settings.runpod_api_secret}'}
-            
-            # Build prompt based on policy type  
-            prompt = f"Extract text from this {policy_type.lower()} insurance policy document. Focus on policy details, insured information, dates, amounts, and vehicle details (if applicable)."
-            
-            data = {'prompt': prompt}
-            
-            frappe.logger().info(f"RunPod request - URL: {extract_url}, Headers: {headers}, Data: {data}")
-            
-            try:
-                # Make request to RunPod API
-                start_time = time.time()
-                response = requests.post(
-                    extract_url, 
-                    files=files, 
-                    data=data, 
-                    headers=headers, 
-                    timeout=settings.timeout or 180
-                )
-                response_time = time.time() - start_time
+            return result
                 
-                frappe.logger().info(f"RunPod response - Status: {response.status_code}, Content: {response.text[:200]}...")
-                
-                if response.status_code == 200:
-                    try:
-                        result = response.json()
-                        extracted_text = result.get('text', '')
-                        
-                        if extracted_text:
-                            # Return in compatible format with local processing
-                            return {
-                                "success": True,
-                                "text": extracted_text,
-                                "confidence_data": {
-                                    "average_confidence": 0.85,  # RunPod typically high confidence
-                                    "enhancement_applied": False,
-                                    "processing_method": "runpod",
-                                    "response_time": response_time
-                                }
-                            }
-                        else:
-                            return {"success": False, "error": "No text extracted from RunPod API"}
-                            
-                    except ValueError:
-                        # Response is not JSON
-                        return {"success": False, "error": f"Invalid JSON response from RunPod API: {response.text}"}
-                else:
-                    return {"success": False, "error": f"RunPod API error: HTTP {response.status_code} - {response.text}"}
-            
-            finally:
-                # Always close the file handle
-                files['file'].close()
-                    
-        except requests.exceptions.Timeout:
-            return {"success": False, "error": "RunPod API request timed out"}
-        except requests.exceptions.ConnectionError:
-            return {"success": False, "error": "Cannot connect to RunPod API"}
         except Exception as e:
-            frappe.log_error(f"RunPod API processing error: {str(e)}", "RunPod Processing Error")
-            return {"success": False, "error": f"RunPod API error: {str(e)}"}
+            frappe.log_error(f"RunPod OCR extraction error: {str(e)}", "RunPod OCR Error")
+            return {"success": False, "error": f"RunPod OCR error: {str(e)}"}
     
     def extract_text_with_local(self, file_path, settings):
         """Extract text using local document_reader library (fallback method)"""

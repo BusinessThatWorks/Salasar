@@ -23,10 +23,6 @@ class MotorPolicy(Document):
 	
 	def validate_required_fields(self):
 		"""Validate critical SAIBA fields with better error messages"""
-		if not self.policy_no:
-			frappe.throw("Policy Number is mandatory for SAIBA integration")
-		
-		# Customer code is required for manual creation, but can be 0 for automated creation
-		# This allows policy document processing to create records that can be completed manually
-		if self.customer_code is None:
-			frappe.throw("Customer Code is mandatory for SAIBA integration")
+		# Removed mandatory validation to allow document creation without all fields
+		# Fields can be populated later through AI extraction or manual entry
+		pass
