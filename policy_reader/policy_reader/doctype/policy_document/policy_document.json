@@ -17,6 +17,7 @@
     "ocr_confidence",
     "manual_review_recommended",
     "enhancement_applied",
+    "runpod_endpoint",
     "extraction_results",
     "extracted_fields",
     "raw_ocr_text",
@@ -104,6 +105,13 @@
       "fieldtype": "Check",
       "label": "Image Enhancement Applied",
       "read_only": 1
+    },
+    {
+      "fieldname": "runpod_endpoint",
+      "fieldtype": "Data",
+      "label": "RunPod Endpoint",
+      "read_only": 1,
+      "description": "RunPod API endpoint that was called for processing"
     },
     {
       "fieldname": "extraction_results",

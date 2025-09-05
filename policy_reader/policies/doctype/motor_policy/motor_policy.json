@@ -120,8 +120,9 @@
     {
       "description": "SAIBA(Customer Code)",
       "fieldname": "customer_code",
-      "fieldtype": "Int",
-      "label": "Customer Code"
+      "fieldtype": "Data",
+      "label": "Customer Code",
+      "length": 20
     },
     {
       "description": "SAIBA(PolicyBiz Type)",

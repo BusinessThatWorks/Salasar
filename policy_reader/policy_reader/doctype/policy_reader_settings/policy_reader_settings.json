@@ -76,8 +76,8 @@
    "label": "RunPod API Secret"
   },
   {
-   "default": "/extract",
-   "description": "RunPod API endpoint (default: /extract)",
+   "default": "/ocr-detailed",
+   "description": "RunPod API endpoint (default: /ocr-detailed)",
    "fieldname": "runpod_endpoint",
    "fieldtype": "Data",
    "label": "RunPod Endpoint"

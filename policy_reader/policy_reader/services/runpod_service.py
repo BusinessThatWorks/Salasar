@@ -144,6 +144,7 @@ class RunPodService:
                             return {
                                 "success": True,
                                 "text": extracted_text,
+                                "runpod_endpoint": ocr_url,
                                 "confidence_data": {
                                     "average_confidence": 0.85,  # RunPod typically high confidence
                                     "enhancement_applied": False,

@@ -10,6 +10,7 @@ from frappe.utils import getdate, cstr, flt, cint
 from policy_reader.policy_reader.services.processing_service import ProcessingService
 from policy_reader.policy_reader.services.runpod_service import RunPodService  
 from policy_reader.policy_reader.services.extraction_service import ExtractionService
+from policy_reader.policy_reader.services.policy_creation_service import PolicyCreationService
 
 
 class PolicyDocument(Document):
@@ -119,6 +120,10 @@ class PolicyDocument(Document):
             
             extracted_text = result.get('text', '')
             confidence_data = result.get('confidence_data', {})
+            runpod_endpoint = result.get('runpod_endpoint', '')
+            
+            # Store RunPod endpoint immediately after RunPod call (before Claude extraction)
+            self.runpod_endpoint = runpod_endpoint
             
             # Step 2: Extract structured fields using Claude API
             claude_result = self.extract_fields_with_claude(extracted_text, self.policy_type.lower(), settings)
@@ -403,6 +408,70 @@ class PolicyDocument(Document):
                 
                 return True
         return False
+    
+    @frappe.whitelist()
+    def create_policy_entry(self):
+        """
+        Create a policy record (Motor/Health) from the extracted fields
+        """
+        try:
+            # Validate prerequisites
+            policy_creation_service = PolicyCreationService()
+            validation = policy_creation_service.validate_policy_creation_prerequisites(self.name)
+            
+            if not validation["valid"]:
+                frappe.msgprint(validation["error"], alert=True)
+                return {"success": False, "error": validation["error"]}
+            
+            # Create policy record
+            result = policy_creation_service.create_policy_record(self.name, self.policy_type)
+            
+            if result["success"]:
+                frappe.msgprint(
+                    f"✅ {result['message']}\n"
+                    f"📊 Mapped {result['mapped_fields']} fields\n"
+                    f"🔗 Policy: {result['policy_name']}",
+                    alert=True
+                )
+                
+                # Refresh the form to show the new policy link
+                frappe.publish_realtime('policy_created', {
+                    'policy_document': self.name,
+                    'policy_name': result['policy_name'],
+                    'policy_type': result['policy_type']
+                })
+            else:
+                frappe.msgprint(f"❌ {result['error']}", alert=True)
+            
+            return result
+            
+        except Exception as e:
+            frappe.log_error(f"Policy creation failed: {str(e)}")
+            frappe.msgprint(f"❌ Policy creation failed: {str(e)}", alert=True)
+            return {"success": False, "error": str(e)}
+    
+    @frappe.whitelist()
+    def get_policy_creation_status(self):
+        """
+        Get the status of policy creation for this document
+        """
+        try:
+            policy_creation_service = PolicyCreationService()
+            validation = policy_creation_service.validate_policy_creation_prerequisites(self.name)
+            
+            return {
+                "can_create": validation["valid"],
+                "error": validation.get("error"),
+                "policy_type": self.policy_type,
+                "has_extracted_fields": bool(self.extracted_fields),
+                "existing_policy": self.motor_policy or self.health_policy
+            }
+            
+        except Exception as e:
+            return {
+                "can_create": False,
+                "error": str(e)
+            }
 
 # API Key status checking method
 @frappe.whitelist()
@@ -502,3 +571,4 @@ def process_policy_background(doc_name):
         except Exception as save_error:
             frappe.log_error(f"Failed to update document status for {doc_name}: {str(save_error)}", "Policy OCR Status Update Error")
             # Don't re-raise to avoid recursive errors
+    

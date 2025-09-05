@@ -34,6 +34,9 @@ frappe.ui.form.on("Policy Document", {
 			);
 		}
 
+		// Add Create Policy Entry button
+		frm.trigger("setup_policy_creation_button");
+
 		// Add Reset Status button for stuck documents using Frappe patterns
 		if (frm.doc.status === "Processing") {
 			frm.add_custom_button(
@@ -69,16 +72,6 @@ frappe.ui.form.on("Policy Document", {
 		}
 
 		// Add Create Policy Record button when conditions are met
-		if (frm.trigger("should_show_create_policy_button")) {
-			let policy_type = frm.doc.policy_type;
-			frm.add_custom_button(
-				__("Create {0} Policy", [policy_type]),
-				function () {
-					frm.trigger("create_policy_record");
-				},
-				__("Actions")
-			);
-		}
 
 		// Show processing status in dashboard (but not the persistent indicator)
 		if (frm.doc.status === "Processing") {
@@ -367,83 +360,6 @@ frappe.ui.form.on("Policy Document", {
 		}
 	},
 
-	should_show_create_policy_button: function (frm) {
-		// Show button when:
-		// - Status is "Completed" (fields extracted)
-		// - Policy type is selected
-		// - Extracted fields exist
-		// - No existing policy record linked for the selected type
-
-		if (frm.doc.status !== "Completed") {
-			return false;
-		}
-
-		if (!frm.doc.policy_type) {
-			return false;
-		}
-
-		if (!frm.doc.extracted_fields) {
-			return false;
-		}
-
-		// Check if policy record already exists based on policy type
-		if (frm.doc.policy_type.toLowerCase() === "motor") {
-			return !frm.doc.motor_policy; // Show button if no motor policy linked
-		} else if (frm.doc.policy_type.toLowerCase() === "health") {
-			return !frm.doc.health_policy; // Show button if no health policy linked
-		}
-
-		return false;
-	},
-
-	create_policy_record: function (frm) {
-		let policy_type = frm.doc.policy_type;
-
-		frappe.confirm(
-			__(
-				"Create a new {0} Policy record from the extracted fields?<br><br>This will create a new policy record using the data extracted from the uploaded document.",
-				[policy_type]
-			),
-			function () {
-				// Show loading indicator
-				frappe.show_alert({
-					message: __("Creating {0} Policy record...", [policy_type]),
-					indicator: "blue",
-				});
-
-				frm.call("create_policy_record")
-					.then((r) => {
-						if (r.message && r.message.success) {
-							frappe.show_alert({
-								message: __(r.message.message + ": {0}", [r.message.policy_name]),
-								indicator: "green",
-							});
-							// Reload document to show the new policy link
-							frm.reload_doc();
-						} else {
-							frappe.msgprint({
-								title: __("Policy Creation Failed"),
-								message: r.message
-									? r.message.message
-									: __("Unknown error occurred"),
-								indicator: "red",
-							});
-						}
-					})
-					.catch((err) => {
-						frappe.msgprint({
-							title: __("Policy Creation Error"),
-							message: __("Failed to create policy record: {0}", [err.message]),
-							indicator: "red",
-						});
-					});
-			},
-			function () {
-				// User cancelled - no action needed
-			}
-		);
-	},
-
 	check_api_key_status: function (frm) {
 		// Check API key status and display in dashboard
 		frappe.call({
@@ -592,6 +508,88 @@ frappe.ui.form.on("Policy Document", {
 						frappe.msgprint({
 							title: __("AI Extraction Error"),
 							message: __("Error: {0}", [err.message]),
+							indicator: "red",
+						});
+					});
+			}
+		);
+	},
+
+	setup_policy_creation_button: function (frm) {
+		// Only show button if document is completed and has extracted fields
+		if (frm.doc.status === "Completed" && frm.doc.extracted_fields && frm.doc.policy_type) {
+			// Check if policy already exists
+			const hasExistingPolicy = frm.doc.motor_policy || frm.doc.health_policy;
+
+			if (!hasExistingPolicy) {
+				frm.add_custom_button(
+					__("Create Policy"),
+					function () {
+						frm.trigger("create_policy");
+					},
+					__("Actions")
+				);
+			} else {
+				// Show existing policy link
+				const policyName = frm.doc.motor_policy || frm.doc.health_policy;
+				const policyType = frm.doc.motor_policy ? "Motor" : "Health";
+
+				frm.add_custom_button(
+					__("View {0} Policy", [policyType]),
+					function () {
+						frappe.set_route("Form", `${policyType} Policy`, policyName);
+					},
+					__("Actions")
+				);
+			}
+		}
+	},
+
+	create_policy: function (frm) {
+		// Show confirmation dialog
+		frappe.confirm(
+			__("Create {0} policy from extracted fields?", [frm.doc.policy_type]),
+			function () {
+				// Show loading indicator
+				frm.dashboard.add_comment(
+					__("Creating {0} policy...", [frm.doc.policy_type]),
+					"blue"
+				);
+
+				// Call server method
+				frm.call("create_policy_entry")
+					.then((r) => {
+						// Remove loading indicator
+						frm.dashboard.clear_comment();
+
+						if (r.message && r.message.success) {
+							// Show success message
+							frappe.show_alert({
+								message: __("Policy created successfully!"),
+								indicator: "green",
+							});
+
+							// Refresh the form to show the new policy link
+							frm.reload_doc();
+						} else {
+							// Show error message
+							frappe.show_alert({
+								message: __("Failed to create policy: {0}", [
+									r.message?.error || "Unknown error",
+								]),
+								indicator: "red",
+							});
+						}
+					})
+					.catch((error) => {
+						// Remove loading indicator
+						frm.dashboard.clear_comment();
+
+						// Show error message
+						frappe.show_alert({
+							message: __("Error creating policy: {0}", [
+								error.message || "Unknown error",
+							]),
 							indicator: "red",
 						});
 					});

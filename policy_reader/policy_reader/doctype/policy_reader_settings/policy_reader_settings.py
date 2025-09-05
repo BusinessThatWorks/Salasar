@@ -192,7 +192,7 @@ class PolicyReaderSettings(Document):
 		if not base_url:
 			return None
 		# Use OCR endpoint if configured, otherwise use the configured endpoint
-		endpoint = self.runpod_endpoint or "/ocr"
+		endpoint = self.runpod_endpoint or "/ocr-detailed"
 		return f"{base_url}{endpoint}"
 	
 	def is_runpod_available(self):
