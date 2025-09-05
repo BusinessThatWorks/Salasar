@@ -559,7 +559,6 @@ frappe.ui.form.on("Policy Document", {
 		// Policy type changed - no special handling needed
 	},
 
-
 	ai_extract_fields: function (frm) {
 		// Rerun AI extraction on the OCR text
 		if (!frm.doc.extracted_fields) {

@@ -19,14 +19,30 @@ This document provides context for the current Policy Reader architecture and ou
 - `extract_fields_with_claude()` - Uses ExtractionService for AI extraction
 - `ai_extract_fields_from_ocr()` - Rerun extraction on stored OCR text
 
-**Fields**:
+**Fields** (Organized in Tabs):
 
-- `title`, `policy_file`, `policy_type`, `insurer`, `status`
+**Document Information Tab**:
+
+- `title` - Document title
+- `policy_file` - PDF file attachment
+- `policy_type` - Motor/Health selection
+- `status` - Processing status
+- `processing_method` - RunPod/Local OCR method
+- `processing_time` - Processing duration
+- `ocr_confidence` - OCR confidence score
+- `manual_review_recommended` - Quality flag
+- `enhancement_applied` - Image enhancement flag
+
+**Extraction Results Tab**:
+
 - `extracted_fields` (JSON) - Raw extracted data
 - `raw_ocr_text` - OCR text for re-extraction
 - `used_prompt` - Prompt used for extraction
-- `processing_time`, `error_message`
-- `ocr_confidence`, `manual_review_recommended`, `enhancement_applied`
+
+**Technical Details Tab**:
+
+- `error_message` - Processing errors
+- `confidence_data` (JSON) - Detailed confidence metrics
 
 **Removed**: All policy creation logic, motor_policy/health_policy link fields
 
