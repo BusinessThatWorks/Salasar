@@ -349,6 +349,10 @@ class PolicyDocument(Document):
             motor_policy.policy_file = self.policy_file
             frappe.logger().info(f"Set policy_document link to {self.name} and copied policy_file")
             
+            # Set default values for manual entry fields (required for SAIBA but not extractable from policy)
+            motor_policy.customer_code = 0  # Default value, can be updated manually later
+            frappe.logger().info(f"Set default customer_code = 0 for automated creation")
+            
             # Track successful field mappings
             mapped_fields = 0
             

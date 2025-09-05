@@ -1,0 +1,319 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-05 21:46:40.705492",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "policy_link_section",
+  "policy_document",
+  "policy_file",
+  "business_information_section",
+  "customer_code",
+  "policy_biz_type",
+  "insurer_branch_code",
+  "new_renewal",
+  "column_break_business",
+  "payment_mode",
+  "bank_name",
+  "payment_transaction_no",
+  "policy_information_section",
+  "policy_no",
+  "policy_type",
+  "policy_issuance_date",
+  "policy_start_date",
+  "policy_expiry_date",
+  "column_break_policy",
+  "sum_insured",
+  "net_od_premium",
+  "tp_premium",
+  "gst",
+  "ncb",
+  "vehicle_information_section",
+  "vehicle_no",
+  "make",
+  "model",
+  "variant",
+  "year_of_man",
+  "column_break_vehicle",
+  "chasis_no",
+  "engine_no",
+  "cc",
+  "fuel",
+  "rto_code",
+  "vehicle_category",
+  "passenger_gvw"
+ ],
+ "fields": [
+  {
+   "fieldname": "policy_link_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Document Link"
+  },
+  {
+   "fieldname": "policy_document",
+   "fieldtype": "Link",
+   "label": "Policy Document",
+   "options": "Policy Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "policy_file",
+   "fieldtype": "Attach",
+   "label": "Policy File",
+   "options": "file_types:pdf"
+  },
+  {
+   "fieldname": "business_information_section",
+   "fieldtype": "Section Break",
+   "label": "Business Information",
+   "description": "Fields to be entered manually in Frappe"
+  },
+  {
+   "fieldname": "customer_code",
+   "fieldtype": "Int",
+   "label": "Customer Code",
+   "description": "Manual entry field - Maps to SAIBA Customer Code (Bigint)"
+  },
+  {
+   "fieldname": "policy_biz_type",
+   "fieldtype": "Data",
+   "label": "PolicyBiz Type",
+   "length": 10,
+   "description": "Manual entry field - Maps to SAIBA PolicyBiz Type (Varchar(10))"
+  },
+  {
+   "fieldname": "insurer_branch_code",
+   "fieldtype": "Int",
+   "label": "Insurer Branch Code",
+   "description": "Manual entry field - Maps to SAIBA Insurer Branch Code (Numeric(18,0))"
+  },
+  {
+   "fieldname": "new_renewal",
+   "fieldtype": "Select",
+   "label": "New/Renewal",
+   "options": "New\nRenewal",
+   "description": "Manual entry field - Maps to SAIBA NewRenewal (Varchar(10))"
+  },
+  {
+   "fieldname": "column_break_business",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_mode",
+   "fieldtype": "Data",
+   "label": "Payment Mode",
+   "description": "Manual entry field - Maps to SAIBA Payment Mode (Varchar(Max))"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name",
+   "length": 75,
+   "description": "Manual entry field - Maps to SAIBA Bank Name (Varchar(75))"
+  },
+  {
+   "fieldname": "payment_transaction_no",
+   "fieldtype": "Data",
+   "label": "Payment Transaction No",
+   "length": 50,
+   "description": "Manual entry field - Maps to SAIBA Payment TransactionNo (Varchar(50))"
+  },
+  {
+   "fieldname": "policy_information_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Information",
+   "description": "Fields extracted from policy copy via OCR"
+  },
+  {
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "label": "Policy No",
+   "length": 100,
+   "description": "OCR extracted - Maps to SAIBA PolicyNo (Varchar(100))"
+  },
+  {
+   "fieldname": "policy_type",
+   "fieldtype": "Data",
+   "label": "Policy Type",
+   "length": 75,
+   "description": "OCR extracted - Maps to SAIBA Policy Type (Varchar(75))"
+  },
+  {
+   "fieldname": "policy_issuance_date",
+   "fieldtype": "Datetime",
+   "label": "Policy Issuance Date",
+   "description": "OCR extracted - Maps to SAIBA PolicyIssuanceDate (Datetime)"
+  },
+  {
+   "fieldname": "policy_start_date",
+   "fieldtype": "Datetime",
+   "label": "Policy Start Date",
+   "description": "OCR extracted - Maps to SAIBA PolicyStartDate (Datetime)"
+  },
+  {
+   "fieldname": "policy_expiry_date",
+   "fieldtype": "Datetime",
+   "label": "Policy Expiry Date",
+   "description": "OCR extracted - Maps to SAIBA PolicyExpiryDate (Datetime)"
+  },
+  {
+   "fieldname": "column_break_policy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sum_insured",
+   "fieldtype": "Float",
+   "label": "Sum Insured",
+   "precision": 2,
+   "description": "OCR extracted - Maps to SAIBA Sum Insured (Numeric(22,2))"
+  },
+  {
+   "fieldname": "net_od_premium",
+   "fieldtype": "Float",
+   "label": "Net/OD Premium",
+   "precision": 2,
+   "description": "OCR extracted - Maps to SAIBA Net/OD Premium (Numeric(18,2))"
+  },
+  {
+   "fieldname": "tp_premium",
+   "fieldtype": "Float",
+   "label": "TP Premium",
+   "precision": 2,
+   "description": "OCR extracted - Maps to SAIBA TP Premium (Numeric(22,2))"
+  },
+  {
+   "fieldname": "gst",
+   "fieldtype": "Float",
+   "label": "GST",
+   "precision": 2,
+   "description": "OCR extracted - Maps to SAIBA GST (Numeric(22,2))"
+  },
+  {
+   "fieldname": "ncb",
+   "fieldtype": "Float",
+   "label": "NCB",
+   "precision": 2,
+   "description": "OCR extracted - Maps to SAIBA NCB (Numeric(18,2))"
+  },
+  {
+   "fieldname": "vehicle_information_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Information",
+   "description": "Vehicle details extracted from policy copy via OCR"
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle No",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA VehicleNo (Varchar(50))"
+  },
+  {
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA Make (Varchar(50))"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA Model (Varchar(50))"
+  },
+  {
+   "fieldname": "variant",
+   "fieldtype": "Data",
+   "label": "Variant",
+   "length": 150,
+   "description": "OCR extracted - Maps to SAIBA Variant (Varchar(150))"
+  },
+  {
+   "fieldname": "year_of_man",
+   "fieldtype": "Int",
+   "label": "Year of Manufacture",
+   "description": "OCR extracted - Maps to SAIBA YearofMan (Bigint)"
+  },
+  {
+   "fieldname": "column_break_vehicle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "chasis_no",
+   "fieldtype": "Data",
+   "label": "Chasis No",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA ChasisNo (Varchar(50))"
+  },
+  {
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA EngineNo (Varchar(50))"
+  },
+  {
+   "fieldname": "cc",
+   "fieldtype": "Data",
+   "label": "CC",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA CC (Varchar(50))"
+  },
+  {
+   "fieldname": "fuel",
+   "fieldtype": "Data",
+   "label": "Fuel",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA Fuel (Varchar(50))"
+  },
+  {
+   "fieldname": "rto_code",
+   "fieldtype": "Data",
+   "label": "RTO Code",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA RTO Code (Varchar(50))"
+  },
+  {
+   "fieldname": "vehicle_category",
+   "fieldtype": "Data",
+   "label": "Vehicle Category",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA VehicleCategory (Varchar(50))"
+  },
+  {
+   "fieldname": "passenger_gvw",
+   "fieldtype": "Data",
+   "label": "Passenger GVW",
+   "length": 50,
+   "description": "OCR extracted - Maps to SAIBA PassengerGVW (Varchar(50))"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-05 21:47:22.979176",
+ "modified_by": "Administrator",
+ "module": "Policies",
+ "name": "Motor Policy",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

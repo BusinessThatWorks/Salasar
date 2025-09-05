@@ -122,7 +122,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-05 22:13:49.048942",
+ "modified": "2025-09-05 09:22:40.190887",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",
@@ -139,8 +139,22 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Policy Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
   }
  ],
+ "restrict_to_domain": "Insurance",
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",

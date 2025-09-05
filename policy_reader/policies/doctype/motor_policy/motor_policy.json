@@ -1,35 +1,68 @@
 {
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "creation": "2025-08-05 21:46:40.705492",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "policy_information_section",
+  "policy_details_tab",
   "policy_document",
   "policy_file",
-  "policy_number",
-  "insured_name",
-  "vehicle_number",
-  "chassis_number",
-  "engine_number",
-  "column_break_vehicle",
-  "policy_from",
-  "policy_to",
-  "premium_amount",
-  "sum_insured",
-  "make_model",
+  "policy_section",
+  "policy_no",
+  "policy_type",
+  "column_break_policy_basic",
+  "policy_issuance_date",
+  "policy_start_date",
+  "policy_expiry_date",
+  "business_information_tab",
+  "customer_info_section",
+  "customer_code",
+  "policy_biz_type",
+  "column_break_customer",
+  "insurer_branch_code",
+  "new_renewal",
+  "payment_section",
+  "payment_mode",
+  "bank_name",
+  "column_break_payment",
+  "payment_transaction_no",
+  "vehicle_information_tab",
+  "basic_vehicle_section",
+  "vehicle_no",
+  "make",
+  "model",
+  "column_break_vehicle_basic",
   "variant",
-  "vehicle_class",
-  "registration_number",
+  "year_of_man",
+  "vehicle_specs_section",
+  "chasis_no",
+  "engine_no",
+  "column_break_specs",
+  "cc",
   "fuel",
-  "seat_capacity"
+  "vehicle_registration_section",
+  "rto_code",
+  "vehicle_category",
+  "column_break_registration",
+  "passenger_gvw",
+  "financial_details_tab",
+  "premium_section",
+  "sum_insured",
+  "net_od_premium",
+  "column_break_premium",
+  "tp_premium",
+  "tax_section",
+  "gst",
+  "column_break_tax",
+  "ncb"
  ],
  "fields": [
   {
-   "fieldname": "policy_information_section",
-   "fieldtype": "Section Break",
-   "label": "Policy Information"
+   "fieldname": "policy_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Policy Details"
   },
   {
    "fieldname": "policy_document",
@@ -39,96 +72,307 @@
    "read_only": 1
   },
   {
+   "description": "Upload policy PDF document for processing",
    "fieldname": "policy_file",
    "fieldtype": "Attach",
    "label": "Policy File",
    "options": "file_types:pdf"
   },
   {
-   "fieldname": "policy_number",
-   "fieldtype": "Data",
-   "label": "Policy Number"
+   "fieldname": "policy_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Information"
   },
   {
-   "fieldname": "insured_name",
-   "fieldtype": "Data",
-   "label": "Insured Name"
-  },
-  {
-   "fieldname": "vehicle_number",
-   "fieldtype": "Data",
-   "label": "Vehicle Number"
-  },
-  {
-   "fieldname": "chassis_number",
-   "fieldtype": "Data",
-   "label": "Chassis Number"
-  },
-  {
-   "fieldname": "engine_number",
-   "fieldtype": "Data",
-   "label": "Engine Number"
-  },
-  {
-   "fieldname": "column_break_vehicle",
+   "fieldname": "column_break_policy_basic",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "policy_from",
+   "description": "SAIBA(PolicyIssuanceDate)",
+   "fieldname": "policy_issuance_date",
+   "fieldtype": "Date",
+   "label": "Policy Issuance Date"
+  },
+  {
+   "description": "SAIBA(PolicyStartDate)",
+   "fieldname": "policy_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Policy Start Date",
+   "reqd": 1
+  },
+  {
+   "description": "SAIBA(PolicyExpiryDate)",
+   "fieldname": "policy_expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Policy Expiry Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Business Information"
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "description": "SAIBA(Customer Code)",
+   "fieldname": "customer_code",
+   "fieldtype": "Int",
+   "label": "Customer Code"
+  },
+  {
+   "description": "SAIBA(PolicyBiz Type)",
+   "fieldname": "policy_biz_type",
    "fieldtype": "Data",
-   "label": "From"
+   "label": "PolicyBiz Type",
+   "length": 10
   },
   {
-   "fieldname": "policy_to",
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(Insurer Branch Code)",
+   "fieldname": "insurer_branch_code",
+   "fieldtype": "Int",
+   "label": "Insurer Branch Code"
+  },
+  {
+   "description": "SAIBA(NewRenewal)",
+   "fieldname": "new_renewal",
+   "fieldtype": "Select",
+   "label": "New/Renewal",
+   "options": "New\nRenewal"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Information"
+  },
+  {
+   "description": "SAIBA(Payment Mode)",
+   "fieldname": "payment_mode",
    "fieldtype": "Data",
-   "label": "To"
+   "label": "Payment Mode"
   },
   {
-   "fieldname": "premium_amount",
-   "fieldtype": "Currency",
-   "label": "Premium Amount"
-  },
-  {
-   "fieldname": "sum_insured",
-   "fieldtype": "Currency",
-   "label": "Sum Insured"
-  },
-  {
-   "fieldname": "make_model",
+   "description": "SAIBA(Bank Name)",
+   "fieldname": "bank_name",
    "fieldtype": "Data",
-   "label": "Make / Model"
+   "label": "Bank Name",
+   "length": 75
   },
   {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(Payment TransactionNo)",
+   "fieldname": "payment_transaction_no",
+   "fieldtype": "Data",
+   "label": "Payment Transaction No",
+   "length": 50
+  },
+  {
+   "fieldname": "vehicle_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Vehicle Information"
+  },
+  {
+   "fieldname": "basic_vehicle_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Vehicle Details"
+  },
+  {
+   "description": "SAIBA(PolicyNo)",
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Policy No",
+   "length": 100,
+   "reqd": 1
+  },
+  {
+   "description": "SAIBA(Policy Type)",
+   "fieldname": "policy_type",
+   "fieldtype": "Data",
+   "label": "Policy Type",
+   "length": 75
+  },
+  {
+   "description": "SAIBA(VehicleNo)",
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle No",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(Make)",
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(Model)",
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "length": 50
+  },
+  {
+   "fieldname": "column_break_vehicle_basic",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(Variant)",
    "fieldname": "variant",
    "fieldtype": "Data",
-   "label": "Variant"
+   "label": "Variant",
+   "length": 150
   },
   {
-   "fieldname": "vehicle_class",
-   "fieldtype": "Data",
-   "label": "Vehicle Class"
-  },
-  {
-   "fieldname": "registration_number",
-   "fieldtype": "Data",
-   "label": "Registration Number"
-  },
-  {
-   "fieldname": "fuel",
-   "fieldtype": "Select",
-   "label": "Fuel",
-   "options": "Petrol\nDiesel\nCNG\nElectric\nHybrid"
-  },
-  {
-   "fieldname": "seat_capacity",
+   "description": "SAIBA(YearofMan)",
+   "fieldname": "year_of_man",
    "fieldtype": "Int",
-   "label": "Seat Capacity"
+   "label": "Year of Manufacture"
+  },
+  {
+   "fieldname": "vehicle_specs_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Specifications"
+  },
+  {
+   "description": "SAIBA(ChasisNo)",
+   "fieldname": "chasis_no",
+   "fieldtype": "Data",
+   "label": "Chasis No",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(EngineNo)",
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "length": 50
+  },
+  {
+   "fieldname": "column_break_specs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(CC)",
+   "fieldname": "cc",
+   "fieldtype": "Data",
+   "label": "CC",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(Fuel)",
+   "fieldname": "fuel",
+   "fieldtype": "Data",
+   "label": "Fuel",
+   "length": 50
+  },
+  {
+   "fieldname": "vehicle_registration_section",
+   "fieldtype": "Section Break",
+   "label": "Registration Details"
+  },
+  {
+   "description": "SAIBA(RTO Code)",
+   "fieldname": "rto_code",
+   "fieldtype": "Data",
+   "label": "RTO Code",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(VehicleCategory)",
+   "fieldname": "vehicle_category",
+   "fieldtype": "Data",
+   "label": "Vehicle Category",
+   "length": 50
+  },
+  {
+   "fieldname": "column_break_registration",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(PassengerGVW)",
+   "fieldname": "passenger_gvw",
+   "fieldtype": "Data",
+   "label": "Passenger GVW",
+   "length": 50
+  },
+  {
+   "fieldname": "financial_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Financial Details"
+  },
+  {
+   "fieldname": "premium_section",
+   "fieldtype": "Section Break",
+   "label": "Premium Information"
+  },
+  {
+   "description": "SAIBA(Sum Insured)",
+   "fieldname": "sum_insured",
+   "fieldtype": "Float",
+   "label": "Sum Insured",
+   "precision": "2"
+  },
+  {
+   "description": "SAIBA(Net/OD Premium)",
+   "fieldname": "net_od_premium",
+   "fieldtype": "Float",
+   "label": "Net/OD Premium",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_premium",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(TP Premium)",
+   "fieldname": "tp_premium",
+   "fieldtype": "Float",
+   "label": "TP Premium",
+   "precision": "2"
+  },
+  {
+   "fieldname": "tax_section",
+   "fieldtype": "Section Break",
+   "label": "Tax & Discount Information"
+  },
+  {
+   "description": "SAIBA(GST)",
+   "fieldname": "gst",
+   "fieldtype": "Float",
+   "label": "GST",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_tax",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(NCB)",
+   "fieldname": "ncb",
+   "fieldtype": "Float",
+   "label": "NCB",
+   "precision": "2"
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-05 21:47:22.979176",
+ "modified": "2025-09-05 09:25:45.320038",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
@@ -145,10 +389,23 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Policy Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

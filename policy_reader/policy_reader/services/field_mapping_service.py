@@ -44,24 +44,49 @@ class FieldMappingService:
             return {}
     
     def get_hardcoded_motor_mapping(self):
-        """Fallback hardcoded motor policy field mapping"""
+        """Fallback hardcoded motor policy field mapping for SAIBA ERP compatibility"""
         return {
-            # Match the exact field names that Claude extracts
-            "PolicyNumber": "policy_number",
-            "InsuredName": "insured_name", 
-            "VehicleNumber": "vehicle_number",
-            "ChassisNumber": "chassis_number",
-            "EngineNumber": "engine_number",
-            "From": "policy_from",
-            "To": "policy_to",
-            "PremiumAmount": "premium_amount",
+            # OCR Extractable fields - mapped to new SAIBA ERP structure
+            "PolicyNumber": "policy_no",
+            "PolicyNo": "policy_no", 
+            "PolicyType": "policy_type",
+            "PolicyIssuanceDate": "policy_issuance_date",
+            "PolicyStartDate": "policy_start_date", 
+            "PolicyExpiryDate": "policy_expiry_date",
+            
+            # Financial fields
             "SumInsured": "sum_insured",
-            "MakeModel": "make_model",
+            "NetODPremium": "net_od_premium",
+            "NetPremium": "net_od_premium",  # Alternative mapping
+            "TPPremium": "tp_premium",
+            "GST": "gst",
+            "NCB": "ncb",
+            
+            # Vehicle information
+            "VehicleNumber": "vehicle_no",
+            "VehicleNo": "vehicle_no",
+            "Make": "make",
+            "Model": "model", 
             "Variant": "variant",
-            "VehicleClass": "vehicle_class",
-            "RegistrationNumber": "registration_number",
+            "YearOfManufacture": "year_of_man",
+            "ManufacturingYear": "year_of_man",
+            "ChassisNumber": "chasis_no",
+            "ChasisNo": "chasis_no",
+            "EngineNumber": "engine_no",
+            "EngineNo": "engine_no",
+            "CC": "cc",
+            "EngineCapacity": "cc",
             "Fuel": "fuel",
-            "SeatCapacity": "seat_capacity"
+            "FuelType": "fuel",
+            "RTOCode": "rto_code",
+            "RTO": "rto_code",
+            "VehicleCategory": "vehicle_category",
+            "VehicleClass": "vehicle_category",  # Alternative mapping
+            "PassengerGVW": "passenger_gvw",
+            "GVW": "passenger_gvw"
+            
+            # NOTE: Manual entry fields (customer_code, policy_biz_type, etc.) 
+            # are not included here as they won't be OCR extracted
         }
     
     def get_hardcoded_health_mapping(self):

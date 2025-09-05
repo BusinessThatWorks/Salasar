@@ -157,6 +157,14 @@ scheduler_events = {
 
 # before_tests = "policy_reader.install.before_tests"
 
+# Patches
+# --------
+# Data patches for migrations and updates
+
+patches = [
+	"policy_reader.patches.v1_0.migrate_motor_policy_schema"
+]
+
 # Overriding Methods
 # ------------------------------
 #
