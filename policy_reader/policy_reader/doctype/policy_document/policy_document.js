@@ -37,6 +37,17 @@ frappe.ui.form.on("Policy Document", {
 		// Add Create Policy Entry button
 		frm.trigger("setup_policy_creation_button");
 
+		// Add View Policy button for completed documents
+		if (frm.doc.status === "Completed" && frm.doc.policy_file) {
+			frm.add_custom_button(
+				__("View Policy"),
+				function () {
+					frm.trigger("open_policy_viewer");
+				},
+				__("Actions")
+			);
+		}
+
 		// Add Reset Status button for stuck documents using Frappe patterns
 		if (frm.doc.status === "Processing") {
 			frm.add_custom_button(
@@ -595,6 +606,12 @@ frappe.ui.form.on("Policy Document", {
 					});
 			}
 		);
+	},
+
+	open_policy_viewer: function (frm) {
+		// Open the policy viewer page with the document ID as parameter
+		const url = `/app/policy-file-view?policy_document=${frm.doc.name}`;
+		window.open(url, "_blank");
 	},
 });
 

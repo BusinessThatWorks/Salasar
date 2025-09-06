@@ -1,0 +1,20 @@
+{
+ "content": null,
+ "creation": "2025-09-06 08:03:44.670780",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-09-06 08:03:44.670780",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "policy-file-view",
+ "owner": "Administrator",
+ "page_name": "policy-file-view",
+ "restrict_to_domain": "Insurance",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Policy Viewer"
+}
