@@ -1,14 +1,14 @@
 frappe.pages["policy-file-view"].on_page_load = function (wrapper) {
-
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: "Policy Viewer",
 		single_column: true,
 	});
 
-	// Get policy document ID from URL parameters
+	// Get URL parameters
 	const urlParams = new URLSearchParams(window.location.search);
 	const policyDocumentId = urlParams.get("policy_document");
+	const motorPolicyId = urlParams.get("motor_policy");
 
 	if (!policyDocumentId) {
 		page.main.html(`
@@ -21,31 +21,56 @@ frappe.pages["policy-file-view"].on_page_load = function (wrapper) {
 	}
 
 	// Load policy document data and render split pane
-	loadPolicyDocument(page, policyDocumentId);
-
+	loadPolicyDocument(page, policyDocumentId, motorPolicyId);
 };
 
-function loadPolicyDocument(page, policyDocumentId) {
+function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 	// Show loading state
 	page.main.html(`
 		<div class="text-center" style="padding: 50px;">
 			<div class="spinner-border" role="status">
 				<span class="sr-only">Loading...</span>
 			</div>
-			<p class="mt-3">Loading policy document...</p>
+			<p class="mt-3">Loading documents...</p>
 		</div>
 	`);
 
-	// Fetch policy document data
-	frappe.call({
-		method: "frappe.client.get",
-		args: {
-			doctype: "Policy Document",
-			name: policyDocumentId,
-		},
-		callback: function (r) {
-			if (r.message) {
-				renderSplitPane(page, r.message);
+	// Prepare API calls
+	const apiCalls = [
+		frappe.call({
+			method: "frappe.client.get",
+			args: {
+				doctype: "Policy Document",
+				name: policyDocumentId,
+			}
+		})
+	];
+
+	// Add Motor Policy call if ID is provided
+	if (motorPolicyId) {
+		apiCalls.push(
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Motor Policy",
+					name: motorPolicyId,
+				}
+			})
+		);
+	}
+
+	// Handle API calls differently - use individual callbacks instead of Promise.all
+	let policyDoc = null;
+	let motorPolicy = null;
+	let completedCalls = 0;
+	const totalCalls = motorPolicyId ? 2 : 1;
+
+	// Function to check if all calls are complete
+	function checkComplete() {
+		completedCalls++;
+		if (completedCalls === totalCalls) {
+			if (policyDoc) {
+				renderSplitPane(page, policyDoc, motorPolicy);
 			} else {
 				page.main.html(`
 					<div class="text-center" style="padding: 50px;">
@@ -54,19 +79,61 @@ function loadPolicyDocument(page, policyDocumentId) {
 					</div>
 				`);
 			}
+		}
+	}
+
+	// Load Policy Document
+	frappe.call({
+		method: "frappe.client.get",
+		args: {
+			doctype: "Policy Document",
+			name: policyDocumentId,
 		},
-		error: function (err) {
+		callback: function(r) {
+			if (r.message) {
+				policyDoc = r.message;
+			}
+			checkComplete();
+		},
+		error: function(err) {
+			console.error('Policy Document load error:', err);
 			page.main.html(`
 				<div class="text-center" style="padding: 50px;">
-					<h3>Error Loading Document</h3>
+					<h3>Error Loading Policy Document</h3>
 					<p>Failed to load policy document: ${err.message || "Unknown error"}</p>
 				</div>
 			`);
-		},
+		}
 	});
+
+	// Load Motor Policy if ID provided
+	if (motorPolicyId) {
+		frappe.call({
+			method: "frappe.client.get",
+			args: {
+				doctype: "Motor Policy",
+				name: motorPolicyId,
+			},
+			callback: function(r) {
+				if (r.message) {
+					motorPolicy = r.message;
+				}
+				checkComplete();
+			},
+			error: function(err) {
+				console.error('Motor Policy load error:', err);
+				// Don't fail completely, just proceed without Motor Policy
+				checkComplete();
+			}
+		});
+	}
 }
 
-function renderSplitPane(page, policyDoc) {
+function renderSplitPane(page, policyDoc, motorPolicy) {
+	// Generate content for the right pane
+	const rightPaneContent = motorPolicy ? renderMotorPolicyFields(motorPolicy, policyDoc) : formatExtractedFields(policyDoc);
+	console.log('Right pane content length:', rightPaneContent.length);
+	
 	// Create split pane layout
 	page.main.html(`
 		<!-- Header with Policy Document Link -->
@@ -130,18 +197,22 @@ function renderSplitPane(page, policyDoc) {
 				<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 30px; background: #9ca3af;"></div>
 			</div>
 
-			<!-- Extracted Fields Pane -->
+			<!-- Motor Policy Fields Pane -->
 			<div class="fields-pane" style="flex: 1; min-width: 0; position: relative;">
 				<div class="pane-header" style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #d1d5db; display: flex; justify-content: space-between; align-items: center;">
-					<h5 class="mb-0">Extracted Fields</h5>
+					<h5 class="mb-0">${motorPolicy ? 'Motor Policy Fields' : 'Extracted Fields'}</h5>
 					<div class="fields-controls">
-						<button class="btn btn-sm btn-outline-secondary" id="toggle-view">Show Raw Text</button>
-						<button class="btn btn-sm btn-outline-secondary" id="copy-fields">Copy</button>
+						${motorPolicy ? 
+							`<button class="btn btn-sm btn-outline-primary" id="save-policy">Save Changes</button>
+							 <button class="btn btn-sm btn-outline-secondary" id="toggle-extracted">Show Extracted</button>` :
+							`<button class="btn btn-sm btn-outline-secondary" id="toggle-view">Show Raw Text</button>
+							 <button class="btn btn-sm btn-outline-secondary" id="copy-fields">Copy</button>`
+						}
 					</div>
 				</div>
 				<div class="fields-container" style="height: calc(100% - 50px); overflow: auto; padding: 15px; background: white;">
-					<div id="extracted-fields-content">
-						${formatExtractedFields(policyDoc)}
+					<div id="policy-fields-content">
+						<!-- Content will be inserted here -->
 					</div>
 				</div>
 			</div>
@@ -149,11 +220,22 @@ function renderSplitPane(page, policyDoc) {
 
 	`);
 
+	// Insert the right pane content after DOM is created with error handling
+	const contentDiv = document.getElementById('policy-fields-content');
+	if (contentDiv) {
+		try {
+			contentDiv.innerHTML = rightPaneContent;
+		} catch (error) {
+			console.error('Error setting innerHTML:', error);
+			contentDiv.innerHTML = '<div class="alert alert-danger">Error loading form fields. Please refresh and try again.</div>';
+		}
+	}
+
 	// Load PDF
 	loadPDF(policyDoc.policy_file);
 
 	// Setup event handlers
-	setupEventHandlers(policyDoc);
+	setupEventHandlers(policyDoc, motorPolicy);
 }
 
 function getStatusBadgeClass(status) {
@@ -263,14 +345,14 @@ function renderFieldsTable(extractedData, policyDoc = {}) {
  * @param {string} prefix - Optional prefix for nested fields
  * @returns {string} HTML string for the rows
  */
-function renderDataRows(data, prefix = '') {
-	let html = '';
-	
+function renderDataRows(data, prefix = "") {
+	let html = "";
+
 	Object.keys(data).forEach((key) => {
 		const value = data[key];
 		const displayKey = prefix ? `${prefix} > ${key}` : key;
 
-		if (value && typeof value === 'object' && !Array.isArray(value)) {
+		if (value && typeof value === "object" && !Array.isArray(value)) {
 			// Nested object - render with prefix
 			html += renderDataRows(value, displayKey);
 		} else {
@@ -287,10 +369,9 @@ function renderDataRows(data, prefix = '') {
 			`;
 		}
 	});
-	
+
 	return html;
 }
-
 
 /**
  * Format field label for display
@@ -305,10 +386,16 @@ function formatFieldLabel(fieldName) {
 		.replace(/\b(No|Id|Code|Gst|Ncb|Cc|Rto)\b/g, (l) => l.toUpperCase());
 }
 
-
 function formatFieldValue(value) {
 	// Handle null, undefined, None, or empty values
-	if (!value || value === "null" || value === "undefined" || value === "None" || value === null || value === undefined) {
+	if (
+		!value ||
+		value === "null" ||
+		value === "undefined" ||
+		value === "None" ||
+		value === null ||
+		value === undefined
+	) {
 		return '<span class="text-muted"><i class="fa fa-minus"></i> Not available</span>';
 	}
 
@@ -321,17 +408,213 @@ function formatFieldValue(value) {
 	}
 
 	// Format dates (basic patterns)
-	if (typeof value === "string" && (/^\d{4}-\d{2}-\d{2}$/.test(stringValue) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(stringValue))) {
+	if (
+		typeof value === "string" &&
+		(/^\d{4}-\d{2}-\d{2}$/.test(stringValue) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(stringValue))
+	) {
 		return `<span class="text-primary"><i class="fa fa-calendar"></i> ${stringValue}</span>`;
 	}
 
 	// Format currency amounts
-	if ((typeof value === "number" && value > 0) || (typeof value === "string" && /^₹?[\d,]+/.test(stringValue))) {
+	if (
+		(typeof value === "number" && value > 0) ||
+		(typeof value === "string" && /^₹?[\d,]+/.test(stringValue))
+	) {
 		return `<span class="text-success"><i class="fa fa-rupee"></i> ${stringValue}</span>`;
 	}
 
 	// Default formatting for regular text
 	return `<span class="text-dark">${stringValue}</span>`;
+}
+
+/**
+ * Render Motor Policy fields as editable form
+ * @param {Object} motorPolicy - The Motor Policy document
+ * @param {Object} policyDoc - The Policy Document (for extracted data hints)
+ * @returns {string} HTML string for the form fields
+ */
+function renderMotorPolicyFields(motorPolicy, policyDoc) {
+	// Extract data for hints
+	let extractedData = {};
+	try {
+		if (policyDoc.extracted_fields) {
+			extractedData = typeof policyDoc.extracted_fields === "string" 
+				? JSON.parse(policyDoc.extracted_fields) 
+				: policyDoc.extracted_fields;
+		}
+	} catch (e) {
+		console.warn("Could not parse extracted fields:", e);
+	}
+
+	// Define field groups based on Motor Policy DocType structure
+	const fieldGroups = [
+		{
+			title: "Policy Information",
+			icon: "file-text-o",
+			fields: [
+				{name: "policy_no", label: "Policy No", type: "text"},
+				{name: "policy_type", label: "Policy Type", type: "text"},
+				{name: "policy_issuance_date", label: "Policy Issuance Date", type: "date"},
+				{name: "policy_start_date", label: "Policy Start Date", type: "date"},
+				{name: "policy_expiry_date", label: "Policy Expiry Date", type: "date"}
+			]
+		},
+		{
+			title: "Vehicle Information",
+			icon: "car",
+			fields: [
+				{name: "vehicle_no", label: "Vehicle No", type: "text"},
+				{name: "make", label: "Make", type: "text"},
+				{name: "model", label: "Model", type: "text"},
+				{name: "variant", label: "Variant", type: "text"},
+				{name: "year_of_man", label: "Year of Manufacture", type: "number"},
+				{name: "chasis_no", label: "Chasis No", type: "text"},
+				{name: "engine_no", label: "Engine No", type: "text"},
+				{name: "cc", label: "CC", type: "text"},
+				{name: "fuel", label: "Fuel", type: "text"}
+			]
+		},
+		{
+			title: "Business Information",
+			icon: "building",
+			fields: [
+				{name: "customer_code", label: "Customer Code", type: "text"},
+				{name: "policy_biz_type", label: "Policy Biz Type", type: "text"},
+				{name: "insurer_branch_code", label: "Insurer Branch Code", type: "number"},
+				{name: "new_renewal", label: "New/Renewal", type: "select", options: ["New", "Renewal"]},
+				{name: "payment_mode", label: "Payment Mode", type: "text"},
+				{name: "bank_name", label: "Bank Name", type: "text"},
+				{name: "payment_transaction_no", label: "Payment Transaction No", type: "text"}
+			]
+		},
+		{
+			title: "Financial Details",
+			icon: "money",
+			fields: [
+				{name: "sum_insured", label: "Sum Insured", type: "float"},
+				{name: "net_od_premium", label: "Net/OD Premium", type: "float"},
+				{name: "tp_premium", label: "TP Premium", type: "float"},
+				{name: "gst", label: "GST", type: "float"},
+				{name: "ncb", label: "NCB", type: "float"}
+			]
+		}
+	];
+
+	let html = '<div class="motor-policy-form">';
+
+	fieldGroups.forEach(group => {
+		html += `
+			<div class="field-group mb-4">
+				<div class="group-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 15px; border-radius: 6px 6px 0 0; margin-bottom: 0;">
+					<h6 class="mb-0" style="font-weight: 600;">
+						<i class="fa fa-${group.icon}"></i> ${group.title}
+					</h6>
+				</div>
+				<div class="group-fields" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 6px 6px; padding: 15px;">
+					<div class="row">
+		`;
+
+		group.fields.forEach((field, index) => {
+			const value = motorPolicy[field.name] || "";
+			const extractedValue = getExtractedValue(extractedData, field.name, field.label);
+			
+			html += `
+				<div class="col-md-6 mb-3">
+					<label class="form-label" style="font-weight: 600; color: #495057;">
+						${field.label}
+						${extractedValue ? '<i class="fa fa-lightbulb-o text-warning ml-1" title="Extracted data available"></i>' : ''}
+					</label>
+					${renderFieldInput(field, value, extractedValue)}
+					${extractedValue && extractedValue !== value ? 
+						`<small class="text-muted">Extracted: <span class="text-info">${escapeQuotes(extractedValue)}</span> 
+						 <button class="btn btn-xs btn-link p-0 ml-1" data-field="${field.name}" data-value="${escapeQuotes(extractedValue)}" onclick="copyExtractedValueFromButton(this)">Copy</button></small>` : ''
+					}
+				</div>
+			`;
+		});
+
+		html += `
+					</div>
+				</div>
+			</div>
+		`;
+	});
+
+	html += '</div>';
+	return html;
+}
+
+/**
+ * Render individual field input based on field type
+ */
+function renderFieldInput(field, value, extractedValue) {
+	const safeValue = escapeQuotes(value || '');
+	const safePlaceholder = escapeQuotes(extractedValue || 'Enter ' + field.label);
+	
+	const commonAttrs = `
+		id="field-${field.name}" 
+		name="${field.name}" 
+		class="form-control motor-policy-field" 
+		data-fieldname="${field.name}"
+		placeholder="${safePlaceholder}"
+	`;
+
+	switch (field.type) {
+		case 'date':
+			return `<input type="date" value="${safeValue}" ${commonAttrs}>`;
+		case 'number':
+		case 'float':
+			return `<input type="number" value="${safeValue}" ${commonAttrs} ${field.type === 'float' ? 'step="0.01"' : ''}>`;
+		case 'select':
+			const options = field.options.map(opt => 
+				`<option value="${escapeQuotes(opt)}" ${value === opt ? 'selected' : ''}>${opt}</option>`
+			).join('');
+			return `<select ${commonAttrs}><option value="">Select ${field.label}</option>${options}</select>`;
+		default:
+			return `<input type="text" value="${safeValue}" ${commonAttrs}>`;
+	}
+}
+
+/**
+ * Escape quotes and special characters for HTML attributes
+ */
+function escapeQuotes(str) {
+	if (!str) return '';
+	return String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;')
+		.replace(/\$/g, '&#36;')
+		.replace(/`/g, '&#96;')
+		.replace(/\{/g, '&#123;')
+		.replace(/\}/g, '&#125;');
+}
+
+/**
+ * Get extracted value for a field by trying different key variations
+ */
+function getExtractedValue(extractedData, fieldName, fieldLabel) {
+	if (!extractedData || typeof extractedData !== 'object') return null;
+	
+	// Try different key variations
+	const keys = [
+		fieldName,
+		fieldLabel,
+		fieldLabel.replace(/\s/g, ''),
+		fieldName.replace(/_/g, ' '),
+		fieldName.replace(/_/g, '')
+	];
+	
+	for (const key of keys) {
+		if (extractedData[key]) return extractedData[key];
+		// Check case-insensitive
+		const found = Object.keys(extractedData).find(k => k.toLowerCase() === key.toLowerCase());
+		if (found && extractedData[found]) return extractedData[found];
+	}
+	
+	return null;
 }
 
 function formatExtractedText(text) {
@@ -545,7 +828,77 @@ function renderPDFFallback(policyFile) {
 	`;
 }
 
-function setupEventHandlers(policyDoc) {
+function setupEventHandlers(policyDoc, motorPolicy) {
+	// Motor Policy field change handlers (auto-save)
+	if (motorPolicy) {
+		// Auto-save functionality
+		let saveTimeout;
+		const saveStatus = createSaveStatusIndicator();
+
+		// Add change listeners to all Motor Policy fields
+		document.addEventListener('change', function(e) {
+			if (e.target.classList.contains('motor-policy-field')) {
+				clearTimeout(saveTimeout);
+				saveStatus.show('saving');
+				
+				saveTimeout = setTimeout(() => {
+					saveMotorPolicyField(motorPolicy.name, e.target.dataset.fieldname, e.target.value, saveStatus);
+				}, 500); // Debounce saves by 500ms
+			}
+		});
+
+		// Handle copy extracted value buttons
+		window.copyExtractedValue = function(fieldName, extractedValue) {
+			const field = document.getElementById(`field-${fieldName}`);
+			if (field) {
+				field.value = extractedValue;
+				field.dispatchEvent(new Event('change')); // Trigger save
+				frappe.show_alert({message: 'Value copied!', indicator: 'green'});
+			}
+		};
+
+		// Handle copy from button data attributes (safer approach)
+		window.copyExtractedValueFromButton = function(button) {
+			const fieldName = button.getAttribute('data-field');
+			const extractedValue = button.getAttribute('data-value');
+			const field = document.getElementById(`field-${fieldName}`);
+			if (field && extractedValue) {
+				field.value = extractedValue;
+				field.dispatchEvent(new Event('change')); // Trigger save
+				frappe.show_alert({message: 'Value copied!', indicator: 'green'});
+			}
+		};
+
+		// Handle save all button
+		const saveBtn = document.getElementById('save-policy');
+		if (saveBtn) {
+			saveBtn.addEventListener('click', function() {
+				saveAllMotorPolicyChanges(motorPolicy.name, saveStatus);
+			});
+		}
+
+		// Handle toggle extracted fields button
+		const toggleBtn = document.getElementById('toggle-extracted');
+		if (toggleBtn) {
+			toggleBtn.addEventListener('click', function() {
+				const content = document.getElementById('policy-fields-content');
+				if (this.textContent === 'Show Extracted') {
+					content.innerHTML = formatExtractedFields(policyDoc);
+					this.textContent = 'Show Form Fields';
+					this.classList.remove('btn-outline-secondary');
+					this.classList.add('btn-outline-primary');
+				} else {
+					content.innerHTML = renderMotorPolicyFields(motorPolicy, policyDoc);
+					this.textContent = 'Show Extracted';
+					this.classList.remove('btn-outline-primary');
+					this.classList.add('btn-outline-secondary');
+					// Re-attach event listeners after re-rendering
+					setupMotorPolicyFieldListeners(motorPolicy.name, saveStatus);
+				}
+			});
+		}
+	}
+
 	// Resize handle functionality
 	const container = document.querySelector(".policy-viewer-container");
 	const resizeHandle = document.querySelector(".resize-handle");
@@ -582,8 +935,10 @@ function setupEventHandlers(policyDoc) {
 		}
 	});
 
-	// Toggle view functionality (between fields and raw text)
-	document.getElementById("toggle-view").addEventListener("click", function () {
+	// Toggle view functionality (between fields and raw text) - only if element exists
+	const toggleViewBtn = document.getElementById("toggle-view");
+	if (toggleViewBtn) {
+		toggleViewBtn.addEventListener("click", function () {
 		const button = this;
 		const content = document.getElementById("extracted-fields-content");
 		const container = document.querySelector(".fields-container");
@@ -603,10 +958,13 @@ function setupEventHandlers(policyDoc) {
 			button.classList.remove("btn-outline-primary");
 			button.classList.add("btn-outline-secondary");
 		}
-	});
+		});
+	}
 
-	// Copy fields functionality
-	document.getElementById("copy-fields").addEventListener("click", function () {
+	// Copy fields functionality - only if element exists
+	const copyFieldsBtn = document.getElementById("copy-fields");
+	if (copyFieldsBtn) {
+		copyFieldsBtn.addEventListener("click", function () {
 		const content = document.getElementById("extracted-fields-content");
 		let textToCopy = "";
 
@@ -633,10 +991,13 @@ function setupEventHandlers(policyDoc) {
 				indicator: "green",
 			});
 		});
-	});
+		});
+	}
 
-	// Zoom controls
-	document.getElementById("zoom-in").addEventListener("click", function () {
+	// Zoom controls - only if elements exist
+	const zoomInBtn = document.getElementById("zoom-in");
+	if (zoomInBtn) {
+		zoomInBtn.addEventListener("click", function () {
 		if (window.currentPDF && window.currentScale < 3.0) {
 			window.currentScale += 0.25;
 			const canvas = document.querySelector("#pdf-viewer canvas");
@@ -646,9 +1007,12 @@ function setupEventHandlers(policyDoc) {
 				updateZoomDisplay();
 			}
 		}
-	});
+		});
+	}
 
-	document.getElementById("zoom-out").addEventListener("click", function () {
+	const zoomOutBtn = document.getElementById("zoom-out");
+	if (zoomOutBtn) {
+		zoomOutBtn.addEventListener("click", function () {
 		if (window.currentPDF && window.currentScale > 0.5) {
 			window.currentScale -= 0.25;
 			const canvas = document.querySelector("#pdf-viewer canvas");
@@ -657,6 +1021,122 @@ function setupEventHandlers(policyDoc) {
 				renderPage(window.currentPDF, window.currentPage, canvas, context);
 				updateZoomDisplay();
 			}
+		}
+		});
+	}
+}
+
+/**
+ * Create save status indicator
+ */
+function createSaveStatusIndicator() {
+	// Create status element if it doesn't exist
+	let statusEl = document.getElementById('save-status');
+	if (!statusEl) {
+		statusEl = document.createElement('div');
+		statusEl.id = 'save-status';
+		statusEl.style.cssText = `
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			z-index: 1000;
+			padding: 8px 16px;
+			border-radius: 4px;
+			font-size: 14px;
+			display: none;
+		`;
+		document.body.appendChild(statusEl);
+	}
+
+	return {
+		show: function(type) {
+			const messages = {
+				saving: { text: 'Saving...', class: 'bg-warning text-dark' },
+				saved: { text: 'Saved!', class: 'bg-success text-white' },
+				error: { text: 'Save failed', class: 'bg-danger text-white' }
+			};
+
+			const msg = messages[type] || messages.error;
+			statusEl.textContent = msg.text;
+			statusEl.className = msg.class;
+			statusEl.style.display = 'block';
+
+			if (type === 'saved') {
+				setTimeout(() => statusEl.style.display = 'none', 2000);
+			}
+		},
+		hide: function() {
+			statusEl.style.display = 'none';
+		}
+	};
+}
+
+/**
+ * Save individual Motor Policy field
+ */
+function saveMotorPolicyField(motorPolicyName, fieldName, value, saveStatus) {
+	frappe.call({
+		method: "frappe.client.set_value",
+		args: {
+			doctype: "Motor Policy",
+			name: motorPolicyName,
+			fieldname: fieldName,
+			value: value
+		},
+		callback: function(response) {
+			if (response.message) {
+				saveStatus.show('saved');
+			} else {
+				saveStatus.show('error');
+			}
+		},
+		error: function(err) {
+			console.error('Save error:', err);
+			saveStatus.show('error');
+		}
+	});
+}
+
+/**
+ * Save all Motor Policy changes at once
+ */
+function saveAllMotorPolicyChanges(motorPolicyName, saveStatus) {
+	const fields = document.querySelectorAll('.motor-policy-field');
+	const updates = {};
+
+	fields.forEach(field => {
+		updates[field.dataset.fieldname] = field.value;
+	});
+
+	saveStatus.show('saving');
+
+	frappe.call({
+		method: "frappe.client.save",
+		args: {
+			doc: {
+				doctype: "Motor Policy",
+				name: motorPolicyName,
+				...updates
+			}
+		},
+		callback: function(response) {
+			if (response.message) {
+				saveStatus.show('saved');
+				frappe.show_alert({
+					message: 'All changes saved successfully!',
+					indicator: 'green'
+				});
+			} else {
+				saveStatus.show('error');
+			}
+		},
+		error: function(err) {
+			console.error('Save all error:', err);
+			saveStatus.show('error');
+			frappe.show_alert({
+				message: 'Failed to save changes',
+				indicator: 'red'
+			});
 		}
 	});
 }
