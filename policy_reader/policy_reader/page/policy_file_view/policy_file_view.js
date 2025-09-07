@@ -1,4 +1,5 @@
 frappe.pages["policy-file-view"].on_page_load = function (wrapper) {
+
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: "Policy Viewer",
@@ -21,6 +22,7 @@ frappe.pages["policy-file-view"].on_page_load = function (wrapper) {
 
 	// Load policy document data and render split pane
 	loadPolicyDocument(page, policyDocumentId);
+
 };
 
 function loadPolicyDocument(page, policyDocumentId) {
@@ -67,7 +69,40 @@ function loadPolicyDocument(page, policyDocumentId) {
 function renderSplitPane(page, policyDoc) {
 	// Create split pane layout
 	page.main.html(`
-		<div class="policy-viewer-container" style="height: calc(100vh - 120px); display: flex; border: 1px solid #d1d5db;">
+		<!-- Header with Policy Document Link -->
+		<div class="policy-header" style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #d1d5db; margin-bottom: 0;">
+			<div class="d-flex justify-content-between align-items-center">
+				<div>
+					<div class="d-flex align-items-center mb-2">
+						<button class="btn btn-outline-secondary btn-sm mr-3" onclick="window.close()" title="Close this tab">
+							<i class="fa fa-times"></i> Close
+						</button>
+						<button class="btn btn-outline-info btn-sm mr-3" onclick="restoreNavigation(); window.location.href='/app'" title="Back to Frappe">
+							<i class="fa fa-home"></i> Back to Frappe
+						</button>
+						<h4 class="mb-0">${policyDoc.title || "Policy Document"}</h4>
+					</div>
+					<p class="mb-0 text-muted">
+						Policy Type: <span class="badge badge-primary">${policyDoc.policy_type}</span>
+						<span class="mx-2">|</span>
+						Status: <span class="badge badge-${getStatusBadgeClass(policyDoc.status)}">${
+		policyDoc.status
+	}</span>
+						<span class="mx-2">|</span>
+						Processing Method: <span class="badge badge-info">${policyDoc.processing_method || "N/A"}</span>
+					</p>
+				</div>
+				<div>
+					<a href="/app/policy-document/${
+						policyDoc.name
+					}" class="btn btn-outline-primary btn-sm" target="_blank">
+						<i class="fa fa-external-link"></i> View Policy Document
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="policy-viewer-container" style="height: calc(100vh - 180px); display: flex; border: 1px solid #d1d5db;">
 			<!-- PDF Viewer Pane -->
 			<div class="pdf-pane" style="flex: 1; min-width: 0; border-right: 1px solid #d1d5db; position: relative;">
 				<div class="pane-header" style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #d1d5db; display: flex; justify-content: space-between; align-items: center;">
@@ -95,47 +130,23 @@ function renderSplitPane(page, policyDoc) {
 				<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 30px; background: #9ca3af;"></div>
 			</div>
 
-			<!-- Text Viewer Pane -->
-			<div class="text-pane" style="flex: 1; min-width: 0; position: relative;">
+			<!-- Extracted Fields Pane -->
+			<div class="fields-pane" style="flex: 1; min-width: 0; position: relative;">
 				<div class="pane-header" style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #d1d5db; display: flex; justify-content: space-between; align-items: center;">
-					<h5 class="mb-0">Extracted Text</h5>
-					<div class="text-controls">
-						<button class="btn btn-sm btn-outline-secondary" id="search-text">Search</button>
-						<button class="btn btn-sm btn-outline-secondary" id="copy-text">Copy</button>
+					<h5 class="mb-0">Extracted Fields</h5>
+					<div class="fields-controls">
+						<button class="btn btn-sm btn-outline-secondary" id="toggle-view">Show Raw Text</button>
+						<button class="btn btn-sm btn-outline-secondary" id="copy-fields">Copy</button>
 					</div>
 				</div>
-				<div class="text-container" style="height: calc(100% - 50px); overflow: auto; padding: 15px; background: white;">
-					<div id="extracted-text-content">
-						${
-							policyDoc.raw_ocr_text
-								? formatExtractedText(policyDoc.raw_ocr_text)
-								: '<p class="text-muted">No extracted text available</p>'
-						}
+				<div class="fields-container" style="height: calc(100% - 50px); overflow: auto; padding: 15px; background: white;">
+					<div id="extracted-fields-content">
+						${formatExtractedFields(policyDoc)}
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- Search Modal -->
-		<div class="modal fade" id="searchModal" tabindex="-1" role="dialog">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Search in Text</h5>
-						<button type="button" class="close" data-dismiss="modal">
-							<span>&times;</span>
-						</button>
-					</div>
-					<div class="modal-body">
-						<input type="text" class="form-control" id="search-input" placeholder="Enter search term...">
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-						<button type="button" class="btn btn-primary" id="search-btn">Search</button>
-					</div>
-				</div>
-			</div>
-		</div>
 	`);
 
 	// Load PDF
@@ -143,6 +154,184 @@ function renderSplitPane(page, policyDoc) {
 
 	// Setup event handlers
 	setupEventHandlers(policyDoc);
+}
+
+function getStatusBadgeClass(status) {
+	const statusClasses = {
+		Draft: "secondary",
+		Processing: "warning",
+		Completed: "success",
+		Failed: "danger",
+	};
+	return statusClasses[status] || "secondary";
+}
+
+function formatExtractedFields(policyDoc) {
+	if (!policyDoc.extracted_fields) {
+		return `
+			<div class="text-center text-muted" style="padding: 40px;">
+				<i class="fa fa-exclamation-triangle fa-3x mb-3"></i>
+				<h5>No Extracted Fields Available</h5>
+				<p>This document hasn't been processed yet or extraction failed.</p>
+			</div>
+		`;
+	}
+
+	try {
+		const extractedData =
+			typeof policyDoc.extracted_fields === "string"
+				? JSON.parse(policyDoc.extracted_fields)
+				: policyDoc.extracted_fields;
+
+		if (!extractedData || Object.keys(extractedData).length === 0) {
+			return `
+				<div class="text-center text-muted" style="padding: 40px;">
+					<i class="fa fa-info-circle fa-3x mb-3"></i>
+					<h5>No Fields Extracted</h5>
+					<p>The extraction process completed but no fields were found.</p>
+				</div>
+			`;
+		}
+
+		return renderFieldsTable(extractedData, policyDoc);
+	} catch (error) {
+		console.error("Error formatting extracted fields:", error);
+		return `
+			<div class="alert alert-danger">
+				<i class="fa fa-exclamation-triangle"></i>
+				<strong>Error:</strong> Could not parse extracted fields data.
+			</div>
+		`;
+	}
+}
+
+/**
+ * Simple function to render extracted fields as a clean table
+ * @param {Object} extractedData - The extracted fields JSON data
+ * @param {Object} policyDoc - The policy document object (for metadata)
+ * @returns {string} HTML string for the rendered table
+ */
+function renderFieldsTable(extractedData, policyDoc = {}) {
+	let html = '<div class="extracted-fields-table">';
+
+	// Add confidence score if available
+	if (policyDoc && policyDoc.ocr_confidence) {
+		html += `
+			<div class="alert alert-info mb-3">
+				<i class="fa fa-chart-line"></i>
+				<strong>OCR Confidence:</strong> ${Math.round(policyDoc.ocr_confidence * 100)}%
+				${
+					policyDoc && policyDoc.manual_review_recommended
+						? '<span class="badge badge-warning ml-2">Manual Review Recommended</span>'
+						: ""
+				}
+			</div>
+		`;
+	}
+
+	// Create table structure
+	html += `
+		<div class="fields-table-section">
+			<div class="table-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
+				<h5 class="mb-0" style="font-weight: 600;">
+					<i class="fa fa-list"></i> Extracted Fields
+				</h5>
+			</div>
+			<div class="table-content" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden;">
+				<div class="table-responsive">
+					<table class="table table-hover mb-0">
+						<tbody>
+	`;
+
+	// Render fields from data (handles both flat and nested structures)
+	html += renderDataRows(extractedData);
+
+	html += `
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>`;
+
+	return html;
+}
+
+/**
+ * Recursively render data rows for both flat and nested structures
+ * @param {Object} data - The data object to render
+ * @param {string} prefix - Optional prefix for nested fields
+ * @returns {string} HTML string for the rows
+ */
+function renderDataRows(data, prefix = '') {
+	let html = '';
+	
+	Object.keys(data).forEach((key) => {
+		const value = data[key];
+		const displayKey = prefix ? `${prefix} > ${key}` : key;
+
+		if (value && typeof value === 'object' && !Array.isArray(value)) {
+			// Nested object - render with prefix
+			html += renderDataRows(value, displayKey);
+		} else {
+			// Simple key-value pair
+			html += `
+				<tr style="border-bottom: 1px solid #f8f9fa;">
+					<td style="width: 40%; padding: 12px 20px; font-weight: 600; color: #495057; background: #f8f9fa; border-right: 1px solid #e9ecef;">
+						${formatFieldLabel(displayKey)}
+					</td>
+					<td style="width: 60%; padding: 12px 20px; color: #212529;">
+						${formatFieldValue(value)}
+					</td>
+				</tr>
+			`;
+		}
+	});
+	
+	return html;
+}
+
+
+/**
+ * Format field label for display
+ * @param {string} fieldName - The field name
+ * @returns {string} Formatted field label
+ */
+function formatFieldLabel(fieldName) {
+	// Convert snake_case to Title Case
+	return fieldName
+		.replace(/_/g, " ")
+		.replace(/\b\w/g, (l) => l.toUpperCase())
+		.replace(/\b(No|Id|Code|Gst|Ncb|Cc|Rto)\b/g, (l) => l.toUpperCase());
+}
+
+
+function formatFieldValue(value) {
+	// Handle null, undefined, None, or empty values
+	if (!value || value === "null" || value === "undefined" || value === "None" || value === null || value === undefined) {
+		return '<span class="text-muted"><i class="fa fa-minus"></i> Not available</span>';
+	}
+
+	// Convert to string for processing
+	const stringValue = String(value).trim();
+
+	// Handle empty strings
+	if (stringValue === "" || stringValue === "None") {
+		return '<span class="text-muted"><i class="fa fa-minus"></i> Not available</span>';
+	}
+
+	// Format dates (basic patterns)
+	if (typeof value === "string" && (/^\d{4}-\d{2}-\d{2}$/.test(stringValue) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(stringValue))) {
+		return `<span class="text-primary"><i class="fa fa-calendar"></i> ${stringValue}</span>`;
+	}
+
+	// Format currency amounts
+	if ((typeof value === "number" && value > 0) || (typeof value === "string" && /^₹?[\d,]+/.test(stringValue))) {
+		return `<span class="text-success"><i class="fa fa-rupee"></i> ${stringValue}</span>`;
+	}
+
+	// Default formatting for regular text
+	return `<span class="text-dark">${stringValue}</span>`;
 }
 
 function formatExtractedText(text) {
@@ -361,7 +550,7 @@ function setupEventHandlers(policyDoc) {
 	const container = document.querySelector(".policy-viewer-container");
 	const resizeHandle = document.querySelector(".resize-handle");
 	const pdfPane = document.querySelector(".pdf-pane");
-	const textPane = document.querySelector(".text-pane");
+	const fieldsPane = document.querySelector(".fields-pane");
 
 	let isResizing = false;
 
@@ -381,7 +570,7 @@ function setupEventHandlers(policyDoc) {
 		if (newPdfWidth > 200 && newPdfWidth < containerWidth - 200) {
 			const pdfPercentage = (newPdfWidth / containerWidth) * 100;
 			pdfPane.style.flex = `0 0 ${pdfPercentage}%`;
-			textPane.style.flex = `0 0 ${100 - pdfPercentage}%`;
+			fieldsPane.style.flex = `0 0 ${100 - pdfPercentage}%`;
 		}
 	});
 
@@ -393,25 +582,54 @@ function setupEventHandlers(policyDoc) {
 		}
 	});
 
-	// Search functionality
-	document.getElementById("search-text").addEventListener("click", function () {
-		$("#searchModal").modal("show");
-	});
+	// Toggle view functionality (between fields and raw text)
+	document.getElementById("toggle-view").addEventListener("click", function () {
+		const button = this;
+		const content = document.getElementById("extracted-fields-content");
+		const container = document.querySelector(".fields-container");
 
-	document.getElementById("search-btn").addEventListener("click", function () {
-		const searchTerm = document.getElementById("search-input").value;
-		if (searchTerm) {
-			searchInText(searchTerm);
-			$("#searchModal").modal("hide");
+		if (button.textContent === "Show Raw Text") {
+			// Switch to raw text view
+			content.innerHTML = policyDoc.raw_ocr_text
+				? formatExtractedText(policyDoc.raw_ocr_text)
+				: '<p class="text-muted">No raw text available</p>';
+			button.textContent = "Show Extracted Fields";
+			button.classList.remove("btn-outline-secondary");
+			button.classList.add("btn-outline-primary");
+		} else {
+			// Switch to fields view
+			content.innerHTML = formatExtractedFields(policyDoc);
+			button.textContent = "Show Raw Text";
+			button.classList.remove("btn-outline-primary");
+			button.classList.add("btn-outline-secondary");
 		}
 	});
 
-	// Copy text functionality
-	document.getElementById("copy-text").addEventListener("click", function () {
-		const textContent = document.getElementById("extracted-text-content").textContent;
-		navigator.clipboard.writeText(textContent).then(function () {
+	// Copy fields functionality
+	document.getElementById("copy-fields").addEventListener("click", function () {
+		const content = document.getElementById("extracted-fields-content");
+		let textToCopy = "";
+
+		// Check if we're showing fields or raw text
+		const tableRows = content.querySelectorAll("table tbody tr");
+		if (tableRows.length > 0) {
+			// Copy table data as text
+			tableRows.forEach((row) => {
+				const cells = row.querySelectorAll("td");
+				if (cells.length >= 2) {
+					const label = cells[0].textContent.trim();
+					const value = cells[1].textContent.trim();
+					textToCopy += `${label}: ${value}\n`;
+				}
+			});
+		} else {
+			// Copy raw text
+			textToCopy = content.textContent.trim();
+		}
+
+		navigator.clipboard.writeText(textToCopy).then(function () {
 			frappe.show_alert({
-				message: "Text copied to clipboard!",
+				message: "Content copied to clipboard!",
 				indicator: "green",
 			});
 		});
@@ -440,34 +658,5 @@ function setupEventHandlers(policyDoc) {
 				updateZoomDisplay();
 			}
 		}
-	});
-}
-
-function searchInText(searchTerm) {
-	const textContent = document.getElementById("extracted-text-content");
-	const originalHTML = textContent.innerHTML;
-
-	// Remove previous highlights
-	const cleanText = textContent.textContent;
-
-	// Create highlighted version
-	const highlightedText = cleanText.replace(
-		new RegExp(searchTerm, "gi"),
-		`<mark style="background-color: yellow; padding: 2px 4px;">$&</mark>`
-	);
-
-	textContent.innerHTML = highlightedText;
-
-	// Scroll to first match
-	const firstMatch = textContent.querySelector("mark");
-	if (firstMatch) {
-		firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
-	}
-
-	// Show search results count
-	const matches = textContent.querySelectorAll("mark");
-	frappe.show_alert({
-		message: `Found ${matches.length} matches for "${searchTerm}"`,
-		indicator: "blue",
 	});
 }

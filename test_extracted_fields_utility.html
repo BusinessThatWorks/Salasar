@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Extracted Fields Utility Test</title>
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css"
+			rel="stylesheet"
+		/>
+		<style>
+			body {
+				padding: 20px;
+				background: #f8f9fa;
+			}
+			.test-container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+			.test-section {
+				background: white;
+				border-radius: 8px;
+				padding: 20px;
+				margin-bottom: 20px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			.json-input {
+				font-family: monospace;
+				font-size: 12px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="test-container">
+			<h1 class="mb-4">Extracted Fields Utility Test</h1>
+
+			<div class="test-section">
+				<h3>Test Data (Grouped Format)</h3>
+				<p>This simulates the data structure from your image:</p>
+				<pre class="json-input bg-light p-3 rounded">
+{
+  "BUSINESS INFORMATION": {
+    "Customer Code": "23064598812",
+    "Insurer Branch Code": 30500,
+    "Payment Mode": null,
+    "Bank Name": null,
+    "Payment Transaction No": null
+  },
+  "FINANCIAL DETAILS": {
+    "Sum Insured": 21766,
+    "Net/OD Premium": 78,
+    "TP Premium": 714,
+    "GST": 152,
+    "NCB": 78
+  },
+  "POLICY INFORMATION": {
+    "Policy No": "0305003125P104075450",
+    "Policy Type": "MOTORCYCLE / SCOOTER PACKAGE POLICY",
+    "Policy Issuance Date": "11/06/2025",
+    "Policy Start Date": "21/06/2025",
+    "Policy Expiry Date": "20/06/2026",
+    "PolicyBiz Type": null
+  },
+  "VEHICLE INFORMATION": {
+    "Vehicle No": "BR 06 BQ 1263",
+    "Make": "HERO MOTOCORP LTD",
+    "Model": "BOLO",
+    "Engine No": "OBSOLETE",
+    "CC": "97.2",
+    "Fuel": null,
+    "RTO Code": "UZAFFARPUR",
+    "Vehicle Category": null
+  }
+}</pre
+				>
+			</div>
+
+			<div class="test-section">
+				<h3>Rendered Output</h3>
+				<div id="rendered-output"></div>
+			</div>
+
+			<div class="test-section">
+				<h3>Test Flat Data</h3>
+				<p>This tests the flat data structure:</p>
+				<pre class="json-input bg-light p-3 rounded">
+{
+  "Policy Number": "POL-123456",
+  "Insured Name": "John Doe",
+  "Vehicle Number": "KA 01 AB 1234",
+  "Premium Amount": 5000,
+  "Sum Insured": 500000,
+  "Policy Start Date": "2025-01-01",
+  "Policy End Date": "2025-12-31"
+}</pre
+				>
+				<div id="flat-output"></div>
+			</div>
+		</div>
+
+		<script>
+			// Copy the utility functions from the main file
+			function renderExtractedFieldsTable(extractedData, policyDoc = {}) {
+				let html = '<div class="extracted-fields-table">';
+
+				// Add confidence score if available
+				if (policyDoc.ocr_confidence) {
+					html += `
+                    <div class="alert alert-info mb-3">
+                        <i class="fa fa-chart-line"></i>
+                        <strong>OCR Confidence:</strong> ${Math.round(
+							policyDoc.ocr_confidence * 100
+						)}%
+                        ${
+							policyDoc.manual_review_recommended
+								? '<span class="badge badge-warning ml-2">Manual Review Recommended</span>'
+								: ""
+						}
+                    </div>
+                `;
+				}
+
+				// Check if data is already grouped by categories
+				if (isGroupedData(extractedData)) {
+					html += renderGroupedFieldsTable(extractedData);
+				} else {
+					html += renderFlatFieldsTable(extractedData);
+				}
+
+				html += "</div>";
+				return html;
+			}
+
+			function isGroupedData(data) {
+				const keys = Object.keys(data);
+				return keys.some(
+					(key) =>
+						key.includes(" ") &&
+						key === key.toUpperCase() &&
+						typeof data[key] === "object" &&
+						!Array.isArray(data[key])
+				);
+			}
+
+			function renderGroupedFieldsTable(groupedData) {
+				let html = "";
+
+				Object.keys(groupedData).forEach((categoryName) => {
+					const categoryData = groupedData[categoryName];
+
+					if (
+						typeof categoryData !== "object" ||
+						Array.isArray(categoryData) ||
+						Object.keys(categoryData).length === 0
+					) {
+						return;
+					}
+
+					html += `
+                    <div class="category-section mb-4">
+                        <div class="category-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
+                            <h5 class="mb-0" style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <i class="fa fa-${getCategoryIcon(
+									categoryName
+								)}"></i> ${categoryName}
+                            </h5>
+                        </div>
+                        <div class="category-content" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden;">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <tbody>
+                `;
+
+					Object.keys(categoryData).forEach((fieldName) => {
+						const fieldValue = categoryData[fieldName];
+						html += `
+                        <tr style="border-bottom: 1px solid #f8f9fa;">
+                            <td style="width: 40%; padding: 12px 20px; font-weight: 600; color: #495057; background: #f8f9fa; border-right: 1px solid #e9ecef;">
+                                ${formatFieldLabel(fieldName)}
+                            </td>
+                            <td style="width: 60%; padding: 12px 20px; color: #212529;">
+                                ${formatFieldValue(fieldValue)}
+                            </td>
+                        </tr>
+                    `;
+					});
+
+					html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+				});
+
+				return html;
+			}
+
+			function renderFlatFieldsTable(flatData) {
+				let html = `
+                <div class="fields-table-section">
+                    <div class="table-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
+                        <h5 class="mb-0" style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fa fa-list"></i> Extracted Fields
+                        </h5>
+                    </div>
+                    <div class="table-content" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden;">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <tbody>
+            `;
+
+				Object.keys(flatData).forEach((fieldName) => {
+					const fieldValue = flatData[fieldName];
+					html += `
+                    <tr style="border-bottom: 1px solid #f8f9fa;">
+                        <td style="width: 40%; padding: 12px 20px; font-weight: 600; color: #495057; background: #f8f9fa; border-right: 1px solid #e9ecef;">
+                            ${formatFieldLabel(fieldName)}
+                        </td>
+                        <td style="width: 60%; padding: 12px 20px; color: #212529;">
+                            ${formatFieldValue(fieldValue)}
+                        </td>
+                    </tr>
+                `;
+				});
+
+				html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+				return html;
+			}
+
+			function getCategoryIcon(categoryName) {
+				const iconMap = {
+					"BUSINESS INFORMATION": "building",
+					"FINANCIAL DETAILS": "money",
+					"POLICY INFORMATION": "file-text-o",
+					"VEHICLE INFORMATION": "car",
+					"PERSONAL DETAILS": "user",
+					"COVERAGE DETAILS": "shield",
+					"OTHER INFORMATION": "info-circle",
+				};
+
+				if (iconMap[categoryName]) {
+					return iconMap[categoryName];
+				}
+
+				const lowerCategory = categoryName.toLowerCase();
+				if (lowerCategory.includes("business")) return "building";
+				if (lowerCategory.includes("financial") || lowerCategory.includes("money"))
+					return "money";
+				if (lowerCategory.includes("policy")) return "file-text-o";
+				if (lowerCategory.includes("vehicle") || lowerCategory.includes("car"))
+					return "car";
+				if (lowerCategory.includes("personal") || lowerCategory.includes("customer"))
+					return "user";
+				if (lowerCategory.includes("coverage") || lowerCategory.includes("insurance"))
+					return "shield";
+
+				return "info-circle";
+			}
+
+			function formatFieldLabel(fieldName) {
+				return fieldName
+					.replace(/_/g, " ")
+					.replace(/\b\w/g, (l) => l.toUpperCase())
+					.replace(/\b(No|Id|Code|Gst|Ncb|Cc|Rto)\b/g, (l) => l.toUpperCase());
+			}
+
+			function formatFieldValue(value) {
+				if (
+					!value ||
+					value === "null" ||
+					value === "undefined" ||
+					value === "None" ||
+					value === null ||
+					value === undefined
+				) {
+					return '<span class="text-muted"><i class="fa fa-minus"></i> Not available</span>';
+				}
+
+				const stringValue = String(value).trim();
+
+				if (stringValue === "" || stringValue === "None") {
+					return '<span class="text-muted"><i class="fa fa-minus"></i> Not available</span>';
+				}
+
+				// Format dates
+				if (
+					typeof value === "string" &&
+					(/^\d{4}-\d{2}-\d{2}$/.test(stringValue) ||
+						/^\d{2}\/\d{2}\/\d{4}$/.test(stringValue) ||
+						/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(stringValue))
+				) {
+					return `<span class="text-primary"><i class="fa fa-calendar"></i> ${stringValue}</span>`;
+				}
+
+				// Format currency
+				if (typeof value === "number" && value > 0 && value < 10000000) {
+					return `<span class="text-success"><i class="fa fa-rupee"></i> ${value.toLocaleString()}</span>`;
+				}
+
+				if (typeof value === "string" && /^₹?[\d,]+/.test(stringValue)) {
+					return `<span class="text-success"><i class="fa fa-rupee"></i> ${stringValue}</span>`;
+				}
+
+				// Format vehicle numbers
+				if (
+					typeof value === "string" &&
+					/^[A-Z]{2}\s?\d{2}\s?[A-Z]{1,2}\s?\d{4}$/.test(stringValue)
+				) {
+					return `<span class="text-info"><i class="fa fa-car"></i> ${stringValue}</span>`;
+				}
+
+				// Format policy numbers
+				if (
+					typeof value === "string" &&
+					(/^[A-Z]{2,3}-\d+$/.test(stringValue) ||
+						/^\d+[A-Z]\d+$/.test(stringValue) ||
+						/^[A-Z0-9]{10,20}$/.test(stringValue))
+				) {
+					return `<span class="text-warning"><i class="fa fa-file-text"></i> ${stringValue}</span>`;
+				}
+
+				// Format codes
+				if (
+					typeof value === "string" &&
+					(/^[A-Z]{2,4}\d+$/.test(stringValue) || /^\d{8,12}$/.test(stringValue))
+				) {
+					return `<span class="text-dark"><i class="fa fa-barcode"></i> ${stringValue}</span>`;
+				}
+
+				// Format company names
+				if (
+					typeof value === "string" &&
+					((stringValue === stringValue.toUpperCase() && stringValue.length > 5) ||
+						/^[A-Z][a-z]+(\s[A-Z][a-z]+)*\s(LTD|LIMITED|CORP|CORPORATION)$/i.test(
+							stringValue
+						))
+				) {
+					return `<span class="text-dark"><i class="fa fa-building"></i> ${stringValue}</span>`;
+				}
+
+				return `<span class="text-dark">${stringValue}</span>`;
+			}
+
+			// Test data
+			const groupedData = {
+				"BUSINESS INFORMATION": {
+					"Customer Code": "23064598812",
+					"Insurer Branch Code": 30500,
+					"Payment Mode": null,
+					"Bank Name": null,
+					"Payment Transaction No": null,
+				},
+				"FINANCIAL DETAILS": {
+					"Sum Insured": 21766,
+					"Net/OD Premium": 78,
+					"TP Premium": 714,
+					GST: 152,
+					NCB: 78,
+				},
+				"POLICY INFORMATION": {
+					"Policy No": "0305003125P104075450",
+					"Policy Type": "MOTORCYCLE / SCOOTER PACKAGE POLICY",
+					"Policy Issuance Date": "11/06/2025",
+					"Policy Start Date": "21/06/2025",
+					"Policy Expiry Date": "20/06/2026",
+					"PolicyBiz Type": null,
+				},
+				"VEHICLE INFORMATION": {
+					"Vehicle No": "BR 06 BQ 1263",
+					Make: "HERO MOTOCORP LTD",
+					Model: "BOLO",
+					"Engine No": "OBSOLETE",
+					CC: "97.2",
+					Fuel: null,
+					"RTO Code": "UZAFFARPUR",
+					"Vehicle Category": null,
+				},
+			};
+
+			const flatData = {
+				"Policy Number": "POL-123456",
+				"Insured Name": "John Doe",
+				"Vehicle Number": "KA 01 AB 1234",
+				"Premium Amount": 5000,
+				"Sum Insured": 500000,
+				"Policy Start Date": "2025-01-01",
+				"Policy End Date": "2025-12-31",
+			};
+
+			// Render the test data
+			document.getElementById("rendered-output").innerHTML = renderExtractedFieldsTable(
+				groupedData,
+				{ ocr_confidence: 0.85, manual_review_recommended: false }
+			);
+			document.getElementById("flat-output").innerHTML =
+				renderExtractedFieldsTable(flatData);
+		</script>
+	</body>
+</html>
