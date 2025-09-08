@@ -204,6 +204,7 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 					<div class="fields-controls">
 						${motorPolicy ? 
 							`<button class="btn btn-sm btn-outline-primary" id="save-policy">Save Changes</button>
+							 <button class="btn btn-sm btn-outline-info" id="refresh-policy">Refresh</button>
 							 <button class="btn btn-sm btn-outline-secondary" id="toggle-extracted">Show Extracted</button>` :
 							`<button class="btn btn-sm btn-outline-secondary" id="toggle-view">Show Raw Text</button>
 							 <button class="btn btn-sm btn-outline-secondary" id="copy-fields">Copy</button>`
@@ -877,6 +878,20 @@ function setupEventHandlers(policyDoc, motorPolicy) {
 			});
 		}
 
+		// Handle refresh button
+		const refreshBtn = document.getElementById('refresh-policy');
+		if (refreshBtn) {
+			refreshBtn.addEventListener('click', function() {
+				// Reset button appearance if it was showing warning state
+				this.classList.remove('btn-warning');
+				this.classList.add('btn-outline-info');
+				this.innerHTML = '<i class="fa fa-refresh"></i> Refresh';
+				
+				// Reload the page with same parameters to get fresh data
+				window.location.reload();
+			});
+		}
+
 		// Handle toggle extracted fields button
 		const toggleBtn = document.getElementById('toggle-extracted');
 		if (toggleBtn) {
@@ -1072,71 +1087,178 @@ function createSaveStatusIndicator() {
 }
 
 /**
- * Save individual Motor Policy field
+ * Save individual Motor Policy field with version conflict handling
  */
 function saveMotorPolicyField(motorPolicyName, fieldName, value, saveStatus) {
+	// First get the latest document version
 	frappe.call({
-		method: "frappe.client.set_value",
+		method: "frappe.client.get",
 		args: {
 			doctype: "Motor Policy",
-			name: motorPolicyName,
-			fieldname: fieldName,
-			value: value
+			name: motorPolicyName
 		},
 		callback: function(response) {
 			if (response.message) {
-				saveStatus.show('saved');
-			} else {
-				saveStatus.show('error');
+				const latestDoc = response.message;
+				
+				// Update the specific field with our value
+				latestDoc[fieldName] = value;
+				
+				// Save the updated document
+				frappe.call({
+					method: "frappe.client.save",
+					args: {
+						doc: latestDoc
+					},
+					callback: function(saveResponse) {
+						if (saveResponse.message) {
+							saveStatus.show('saved');
+							
+							// Update the form field with any server-side modifications
+							const field = document.getElementById(`field-${fieldName}`);
+							if (field && saveResponse.message[fieldName] !== undefined) {
+								field.value = saveResponse.message[fieldName];
+							}
+						} else {
+							saveStatus.show('error');
+						}
+					},
+					error: function(err) {
+						console.error('Save error:', err);
+						handleSaveError(err, saveStatus);
+					}
+				});
 			}
 		},
 		error: function(err) {
-			console.error('Save error:', err);
+			console.error('Fetch latest document error:', err);
 			saveStatus.show('error');
+			frappe.show_alert({
+				message: 'Failed to fetch latest document. Please refresh the page.',
+				indicator: 'red'
+			});
 		}
 	});
 }
 
 /**
- * Save all Motor Policy changes at once
+ * Handle save errors with appropriate user feedback
+ */
+function handleSaveError(err, saveStatus) {
+	saveStatus.show('error');
+	
+	if (err.message) {
+		if (err.message.includes('has been modified')) {
+			frappe.show_alert({
+				message: 'Document was modified. Please refresh to get the latest version.',
+				indicator: 'orange'
+			});
+			
+			// Add a refresh button to the fields pane header if it doesn't exist
+			const refreshBtn = document.getElementById('refresh-policy');
+			if (refreshBtn) {
+				refreshBtn.classList.add('btn-warning');
+				refreshBtn.innerHTML = '<i class="fa fa-refresh"></i> Refresh Required';
+			}
+		} else if (err.message.includes('Permission')) {
+			frappe.show_alert({
+				message: 'You do not have permission to modify this document.',
+				indicator: 'red'
+			});
+		} else {
+			frappe.show_alert({
+				message: `Save failed: ${err.message}`,
+				indicator: 'red'
+			});
+		}
+	} else {
+		frappe.show_alert({
+			message: 'Save failed due to an unknown error',
+			indicator: 'red'
+		});
+	}
+}
+
+/**
+ * Save all Motor Policy changes at once with improved error handling
  */
 function saveAllMotorPolicyChanges(motorPolicyName, saveStatus) {
 	const fields = document.querySelectorAll('.motor-policy-field');
 	const updates = {};
 
+	// Collect all field values
 	fields.forEach(field => {
 		updates[field.dataset.fieldname] = field.value;
 	});
 
 	saveStatus.show('saving');
 
+	// Get the latest document version first
 	frappe.call({
-		method: "frappe.client.save",
+		method: "frappe.client.get",
 		args: {
-			doc: {
-				doctype: "Motor Policy",
-				name: motorPolicyName,
-				...updates
-			}
+			doctype: "Motor Policy",
+			name: motorPolicyName
 		},
 		callback: function(response) {
 			if (response.message) {
-				saveStatus.show('saved');
-				frappe.show_alert({
-					message: 'All changes saved successfully!',
-					indicator: 'green'
+				const latestDoc = response.message;
+				
+				// Merge updates with the latest document
+				Object.keys(updates).forEach(fieldName => {
+					latestDoc[fieldName] = updates[fieldName];
 				});
-			} else {
-				saveStatus.show('error');
+
+				// Save the updated document
+				frappe.call({
+					method: "frappe.client.save",
+					args: {
+						doc: latestDoc
+					},
+					callback: function(saveResponse) {
+						if (saveResponse.message) {
+							saveStatus.show('saved');
+							frappe.show_alert({
+								message: 'All changes saved successfully!',
+								indicator: 'green'
+							});
+							
+							// Update form fields with any server-side modifications
+							updateFormFieldsFromDocument(saveResponse.message);
+						} else {
+							saveStatus.show('error');
+							frappe.show_alert({
+								message: 'Save failed - no response from server',
+								indicator: 'red'
+							});
+						}
+					},
+					error: function(err) {
+						console.error('Save all error:', err);
+						handleSaveError(err, saveStatus);
+					}
+				});
 			}
 		},
 		error: function(err) {
-			console.error('Save all error:', err);
+			console.error('Fetch document error:', err);
 			saveStatus.show('error');
 			frappe.show_alert({
-				message: 'Failed to save changes',
+				message: 'Failed to fetch latest document. Please refresh the page.',
 				indicator: 'red'
 			});
+		}
+	});
+}
+
+/**
+ * Update form fields with values from saved document
+ */
+function updateFormFieldsFromDocument(doc) {
+	document.querySelectorAll('.motor-policy-field').forEach(field => {
+		const fieldName = field.dataset.fieldname;
+		if (doc[fieldName] !== undefined) {
+			field.value = doc[fieldName] || '';
 		}
 	});
 }
