@@ -1,0 +1,106 @@
+{
+ "app": "policy_reader",
+ "charts": [],
+ "content": "[{\"id\":\"1ZEEQwhWPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Documents</b></span>\",\"col\":12}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cQ6ICE_CWt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":3}},{\"id\":\"Y1MqgcRIcc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":3}},{\"id\":\"oxGC3YT1-D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":3}},{\"id\":\"NCEAYm7KCU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance App Settings\",\"col\":3}},{\"id\":\"JVu8-FJZCu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}}]",
+ "creation": "2025-09-08 23:35:48.632301",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "home",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Insurance",
+ "link_type": "DocType",
+ "links": [
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Policy Documents",
+   "link_count": 0,
+   "link_to": "Policy Document",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Motor Policies",
+   "link_count": 0,
+   "link_to": "Motor Policy",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Health Policies",
+   "link_count": 0,
+   "link_to": "Health Policy",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-09-10 17:18:54.445728",
+ "modified_by": "Administrator",
+ "module": "Policies",
+ "name": "Insurance",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "Policy Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Policy Documents",
+   "link_to": "Policy Document",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Health Policies",
+   "link_to": "Health Policy",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Motor Policies",
+   "link_to": "Motor Policy",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Insurance App Settings",
+   "link_to": "Policy Reader Settings",
+   "type": "DocType"
+  }
+ ],
+ "title": "Insurance",
+ "type": "Workspace"
+}
