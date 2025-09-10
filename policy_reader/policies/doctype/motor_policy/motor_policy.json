@@ -57,7 +57,30 @@
   "tax_section",
   "gst",
   "column_break_tax",
-  "ncb"
+  "ncb",
+  "internal_information_tab",
+  "customer_information_section",
+  "branch_code",
+  "customer_group",
+  "customer_title",
+  "customer_name",
+  "column_break_customer_info",
+  "gender",
+  "dob_doi",
+  "customer_id",
+  "mobile_number",
+  "column_break_customer_info_2",
+  "email_id",
+  "cse_id",
+  "rm_id",
+  "insurer_branch_code_internal",
+  "business_information_section",
+  "biz_type",
+  "old_control_number",
+  "column_break_business_info",
+  "payment_mode_internal",
+  "bank_name_internal",
+  "dated"
  ],
  "fields": [
   {
@@ -365,6 +388,159 @@
    "fieldtype": "Float",
    "label": "NCB",
    "precision": "2"
+  },
+  {
+   "fieldname": "internal_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Internal Information"
+  },
+  {
+   "fieldname": "customer_information_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "description": "Branch code for Subhangee Clapgrow",
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code",
+   "reqd": 1
+  },
+  {
+   "default": "NO GROUP",
+   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
+   "fieldname": "customer_group",
+   "fieldtype": "Data",
+   "label": "Customer Group",
+   "reqd": 1
+  },
+  {
+   "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
+   "fieldname": "customer_title",
+   "fieldtype": "Select",
+   "label": "Customer Title",
+   "options": "Dr.\nM/S\nMr.\nMrs.\nMs.",
+   "reqd": 1
+  },
+  {
+   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_customer_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Male / Female / Other",
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther",
+   "reqd": 1
+  },
+  {
+   "description": "Date of Birth/Date of Incorporation (DD-MM-YYYY format)",
+   "fieldname": "dob_doi",
+   "fieldtype": "Date",
+   "label": "DOB/DOI",
+   "reqd": 1
+  },
+  {
+   "description": "Enter the ID, Not the name",
+   "fieldname": "customer_id",
+   "fieldtype": "Data",
+   "label": "Customer ID",
+   "reqd": 1
+  },
+  {
+   "description": "Enter a 10-digit mobile number without spaces (e.g., 9330903897)",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "length": 10,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_customer_info_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Valid customer email address (e.g. insurance@custome.com)",
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email ID",
+   "reqd": 1
+  },
+  {
+   "description": "Enter the ID, Not the name",
+   "fieldname": "cse_id",
+   "fieldtype": "Data",
+   "label": "CSE ID",
+   "reqd": 1
+  },
+  {
+   "description": "Enter the ID, Not the name",
+   "fieldname": "rm_id",
+   "fieldtype": "Data",
+   "label": "RM ID",
+   "reqd": 1
+  },
+  {
+   "description": "Enter the ID, Not the name",
+   "fieldname": "insurer_branch_code_internal",
+   "fieldtype": "Data",
+   "label": "Insurer Branch Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_information_section",
+   "fieldtype": "Section Break",
+   "label": "Business Information"
+  },
+  {
+   "description": "\"New\" for New business, anything else will not be accepted ; \"Renewal\" for the Renewal business, anything else will not be accepted",
+   "fieldname": "biz_type",
+   "fieldtype": "Select",
+   "label": "Biz Type",
+   "options": "New\nRenewal",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.biz_type == 'Renewal'",
+   "description": "Enter the ID, Not the name (Mandatory if Renewal)",
+   "fieldname": "old_control_number",
+   "fieldtype": "Data",
+   "label": "Old Control Number",
+   "mandatory_depends_on": "eval:doc.biz_type == 'Renewal'"
+  },
+  {
+   "fieldname": "column_break_business_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Payment mode (e.g., Bank Transfer)",
+   "fieldname": "payment_mode_internal",
+   "fieldtype": "Data",
+   "label": "Payment Mode",
+   "reqd": 1
+  },
+  {
+   "default": "NONE",
+   "description": "Bank name (can be NONE)",
+   "fieldname": "bank_name_internal",
+   "fieldtype": "Data",
+   "label": "Bank Name",
+   "reqd": 1
+  },
+  {
+   "description": "Date in DD-MM-YYYY format",
+   "fieldname": "dated",
+   "fieldtype": "Date",
+   "label": "Dated",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
