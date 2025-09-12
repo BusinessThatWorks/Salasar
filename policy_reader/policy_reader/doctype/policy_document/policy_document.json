@@ -18,6 +18,9 @@
   "manual_review_recommended",
   "enhancement_applied",
   "runpod_endpoint",
+  "policy_links_section",
+  "motor_policy",
+  "health_policy",
   "extraction_results",
   "extracted_fields",
   "raw_ocr_text",
@@ -111,6 +114,25 @@
    "fieldname": "runpod_endpoint",
    "fieldtype": "Data",
    "label": "RunPod Endpoint",
+   "read_only": 1
+  },
+  {
+   "fieldname": "policy_links_section",
+   "fieldtype": "Section Break",
+   "label": "Created Policy Records"
+  },
+  {
+   "fieldname": "motor_policy",
+   "fieldtype": "Link",
+   "label": "Motor Policy",
+   "options": "Motor Policy",
+   "read_only": 1
+  },
+  {
+   "fieldname": "health_policy",
+   "fieldtype": "Link",
+   "label": "Health Policy",
+   "options": "Health Policy",
    "read_only": 1
   },
   {

@@ -75,7 +75,6 @@
   "rm_id",
   "insurer_branch_code_internal",
   "business_information_section",
-  "biz_type",
   "old_control_number",
   "column_break_business_info",
   "payment_mode_internal",
@@ -403,31 +402,27 @@
    "description": "Branch code for Subhangee Clapgrow",
    "fieldname": "branch_code",
    "fieldtype": "Data",
-   "label": "Branch Code",
-   "reqd": 1
+   "label": "Branch Code"
   },
   {
    "default": "NO GROUP",
    "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
    "fieldname": "customer_group",
    "fieldtype": "Data",
-   "label": "Customer Group",
-   "reqd": 1
+   "label": "Customer Group"
   },
   {
    "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
    "fieldname": "customer_title",
    "fieldtype": "Select",
    "label": "Customer Title",
-   "options": "Dr.\nM/S\nMr.\nMrs.\nMs.",
-   "reqd": 1
+   "options": "Dr.\nM/S\nMr.\nMrs.\nMs."
   },
   {
    "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name",
-   "reqd": 1
+   "label": "Customer Name"
   },
   {
    "fieldname": "column_break_customer_info",
@@ -438,30 +433,26 @@
    "fieldname": "gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther",
-   "reqd": 1
+   "options": "Male\nFemale\nOther"
   },
   {
    "description": "Date of Birth/Date of Incorporation (DD-MM-YYYY format)",
    "fieldname": "dob_doi",
    "fieldtype": "Date",
-   "label": "DOB/DOI",
-   "reqd": 1
+   "label": "DOB/DOI"
   },
   {
    "description": "Enter the ID, Not the name",
    "fieldname": "customer_id",
    "fieldtype": "Data",
-   "label": "Customer ID",
-   "reqd": 1
+   "label": "Customer ID"
   },
   {
    "description": "Enter a 10-digit mobile number without spaces (e.g., 9330903897)",
    "fieldname": "mobile_number",
    "fieldtype": "Data",
    "label": "Mobile Number",
-   "length": 10,
-   "reqd": 1
+   "length": 10
   },
   {
    "fieldname": "column_break_customer_info_2",
@@ -471,29 +462,25 @@
    "description": "Valid customer email address (e.g. insurance@custome.com)",
    "fieldname": "email_id",
    "fieldtype": "Data",
-   "label": "Email ID",
-   "reqd": 1
+   "label": "Email ID"
   },
   {
    "description": "Enter the ID, Not the name",
    "fieldname": "cse_id",
    "fieldtype": "Data",
-   "label": "CSE ID",
-   "reqd": 1
+   "label": "CSE ID"
   },
   {
    "description": "Enter the ID, Not the name",
    "fieldname": "rm_id",
    "fieldtype": "Data",
-   "label": "RM ID",
-   "reqd": 1
+   "label": "RM ID"
   },
   {
    "description": "Enter the ID, Not the name",
    "fieldname": "insurer_branch_code_internal",
    "fieldtype": "Data",
-   "label": "Insurer Branch Code",
-   "reqd": 1
+   "label": "Insurer Branch Code"
   },
   {
    "fieldname": "business_information_section",
@@ -501,20 +488,10 @@
    "label": "Business Information"
   },
   {
-   "description": "\"New\" for New business, anything else will not be accepted ; \"Renewal\" for the Renewal business, anything else will not be accepted",
-   "fieldname": "biz_type",
-   "fieldtype": "Select",
-   "label": "Biz Type",
-   "options": "New\nRenewal",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.biz_type == 'Renewal'",
-   "description": "Enter the ID, Not the name (Mandatory if Renewal)",
+   "description": "Enter the ID, Not the name",
    "fieldname": "old_control_number",
    "fieldtype": "Data",
-   "label": "Old Control Number",
-   "mandatory_depends_on": "eval:doc.biz_type == 'Renewal'"
+   "label": "Old Control Number"
   },
   {
    "fieldname": "column_break_business_info",
@@ -524,23 +501,20 @@
    "description": "Payment mode (e.g., Bank Transfer)",
    "fieldname": "payment_mode_internal",
    "fieldtype": "Data",
-   "label": "Payment Mode",
-   "reqd": 1
+   "label": "Payment Mode"
   },
   {
    "default": "NONE",
    "description": "Bank name (can be NONE)",
    "fieldname": "bank_name_internal",
    "fieldtype": "Data",
-   "label": "Bank Name",
-   "reqd": 1
+   "label": "Bank Name"
   },
   {
    "description": "Date in DD-MM-YYYY format",
    "fieldname": "dated",
    "fieldtype": "Date",
-   "label": "Dated",
-   "reqd": 1
+   "label": "Dated"
   }
  ],
  "grid_page_length": 50,
