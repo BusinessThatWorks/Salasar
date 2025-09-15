@@ -562,36 +562,50 @@ Return data as valid JSON:"""
 		# Common field name variations based on fieldname and label patterns
 		field_aliases = {
 			# Policy fields
-			'policy_no': ['Policy Number', 'PolicyNumber', 'Policy Num', 'PolicyNo'],
-			'policy_type': ['PolicyType'],
-			'policy_issuance_date': ['Policy Issuance Date', 'Issuance Date', 'PolicyIssuanceDate'],
-			'policy_start_date': ['Policy Start Date', 'Start Date', 'PolicyStartDate', 'From Date'],
-			'policy_expiry_date': ['Policy Expiry Date', 'Expiry Date', 'PolicyExpiryDate', 'To Date', 'End Date'],
+			'policy_no': ['Policy Number', 'PolicyNumber', 'Policy Num', 'PolicyNo', 'policyNo', 'policyNumber'],
+			'policy_type': ['PolicyType', 'policyType'],
+			'policy_issuance_date': ['Policy Issuance Date', 'Issuance Date', 'PolicyIssuanceDate', 'policyIssuanceDate'],
+			'policy_start_date': ['Policy Start Date', 'Start Date', 'PolicyStartDate', 'From Date', 'policyStartDate'],
+			'policy_expiry_date': ['Policy Expiry Date', 'Expiry Date', 'PolicyExpiryDate', 'To Date', 'End Date', 'policyExpiryDate'],
+			'policy_biz_type': ['PolicyBiz Type', 'policyBizType', 'policyBizType'],
+			'new_renewal': ['New/Renewal', 'newRenewal'],
 			
 			# Vehicle fields
-			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No'],
-			'make': ['Make', 'Vehicle Make'],
-			'model': ['Model', 'Vehicle Model'],
-			'variant': ['Variant', 'Vehicle Variant'],
-			'year_of_man': ['Year of Manufacture', 'Manufacturing Year', 'YearOfManufacture', 'Year', 'Model Year'],
+			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No', 'vehicleNo', 'vehicleNumber'],
+			'make': ['Make', 'Vehicle Make', 'make'],
+			'model': ['Model', 'Vehicle Model', 'model'],
+			'variant': ['Variant', 'Vehicle Variant', 'variant'],
+			'year_of_man': ['Year of Manufacture', 'Manufacturing Year', 'YearOfManufacture', 'Year', 'Model Year', 'yearOfManufacture'],
 			
 			# Engine/Chassis fields (handle the typo in DocType)
-			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No'],
-			'engine_no': ['Engine Number', 'EngineNumber', 'Engine No', 'EngineNo'],
-			'cc': ['CC', 'Engine Capacity', 'Cubic Capacity'],
-			'fuel': ['Fuel', 'Fuel Type', 'FuelType'],
+			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No', 'chasisNo', 'chassisNo'],
+			'engine_no': ['Engine Number', 'EngineNumber', 'Engine No', 'EngineNo', 'engineNo'],
+			'cc': ['CC', 'Engine Capacity', 'Cubic Capacity', 'cc'],
+			'fuel': ['Fuel', 'Fuel Type', 'FuelType', 'fuel'],
 			
 			# Financial fields
-			'sum_insured': ['Sum Insured', 'SumInsured', 'Insured Amount', 'Coverage Amount'],
-			'net_od_premium': ['Net Premium', 'NetPremium', 'Net OD Premium', 'NetODPremium', 'OD Premium'],
-			'tp_premium': ['TP Premium', 'TPPremium', 'Third Party Premium'],
-			'gst': ['GST', 'Tax', 'Service Tax'],
-			'ncb': ['NCB', 'No Claim Bonus'],
+			'sum_insured': ['Sum Insured', 'SumInsured', 'Insured Amount', 'Coverage Amount', 'sumInsured'],
+			'net_od_premium': ['Net Premium', 'NetPremium', 'Net OD Premium', 'NetODPremium', 'OD Premium', 'netOdPremium'],
+			'tp_premium': ['TP Premium', 'TPPremium', 'Third Party Premium', 'tpPremium'],
+			'gst': ['GST', 'Tax', 'Service Tax', 'gst'],
+			'ncb': ['NCB', 'No Claim Bonus', 'ncb'],
 			
 			# Registration fields
-			'rto_code': ['RTO Code', 'RTOCode', 'RTO'],
-			'vehicle_category': ['Vehicle Category', 'VehicleCategory', 'Vehicle Class', 'Category'],
-			'passenger_gvw': ['Passenger GVW', 'PassengerGVW', 'GVW'],
+			'rto_code': ['RTO Code', 'RTOCode', 'RTO', 'rtoCode'],
+			'vehicle_category': ['Vehicle Category', 'VehicleCategory', 'Vehicle Class', 'Category', 'vehicleCategory'],
+			'passenger_gvw': ['Passenger GVW', 'PassengerGVW', 'GVW', 'passengerGvw'],
+			
+			# Business/Customer fields (from your extracted data)
+			'customer_code': ['Customer Code', 'CustomerCode', 'customerCode'],
+			'insurer_branch_code': ['Insurer Branch Code', 'InsurerBranchCode', 'insurerBranchCode'],
+			'payment_mode': ['Payment Mode', 'PaymentMode', 'paymentMode'],
+			'bank_name': ['Bank Name', 'BankName', 'bankName'],
+			'payment_transaction_no': ['Payment Transaction No', 'PaymentTransactionNo', 'paymentTransactionNo'],
+			'branch_code': ['Branch Code', 'BranchCode', 'branchCode'],
+			'customer_group': ['Customer Group', 'CustomerGroup', 'customerGroup'],
+			'customer_title': ['Customer Title', 'CustomerTitle', 'customerTitle'],
+			'customer_name': ['Customer Name', 'CustomerName', 'customerName'],
+			'customer_id': ['Customer ID', 'CustomerID', 'customerId'],
 			
 			# Health policy fields
 			'policy_number': ['Policy Number', 'PolicyNumber', 'Policy No'],

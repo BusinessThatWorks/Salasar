@@ -152,7 +152,7 @@
    "fieldname": "policy_biz_type",
    "fieldtype": "Data",
    "label": "PolicyBiz Type",
-   "length": 10
+   "length": 100
   },
   {
    "fieldname": "column_break_customer",
@@ -422,7 +422,8 @@
    "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name"
+   "label": "Customer Name",
+   "length": 200
   },
   {
    "fieldname": "column_break_customer_info",

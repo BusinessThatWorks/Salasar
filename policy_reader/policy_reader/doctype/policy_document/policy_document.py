@@ -15,17 +15,32 @@ from policy_reader.policy_reader.services.policy_creation_service import PolicyC
 
 class PolicyDocument(Document):
     def before_save(self):
-        if not self.title and self.policy_file:
-            self.title = self.get_filename_from_attachment()
+        # Auto-update title when file is uploaded or changed
+        if self.policy_file:
+            # Check if this is a new document or if the file has changed
+            if not self.title or (self.has_value_changed('policy_file') and self.policy_file):
+                self.title = self.get_filename_from_attachment()
     
     def validate(self):
         if self.status == "Completed" and not self.extracted_fields:
             frappe.throw("Extracted fields cannot be empty for completed documents")
     
     def get_filename_from_attachment(self):
-        """Extract filename from file attachment"""
+        """Extract filename from file attachment and clean it up"""
         if self.policy_file:
-            return os.path.basename(self.policy_file).replace('.pdf', '').replace('.PDF', '')
+            # Get just the filename without path
+            filename = os.path.basename(self.policy_file)
+            
+            # Remove file extensions (case insensitive)
+            filename_no_ext = os.path.splitext(filename)[0]
+            
+            # Clean up the filename: replace underscores/hyphens with spaces, title case
+            cleaned_name = filename_no_ext.replace('_', ' ').replace('-', ' ')
+            
+            # Remove extra spaces and title case each word
+            cleaned_name = ' '.join(word.capitalize() for word in cleaned_name.split() if word)
+            
+            return cleaned_name if cleaned_name else "Policy Document"
         return "New Policy Document"
     
     def get_policy_reader_settings(self):
