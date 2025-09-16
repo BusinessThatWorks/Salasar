@@ -312,27 +312,21 @@ function renderFieldsTable(extractedData, policyDoc = {}) {
 		`;
 	}
 
-	// Create table structure
+	// Create simple fields container
 	html += `
-		<div class="fields-table-section">
-			<div class="table-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
+		<div class="fields-simple-section">
+			<div class="fields-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
 				<h5 class="mb-0" style="font-weight: 600;">
 					<i class="fa fa-list"></i> Extracted Fields
 				</h5>
 			</div>
-			<div class="table-content" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden;">
-				<div class="table-responsive">
-					<table class="table table-hover mb-0">
-						<tbody>
+			<div class="fields-content" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; padding: 16px 20px;">
 	`;
 
 	// Render fields from data (handles both flat and nested structures)
 	html += renderDataRows(extractedData);
 
 	html += `
-						</tbody>
-					</table>
-				</div>
 			</div>
 		</div>
 	</div>`;
@@ -357,16 +351,16 @@ function renderDataRows(data, prefix = "") {
 			// Nested object - render with prefix
 			html += renderDataRows(value, displayKey);
 		} else {
-			// Simple key-value pair
+			// Simple key-value pair - cleaner line format
 			html += `
-				<tr style="border-bottom: 1px solid #f8f9fa;">
-					<td style="width: 40%; padding: 12px 20px; font-weight: 600; color: #495057; background: #f8f9fa; border-right: 1px solid #e9ecef;">
-						${formatFieldLabel(displayKey)}
-					</td>
-					<td style="width: 60%; padding: 12px 20px; color: #212529;">
+				<div style="display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f1f3f4; margin-bottom: 4px;">
+					<div style="flex: 0 0 200px; font-weight: 600; color: #495057; padding-right: 16px; font-size: 13px;">
+						${formatFieldLabel(displayKey)}:
+					</div>
+					<div style="flex: 1; color: #212529; font-size: 13px; line-height: 1.4;">
 						${formatFieldValue(value)}
-					</td>
-				</tr>
+					</div>
+				</div>
 			`;
 		}
 	});

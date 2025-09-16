@@ -578,7 +578,7 @@ Return data as valid JSON:"""
 			'year_of_man': ['Year of Manufacture', 'Manufacturing Year', 'YearOfManufacture', 'Year', 'Model Year', 'yearOfManufacture'],
 			
 			# Engine/Chassis fields (handle the typo in DocType)
-			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No', 'chasisNo', 'chassisNo'],
+			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No', 'chasisNo', 'chassisNo', 'ChasisNo'],
 			'engine_no': ['Engine Number', 'EngineNumber', 'Engine No', 'EngineNo', 'engineNo'],
 			'cc': ['CC', 'Engine Capacity', 'Cubic Capacity', 'cc'],
 			'fuel': ['Fuel', 'Fuel Type', 'FuelType', 'fuel'],

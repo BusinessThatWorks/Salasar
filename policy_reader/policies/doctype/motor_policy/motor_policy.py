@@ -53,11 +53,12 @@ class MotorPolicy(Document):
 			extracted_data = frappe.parse_json(policy_doc.extracted_fields)
 			parsed_data = policy_service.parse_nested_extracted_data(extracted_data)
 			
-			# Refresh field mappings to include latest aliases
+			# Refresh field mappings to include latest aliases (including ChasisNo)
 			try:
 				settings = frappe.get_single("Policy Reader Settings")
 				settings.refresh_field_mappings()
 				frappe.db.commit()
+				frappe.logger().info("Field mappings refreshed successfully - ChasisNo mapping updated")
 			except Exception as e:
 				frappe.logger().warning(f"Could not refresh field mappings: {str(e)}")
 			
@@ -69,6 +70,16 @@ class MotorPolicy(Document):
 					"success": False,
 					"error": "No field mapping found for Motor policy. Please check Policy Reader Settings."
 				}
+			
+			# Debug: Log the specific fields we're trying to map
+			chasis_related = [k for k in parsed_data.keys() if 'chasis' in k.lower() or 'chassis' in k.lower()]
+			if chasis_related:
+				frappe.logger().info(f"Found chassis-related fields in parsed data: {chasis_related}")
+				for field in chasis_related:
+					if field in field_mapping:
+						frappe.logger().info(f"✓ Field '{field}' maps to: {field_mapping[field]}")
+					else:
+						frappe.logger().warning(f"✗ Field '{field}' NOT found in mapping")
 			
 			# Map fields using existing service method
 			mapping_results = policy_service.map_fields_dynamically(
