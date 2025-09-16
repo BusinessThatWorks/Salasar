@@ -145,7 +145,7 @@
    "fieldname": "customer_code",
    "fieldtype": "Data",
    "label": "Customer Code",
-   "length": 20
+   "length": 50
   },
   {
    "description": "SAIBA(PolicyBiz Type)",
@@ -187,7 +187,7 @@
    "fieldname": "bank_name",
    "fieldtype": "Data",
    "label": "Bank Name",
-   "length": 75
+   "length": 150
   },
   {
    "fieldname": "column_break_payment",
@@ -198,7 +198,7 @@
    "fieldname": "payment_transaction_no",
    "fieldtype": "Data",
    "label": "Payment Transaction No",
-   "length": 50
+   "length": 100
   },
   {
    "fieldname": "vehicle_information_tab",
@@ -230,21 +230,21 @@
    "fieldname": "vehicle_no",
    "fieldtype": "Data",
    "label": "Vehicle No",
-   "length": 50
+   "length": 100
   },
   {
    "description": "SAIBA(Make)",
    "fieldname": "make",
    "fieldtype": "Data",
    "label": "Make",
-   "length": 50
+   "length": 100
   },
   {
    "description": "SAIBA(Model)",
    "fieldname": "model",
    "fieldtype": "Data",
    "label": "Model",
-   "length": 50
+   "length": 100
   },
   {
    "fieldname": "column_break_vehicle_basic",
@@ -273,14 +273,14 @@
    "fieldname": "chasis_no",
    "fieldtype": "Data",
    "label": "Chasis No",
-   "length": 50
+   "length": 100
   },
   {
    "description": "SAIBA(EngineNo)",
    "fieldname": "engine_no",
    "fieldtype": "Data",
    "label": "Engine No",
-   "length": 50
+   "length": 100
   },
   {
    "fieldname": "column_break_specs",
@@ -291,14 +291,14 @@
    "fieldname": "cc",
    "fieldtype": "Data",
    "label": "CC",
-   "length": 50
+   "length": 100
   },
   {
    "description": "SAIBA(Fuel)",
    "fieldname": "fuel",
    "fieldtype": "Data",
    "label": "Fuel",
-   "length": 50
+   "length": 100
   },
   {
    "fieldname": "vehicle_registration_section",
@@ -310,14 +310,14 @@
    "fieldname": "rto_code",
    "fieldtype": "Data",
    "label": "RTO Code",
-   "length": 50
+   "length": 100
   },
   {
    "description": "SAIBA(VehicleCategory)",
    "fieldname": "vehicle_category",
    "fieldtype": "Data",
    "label": "Vehicle Category",
-   "length": 50
+   "length": 100
   },
   {
    "fieldname": "column_break_registration",
@@ -326,9 +326,8 @@
   {
    "description": "SAIBA(PassengerGVW)",
    "fieldname": "passenger_gvw",
-   "fieldtype": "Data",
-   "label": "Passenger GVW",
-   "length": 50
+   "fieldtype": "Text",
+   "label": "Passenger GVW"
   },
   {
    "fieldname": "financial_details_tab",
@@ -449,11 +448,11 @@
    "label": "Customer ID"
   },
   {
-   "description": "Enter a 10-digit mobile number without spaces (e.g., 9330903897)",
+   "description": "Enter mobile number (up to 15 characters for international formats)",
    "fieldname": "mobile_number",
    "fieldtype": "Data",
    "label": "Mobile Number",
-   "length": 10
+   "length": 15
   },
   {
    "fieldname": "column_break_customer_info_2",
