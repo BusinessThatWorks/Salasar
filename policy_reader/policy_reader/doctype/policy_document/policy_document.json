@@ -125,15 +125,13 @@
    "fieldname": "motor_policy",
    "fieldtype": "Link",
    "label": "Motor Policy",
-   "options": "Motor Policy",
-   "read_only": 1
+   "options": "Motor Policy"
   },
   {
    "fieldname": "health_policy",
    "fieldtype": "Link",
    "label": "Health Policy",
-   "options": "Health Policy",
-   "read_only": 1
+   "options": "Health Policy"
   },
   {
    "fieldname": "extraction_results",
