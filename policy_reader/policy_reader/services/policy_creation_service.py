@@ -151,6 +151,10 @@ class PolicyCreationService:
         Convert field value to appropriate type based on DocType field definition
         """
         try:
+            # Handle null/empty/NA values first
+            if not value or str(value).strip().upper() in ['NA', 'N/A', 'NULL', 'NONE', '']:
+                return None
+            
             # Get field metadata
             meta = frappe.get_meta(doctype)
             field = meta.get_field(field_name)
@@ -160,28 +164,32 @@ class PolicyCreationService:
             
             # Convert based on field type
             if field.fieldtype == "Date":
-                return getdate(value) if value else None
+                return getdate(value)
             elif field.fieldtype == "Float":
-                return flt(value) if value else 0.0
+                return flt(value)
             elif field.fieldtype == "Int":
-                return cint(value) if value else 0
+                return cint(value)
             elif field.fieldtype == "Check":
-                return bool(value) if value else False
+                return bool(value)
             elif field.fieldtype == "Select":
                 return self.normalize_select_value(value, field.options)
             else:
-                return cstr(value) if value else ""
+                return cstr(value)
                 
         except Exception as e:
             frappe.logger().error(f"Error converting field {field_name}: {str(e)}")
-            return value
+            return None
     
     def normalize_select_value(self, value, options):
         """
         Normalize select field value to match available options
         """
         if not value or not options:
-            return value
+            return None
+        
+        # Handle NA values
+        if str(value).strip().upper() in ['NA', 'N/A', 'NULL', 'NONE', '']:
+            return None
         
         # Split options by newline
         available_options = [opt.strip() for opt in options.split('\n') if opt.strip()]
@@ -200,7 +208,8 @@ class PolicyCreationService:
             if value.lower() in option.lower() or option.lower() in value.lower():
                 return option
         
-        return value
+        # If no match found, return None to avoid validation errors
+        return None
     
     def get_field_mapping_for_policy_type(self, policy_type):
         """
