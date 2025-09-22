@@ -145,8 +145,8 @@ class ExtractionService:
                 content = response['content'][0]['text']
                 frappe.logger().info(f"Extracted content from response: {content[:200]}...")
                 
-                # Parse the JSON response from Claude
-                extracted_fields = frappe.parse_json(content)
+                # Parse the JSON response from Claude with improved extraction
+                extracted_fields = self._extract_json_from_text(content)
                 frappe.logger().info(f"Successfully parsed extracted fields: {len(extracted_fields)} fields")
                 
                 return {
@@ -164,7 +164,7 @@ class ExtractionService:
             
             elif isinstance(response, str):
                 frappe.logger().info(f"Received string response: {response[:200]}...")
-                extracted_fields = frappe.parse_json(response)
+                extracted_fields = self._extract_json_from_text(response)
                 return {
                     "success": True,
                     "extracted_fields": extracted_fields
@@ -214,13 +214,13 @@ class ExtractionService:
     def _build_fallback_prompt(self, extracted_text, policy_type, settings):
         """Build a simple fallback prompt if no specific prompt is available"""
         try:
-            truncation_limit = 50000  # Default text truncation limit
+            truncation_limit = 200000  # Default text truncation limit (200k chars)
         except:
-            truncation_limit = 50000
+            truncation_limit = 200000
         
         if policy_type.lower() == "motor":
             return f"""Extract motor insurance policy information as JSON:
-PolicyNumber, VehicleNumber, Make, Model, PolicyStartDate, PolicyExpiryDate, SumInsured, NetODPremium, TP Premium, GST, NCB
+PolicyNumber, VehicleNumber, ChasisNo, EngineNo, Make, Model, PolicyStartDate, PolicyExpiryDate, SumInsured, NetODPremium, TPPremium, GST, NCB
 
 EXTRACTION RULES:
 - Dates: DD/MM/YYYY format only
@@ -228,10 +228,14 @@ EXTRACTION RULES:
 - Numbers: Digits only (remove descriptive text)
 - Text: Clean format
 - Missing fields: null
+- Chassis/Engine: Extract from combined formats like "Chassis no./Engine no.: ABC123 DEF456"
+
+EXAMPLES:
+- "Chassis no./Engine no.: MATRC4GGA91 J57810/GG91.76864" → ChasisNo: "MATRC4GGA91", EngineNo: "J57810"
 
 Document: {extracted_text[:truncation_limit]}
 
-Return only valid JSON:"""
+RESPOND WITH VALID JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
         
         elif policy_type.lower() == "health":
             return f"""Extract health insurance policy information as JSON:
@@ -245,7 +249,7 @@ EXTRACTION RULES:
 
 Document: {extracted_text[:truncation_limit]}
 
-Return only valid JSON:"""
+RESPOND WITH VALID JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
         
         else:
             return f"""Extract {policy_type} insurance policy information as JSON.
@@ -253,7 +257,7 @@ Return clean, structured data with dates in DD/MM/YYYY format and numbers as dig
 
 Document: {extracted_text[:truncation_limit]}
 
-Return only valid JSON:"""
+RESPOND WITH VALID JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
     
     def get_field_mapping_for_policy_type(self, policy_type):
         """Get field mapping for a policy type (for backward compatibility)"""
@@ -262,4 +266,60 @@ Return only valid JSON:"""
             return settings.get_cached_field_mapping(policy_type)
         except Exception as e:
             frappe.log_error(f"Error getting field mapping for {policy_type}: {str(e)}", "Field Mapping Error")
+            return {}
+    
+    def _extract_json_from_text(self, text):
+        """Extract JSON from Claude's response, handling various formats"""
+        import re
+        import json
+        
+        frappe.logger().info(f"Attempting to extract JSON from text: {text[:500]}...")
+        
+        # First, try to parse the text directly as JSON
+        try:
+            return frappe.parse_json(text)
+        except:
+            pass
+        
+        # Look for JSON wrapped in code blocks
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if json_match:
+            try:
+                json_text = json_match.group(1)
+                frappe.logger().info(f"Found JSON in code block: {json_text[:200]}...")
+                return frappe.parse_json(json_text)
+            except Exception as e:
+                frappe.logger().warning(f"Failed to parse JSON from code block: {str(e)}")
+        
+        # Look for JSON object starting with { and ending with }
+        json_match = re.search(r'(\{.*\})', text, re.DOTALL)
+        if json_match:
+            try:
+                json_text = json_match.group(1)
+                frappe.logger().info(f"Found JSON object: {json_text[:200]}...")
+                return frappe.parse_json(json_text)
+            except Exception as e:
+                frappe.logger().warning(f"Failed to parse extracted JSON object: {str(e)}")
+        
+        # If all else fails, try to clean the text and parse
+        try:
+            # Remove common non-JSON prefixes/suffixes
+            cleaned_text = text.strip()
+            
+            # Remove any text before the first {
+            start_idx = cleaned_text.find('{')
+            if start_idx > 0:
+                cleaned_text = cleaned_text[start_idx:]
+            
+            # Remove any text after the last }
+            end_idx = cleaned_text.rfind('}')
+            if end_idx >= 0:
+                cleaned_text = cleaned_text[:end_idx + 1]
+            
+            frappe.logger().info(f"Cleaned text for JSON parsing: {cleaned_text[:200]}...")
+            return frappe.parse_json(cleaned_text)
+            
+        except Exception as e:
+            frappe.logger().error(f"All JSON extraction attempts failed: {str(e)}")
+            # Return empty dict as fallback
             return {}

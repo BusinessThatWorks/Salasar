@@ -252,7 +252,7 @@ class PolicyReaderSettings(Document):
 	def get_cached_extraction_prompt(self, policy_type, extracted_text):
 		"""Get cached extraction prompt or build dynamically if not cached"""
 		try:
-			truncation_limit = self.text_truncation_limit or 50000
+			truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 			if policy_type.lower() == "motor":
 				if self.motor_extraction_prompt:
 					# Replace the sample text with actual extracted text
@@ -395,7 +395,7 @@ class PolicyReaderSettings(Document):
 				prompt_sections.append("BUSINESS INFORMATION:\n" + "\n".join(business_fields))
 			
 			# Get truncation limit from settings
-			truncation_limit = self.text_truncation_limit or 50000
+			truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 			
 			# Build complete prompt
 			prompt = f"""Extract these motor insurance policy fields as JSON:
@@ -409,12 +409,14 @@ EXTRACTION RULES:
 - Text: Clean format (remove extra prefixes/suffixes)
 - Select: Match exact options (case-insensitive)
 - Missing fields: null
+- Chassis/Engine Numbers: Extract from combined formats
 
 EXAMPLES:
 - "FROM 15/03/2024" → "15/03/2024"
 - "Rs. 25,000/-" → "25000"
 - "5 seater capacity" → "5"
 - "DL-01-AA-1234 (Vehicle)" → "DL-01-AA-1234"
+- "Chassis no./Engine no.: MATRC4GGA91 J57810/GG91.76864" → ChasisNo: "MATRC4GGA91", EngineNo: "J57810"
 
 Document: {extracted_text[:truncation_limit]}
 
@@ -478,7 +480,7 @@ Return only valid JSON:"""
 				prompt_sections.append("FINANCIAL DETAILS:\n" + "\n".join(financial_fields))
 			
 			# Get truncation limit from settings
-			truncation_limit = self.text_truncation_limit or 50000
+			truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 			
 			# Build complete prompt
 			prompt = f"""Extract these health insurance policy fields as JSON:
@@ -522,7 +524,7 @@ Return only valid JSON:"""
 	
 	def _build_generic_extraction_prompt(self, policy_type, extracted_text):
 		"""Build generic extraction prompt for unknown policy types"""
-		truncation_limit = self.text_truncation_limit or 50000
+		truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 		return f"""Extract relevant information from this {policy_type} insurance policy document.
 		
 Return clean, structured data as JSON format.
@@ -536,7 +538,7 @@ Return only valid JSON:"""
 	
 	def _build_fallback_prompt(self, policy_type, extracted_text):
 		"""Build simple fallback prompt if dynamic generation fails"""
-		truncation_limit = self.text_truncation_limit or 50000
+		truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 		return f"""Extract information from this {policy_type} insurance policy document.
 		
 Document: {extracted_text[:truncation_limit]}

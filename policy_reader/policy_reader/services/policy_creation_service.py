@@ -87,32 +87,62 @@ class PolicyCreationService:
     
     def parse_nested_extracted_data(self, extracted_data):
         """
-        Parse the nested JSON structure dynamically without hardcoded categories
+        Parse the extracted JSON structure - handles both flat and nested formats
         """
         parsed_data = {}
         
-        for category_name, category_data in extracted_data.items():
-            try:
-                # Parse the string representation of dictionary
-                if isinstance(category_data, str):
-                    category_dict = ast.literal_eval(category_data)
-                elif isinstance(category_data, dict):
-                    category_dict = category_data
-                else:
-                    frappe.logger().warning(f"Unexpected data type for {category_name}: {type(category_data)}")
-                    continue
-                
-                # Add all fields from this category to parsed_data
-                for field_name, field_value in category_dict.items():
-                    parsed_data[field_name] = field_value
-                    frappe.logger().info(f"Parsed field: {field_name} = {field_value}")
-                    
-            except Exception as e:
-                frappe.logger().error(f"Error parsing category {category_name}: {str(e)}")
-                continue
+        frappe.logger().info(f"Parsing extracted data structure: {type(extracted_data)}")
+        frappe.logger().info(f"Sample data keys: {list(extracted_data.keys())[:10] if isinstance(extracted_data, dict) else 'Not a dict'}")
         
-        frappe.logger().info(f"Parsed {len(parsed_data)} fields from {len(extracted_data)} categories")
+        # Handle flat JSON structure (direct field->value mapping)
+        if self._is_flat_structure(extracted_data):
+            frappe.logger().info("Detected flat JSON structure")
+            for field_name, field_value in extracted_data.items():
+                parsed_data[field_name] = field_value
+                frappe.logger().info(f"Parsed flat field: {field_name} = {field_value}")
+        else:
+            # Handle nested JSON structure (category->fields mapping)
+            frappe.logger().info("Detected nested JSON structure")
+            for category_name, category_data in extracted_data.items():
+                try:
+                    # Parse the string representation of dictionary
+                    if isinstance(category_data, str):
+                        category_dict = ast.literal_eval(category_data)
+                    elif isinstance(category_data, dict):
+                        category_dict = category_data
+                    else:
+                        frappe.logger().warning(f"Unexpected data type for {category_name}: {type(category_data)}")
+                        continue
+                    
+                    # Add all fields from this category to parsed_data
+                    for field_name, field_value in category_dict.items():
+                        parsed_data[field_name] = field_value
+                        frappe.logger().info(f"Parsed nested field: {field_name} = {field_value}")
+                        
+                except Exception as e:
+                    frappe.logger().error(f"Error parsing category {category_name}: {str(e)}")
+                    continue
+        
+        frappe.logger().info(f"Parsed {len(parsed_data)} total fields")
         return parsed_data
+    
+    def _is_flat_structure(self, data):
+        """
+        Check if the extracted data is a flat structure (field->value) 
+        vs nested structure (category->fields)
+        """
+        if not isinstance(data, dict):
+            return False
+        
+        # Sample a few values to determine structure
+        sample_values = list(data.values())[:5]
+        
+        # If most values are strings, numbers, or None, it's likely flat
+        simple_types = (str, int, float, type(None), bool)
+        simple_count = sum(1 for v in sample_values if isinstance(v, simple_types))
+        
+        # If 80% or more are simple types, consider it flat
+        return simple_count >= len(sample_values) * 0.8
     
     def map_fields_dynamically(self, parsed_data, field_mapping, policy_record, policy_type):
         """
@@ -121,25 +151,43 @@ class PolicyCreationService:
         mapped_count = 0
         unmapped_fields = []
         
+        frappe.logger().info(f"=== FIELD MAPPING DEBUG ===")
+        frappe.logger().info(f"Parsed data keys: {list(parsed_data.keys())}")
+        frappe.logger().info(f"Field mapping keys: {list(field_mapping.keys())}")
+        frappe.logger().info(f"Policy record doctype: {policy_record.doctype}")
+        
         for extracted_field_name, policy_field_name in field_mapping.items():
             value = parsed_data.get(extracted_field_name)
+            frappe.logger().info(f"Checking field '{extracted_field_name}' -> '{policy_field_name}': value = {value}")
+            
             if value is not None and str(value).strip():
                 try:
                     # Convert value to appropriate type
                     converted_value = self.convert_field_value(policy_field_name, value, policy_record.doctype)
+                    frappe.logger().info(f"Converted value for {policy_field_name}: {converted_value} (type: {type(converted_value)})")
+                    
                     if converted_value is not None:
                         setattr(policy_record, policy_field_name, converted_value)
                         mapped_count += 1
-                        frappe.logger().info(f"Mapped {extracted_field_name} -> {policy_field_name}: {converted_value}")
+                        frappe.logger().info(f"✓ Mapped {extracted_field_name} -> {policy_field_name}: {converted_value}")
+                    else:
+                        frappe.logger().warning(f"✗ Converted value is None for {extracted_field_name}")
+                        unmapped_fields.append(extracted_field_name)
                 except Exception as e:
-                    frappe.logger().error(f"Error mapping {extracted_field_name}: {str(e)}")
+                    frappe.logger().error(f"✗ Error mapping {extracted_field_name}: {str(e)}")
                     unmapped_fields.append(extracted_field_name)
             else:
+                frappe.logger().info(f"✗ Field {extracted_field_name} has no value or empty value")
                 unmapped_fields.append(extracted_field_name)
         
-        frappe.logger().info(f"Field mapping results: {mapped_count} mapped, {len(unmapped_fields)} unmapped")
-        if unmapped_fields:
-            frappe.logger().info(f"Unmapped fields: {unmapped_fields}")
+        # Check for extracted fields that don't have mappings
+        unmapped_extracted_fields = [key for key in parsed_data.keys() if key not in field_mapping]
+        if unmapped_extracted_fields:
+            frappe.logger().info(f"Extracted fields without mappings: {unmapped_extracted_fields}")
+        
+        frappe.logger().info(f"=== FIELD MAPPING SUMMARY ===")
+        frappe.logger().info(f"Mapped: {mapped_count}, Unmapped: {len(unmapped_fields)}")
+        frappe.logger().info(f"Unmapped fields: {unmapped_fields}")
         
         return {
             "mapped_count": mapped_count,
