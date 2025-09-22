@@ -39,18 +39,6 @@ class PolicyReaderSettings(Document):
 	
 	def validate_numeric_fields(self):
 		"""Validate numeric field ranges"""
-		if self.max_pages:
-			if not (1 <= self.max_pages <= 10):
-				frappe.throw("Max Pages must be between 1 and 10")
-		
-		if self.confidence_threshold:
-			if not (0.1 <= self.confidence_threshold <= 1.0):
-				frappe.throw("Confidence Threshold must be between 0.1 and 1.0")
-		
-		if self.text_truncation_limit:
-			if not (1000 <= self.text_truncation_limit <= 100000):
-				frappe.throw("Text Truncation Limit must be between 1,000 and 100,000 characters")
-		
 		if self.timeout:
 			if not (60 <= self.timeout <= 600):
 				frappe.throw("Timeout must be between 60 and 600 seconds")

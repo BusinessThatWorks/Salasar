@@ -99,7 +99,7 @@ class ExtractionService:
             }
             
             payload = {
-                'model': 'claude-3-haiku-20240307' if settings.fast_mode else 'claude-3-sonnet-20240229',
+                'model': getattr(settings, 'claude_model', 'claude-sonnet-4-20250514'),
                 'max_tokens': 4000,
                 'messages': [
                     {
@@ -214,7 +214,7 @@ class ExtractionService:
     def _build_fallback_prompt(self, extracted_text, policy_type, settings):
         """Build a simple fallback prompt if no specific prompt is available"""
         try:
-            truncation_limit = settings.text_truncation_limit or 50000
+            truncation_limit = 50000  # Default text truncation limit
         except:
             truncation_limit = 50000
         

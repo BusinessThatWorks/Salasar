@@ -52,10 +52,7 @@ class PolicyDocument(Document):
             # Return object with default values if settings don't exist
             class DefaultSettings:
                 anthropic_api_key = None
-                fast_mode = True
-                max_pages = 3
-                confidence_threshold = 0.3
-                enable_logging = True
+                claude_model = "claude-sonnet-4-20250514"
                 timeout = 180
                 queue_type = "short"
             return DefaultSettings()

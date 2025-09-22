@@ -7,6 +7,7 @@
  "field_order": [
   "api_configuration_section",
   "anthropic_api_key",
+  "claude_model",
   "runpod_configuration_section",
   "runpod_pod_id",
   "runpod_port",
@@ -44,6 +45,14 @@
    "fieldname": "anthropic_api_key",
    "fieldtype": "Data",
    "label": "Anthropic API Key"
+  },
+  {
+   "default": "claude-sonnet-4-20250514",
+   "description": "Claude model to use for field extraction",
+   "fieldname": "claude_model",
+   "fieldtype": "Select",
+   "label": "Claude Model",
+   "options": "claude-sonnet-4-20250514"
   },
   {
    "fieldname": "runpod_configuration_section",
