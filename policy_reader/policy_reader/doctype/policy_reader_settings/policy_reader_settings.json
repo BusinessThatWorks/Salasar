@@ -17,12 +17,6 @@
   "runpod_response_time",
   "runpod_health_details",
   "test_runpod_connection",
-  "processing_settings_section",
-  "fast_mode",
-  "max_pages",
-  "confidence_threshold",
-  "enable_logging",
-  "text_truncation_limit",
   "field_mapping_section",
   "motor_policy_fields",
   "health_policy_fields",
@@ -117,46 +111,6 @@
    "fieldname": "test_runpod_connection",
    "fieldtype": "Button",
    "label": "Test RunPod Connection"
-  },
-  {
-   "fieldname": "processing_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Processing Settings"
-  },
-  {
-   "default": "1",
-   "description": "Enable fast processing mode for quicker document analysis",
-   "fieldname": "fast_mode",
-   "fieldtype": "Check",
-   "label": "Fast Mode"
-  },
-  {
-   "default": "3",
-   "description": "Maximum number of pages to process per document (1-10)",
-   "fieldname": "max_pages",
-   "fieldtype": "Int",
-   "label": "Max Pages"
-  },
-  {
-   "default": "0.3",
-   "description": "Processing confidence threshold (0.1-1.0). Lower values extract more fields but may include less accurate data",
-   "fieldname": "confidence_threshold",
-   "fieldtype": "Float",
-   "label": "Confidence Threshold"
-  },
-  {
-   "default": "1",
-   "description": "Enable detailed logging for processing operations",
-   "fieldname": "enable_logging",
-   "fieldtype": "Check",
-   "label": "Enable Logging"
-  },
-  {
-   "default": "50000",
-   "description": "Maximum characters to include in extraction prompts (1000-100000). Increase for longer documents.",
-   "fieldname": "text_truncation_limit",
-   "fieldtype": "Int",
-   "label": "Text Truncation Limit"
   },
   {
    "fieldname": "field_mapping_section",
