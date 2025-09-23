@@ -105,19 +105,41 @@ class PolicyCreationService:
             frappe.logger().info("Detected nested JSON structure")
             for category_name, category_data in extracted_data.items():
                 try:
-                    # Parse the string representation of dictionary
+                    category_dict = None
+                    
+                    # Multiple parsing strategies for robustness
                     if isinstance(category_data, str):
-                        category_dict = ast.literal_eval(category_data)
+                        # Strategy 1: Try ast.literal_eval (handles {'key': 'value'} format)
+                        try:
+                            category_dict = ast.literal_eval(category_data)
+                            frappe.logger().info(f"Parsed {category_name} using ast.literal_eval")
+                        except:
+                            # Strategy 2: Try json.loads (handles {"key": "value"} format)
+                            try:
+                                category_dict = frappe.parse_json(category_data)
+                                frappe.logger().info(f"Parsed {category_name} using json.loads")
+                            except:
+                                # Strategy 3: Try cleaning and parsing again
+                                try:
+                                    cleaned = category_data.strip().strip("'\"")
+                                    category_dict = ast.literal_eval(cleaned)
+                                    frappe.logger().info(f"Parsed {category_name} after cleaning")
+                                except:
+                                    frappe.logger().error(f"Failed to parse {category_name}: {category_data[:100]}...")
+                                    continue
                     elif isinstance(category_data, dict):
                         category_dict = category_data
+                        frappe.logger().info(f"Category {category_name} already a dict")
                     else:
                         frappe.logger().warning(f"Unexpected data type for {category_name}: {type(category_data)}")
                         continue
                     
                     # Add all fields from this category to parsed_data
-                    for field_name, field_value in category_dict.items():
-                        parsed_data[field_name] = field_value
-                        frappe.logger().info(f"Parsed nested field: {field_name} = {field_value}")
+                    if category_dict:
+                        for field_name, field_value in category_dict.items():
+                            parsed_data[field_name] = field_value
+                            frappe.logger().info(f"Parsed nested field: {field_name} = {field_value}")
+                        frappe.logger().info(f"Successfully flattened {len(category_dict)} fields from {category_name}")
                         
                 except Exception as e:
                     frappe.logger().error(f"Error parsing category {category_name}: {str(e)}")
@@ -137,12 +159,30 @@ class PolicyCreationService:
         # Sample a few values to determine structure
         sample_values = list(data.values())[:5]
         
-        # If most values are strings, numbers, or None, it's likely flat
+        # Check for string-encoded dictionaries (nested structure indicators)
+        nested_indicators = 0
+        for value in sample_values:
+            if isinstance(value, str):
+                # Check if it looks like a serialized dictionary
+                stripped = value.strip()
+                if (stripped.startswith('{') and stripped.endswith('}')) or \
+                   (stripped.startswith("'{") and stripped.endswith("'}")) or \
+                   (stripped.startswith('"{') and stripped.endswith('}"')):
+                    nested_indicators += 1
+        
+        # If we have nested indicators, it's definitely nested
+        if nested_indicators > 0:
+            frappe.logger().info(f"Detected nested structure: {nested_indicators} string-encoded dictionaries found")
+            return False
+        
+        # If most values are simple types, it's likely flat
         simple_types = (str, int, float, type(None), bool)
         simple_count = sum(1 for v in sample_values if isinstance(v, simple_types))
         
         # If 80% or more are simple types, consider it flat
-        return simple_count >= len(sample_values) * 0.8
+        is_flat = simple_count >= len(sample_values) * 0.8
+        frappe.logger().info(f"Structure detection: {simple_count}/{len(sample_values)} simple types, is_flat: {is_flat}")
+        return is_flat
     
     def map_fields_dynamically(self, parsed_data, field_mapping, policy_record, policy_type):
         """

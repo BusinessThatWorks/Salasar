@@ -398,7 +398,7 @@ class PolicyReaderSettings(Document):
 			truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 			
 			# Build complete prompt
-			prompt = f"""Extract these motor insurance policy fields as JSON:
+			prompt = f"""Extract these motor insurance policy fields as FLAT JSON (field_name: value format):
 
 {chr(10).join(prompt_sections)}
 
@@ -418,9 +418,21 @@ EXAMPLES:
 - "DL-01-AA-1234 (Vehicle)" → "DL-01-AA-1234"
 - "Chassis no./Engine no.: MATRC4GGA91 J57810/GG91.76864" → ChasisNo: "MATRC4GGA91", EngineNo: "J57810"
 
+IMPORTANT: Return ONE FLAT JSON object with all fields at the same level. 
+DO NOT group fields by categories. DO NOT create nested structures.
+
+REQUIRED FORMAT:
+{{
+  "policy_no": "value",
+  "chasis_no": "value", 
+  "engine_no": "value",
+  "make": "value",
+  ...all fields in one flat structure
+}}
+
 Document: {extracted_text[:truncation_limit]}
 
-Return only valid JSON:"""
+RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
 			
 			return prompt
 			
@@ -483,7 +495,7 @@ Return only valid JSON:"""
 			truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
 			
 			# Build complete prompt
-			prompt = f"""Extract these health insurance policy fields as JSON:
+			prompt = f"""Extract these health insurance policy fields as FLAT JSON (field_name: value format):
 
 {chr(10).join(prompt_sections)}
 
@@ -493,9 +505,21 @@ EXTRACTION RULES:
 - Text: Clean format (core information only)
 - Missing fields: null
 
+IMPORTANT: Return ONE FLAT JSON object with all fields at the same level. 
+DO NOT group fields by categories. DO NOT create nested structures.
+
+REQUIRED FORMAT:
+{{
+  "policy_no": "value",
+  "insured_name": "value", 
+  "premium": "value",
+  "sum_insured": "value",
+  ...all fields in one flat structure
+}}
+
 Document: {extracted_text[:truncation_limit]}
 
-Return only valid JSON:"""
+RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
 			
 			return prompt
 			
@@ -552,50 +576,57 @@ Return data as valid JSON:"""
 		# Common field name variations based on fieldname and label patterns
 		field_aliases = {
 			# Policy fields
-			'policy_no': ['Policy Number', 'PolicyNumber', 'Policy Num', 'PolicyNo', 'policyNo', 'policyNumber', 'policy_no'],
-			'policy_type': ['PolicyType', 'policyType', 'policy_type'],
-			'policy_issuance_date': ['Policy Issuance Date', 'Issuance Date', 'PolicyIssuanceDate', 'policyIssuanceDate', 'policy_issuance_date'],
-			'policy_start_date': ['Policy Start Date', 'Start Date', 'PolicyStartDate', 'From Date', 'policyStartDate', 'policy_start_date'],
-			'policy_expiry_date': ['Policy Expiry Date', 'Expiry Date', 'PolicyExpiryDate', 'To Date', 'End Date', 'policyExpiryDate', 'policy_expiry_date'],
-			'policy_biz_type': ['PolicyBiz Type', 'policyBizType', 'policyBizType'],
-			'new_renewal': ['New/Renewal', 'newRenewal'],
+			'policy_no': ['Policy Number', 'PolicyNumber', 'Policy Num', 'PolicyNo', 'policyNo', 'policyNumber', 'policy_no', 'Policy_No'],
+			'policy_type': ['PolicyType', 'policyType', 'policy_type', 'Policy_Type'],
+			'policy_issuance_date': ['Policy Issuance Date', 'Issuance Date', 'PolicyIssuanceDate', 'policyIssuanceDate', 'policy_issuance_date', 'Policy_Issuance_Date'],
+			'policy_start_date': ['Policy Start Date', 'Start Date', 'PolicyStartDate', 'From Date', 'policyStartDate', 'policy_start_date', 'Policy_Start_Date'],
+			'policy_expiry_date': ['Policy Expiry Date', 'Expiry Date', 'PolicyExpiryDate', 'To Date', 'End Date', 'policyExpiryDate', 'policy_expiry_date', 'Policy_Expiry_Date'],
+			'policy_biz_type': ['PolicyBiz Type', 'policyBizType', 'policyBizType', 'PolicyBiz_Type'],
+			'new_renewal': ['New/Renewal', 'newRenewal', 'New_Renewal'],
 			
 			# Vehicle fields
-			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No', 'vehicleNo', 'vehicleNumber'],
+			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No', 'vehicleNo', 'vehicleNumber', 'Vehicle_No'],
 			'make': ['Make', 'Vehicle Make', 'make'],
 			'model': ['Model', 'Vehicle Model', 'model'],
 			'variant': ['Variant', 'Vehicle Variant', 'variant'],
-			'year_of_man': ['Year of Manufacture', 'Manufacturing Year', 'YearOfManufacture', 'Year', 'Model Year', 'yearOfManufacture'],
+			'year_of_man': ['Year of Manufacture', 'Manufacturing Year', 'YearOfManufacture', 'Year', 'Model Year', 'yearOfManufacture', 'Year_of_Manufacture'],
 			
 			# Engine/Chassis fields (handle the typo in DocType)
-			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No', 'chasisNo', 'chassisNo', 'ChasisNo', 'chasis_no'],
-			'engine_no': ['Engine Number', 'EngineNumber', 'Engine No', 'EngineNo', 'engineNo', 'engine_no'],
+			'chasis_no': ['Chassis Number', 'ChassisNumber', 'Chasis Number', 'ChasisNumber', 'Chassis No', 'Chasis No', 'chasisNo', 'chassisNo', 'ChasisNo', 'chasis_no', 'Chasis_No'],
+			'engine_no': ['Engine Number', 'EngineNumber', 'Engine No', 'EngineNo', 'engineNo', 'engine_no', 'Engine_No'],
 			'cc': ['CC', 'Engine Capacity', 'Cubic Capacity', 'cc'],
 			'fuel': ['Fuel', 'Fuel Type', 'FuelType', 'fuel'],
 			
 			# Financial fields
-			'sum_insured': ['Sum Insured', 'SumInsured', 'Insured Amount', 'Coverage Amount', 'sumInsured', 'sum_insured'],
-			'net_od_premium': ['Net Premium', 'NetPremium', 'Net OD Premium', 'NetODPremium', 'OD Premium', 'netOdPremium', 'net_od_premium'],
-			'tp_premium': ['TP Premium', 'TPPremium', 'Third Party Premium', 'tpPremium', 'tp_premium'],
+			'sum_insured': ['Sum Insured', 'SumInsured', 'Insured Amount', 'Coverage Amount', 'sumInsured', 'sum_insured', 'Sum_Insured'],
+			'net_od_premium': ['Net Premium', 'NetPremium', 'Net OD Premium', 'NetODPremium', 'OD Premium', 'netOdPremium', 'net_od_premium', 'Net_OD_Premium'],
+			'tp_premium': ['TP Premium', 'TPPremium', 'Third Party Premium', 'tpPremium', 'tp_premium', 'TP_Premium'],
 			'gst': ['GST', 'Tax', 'Service Tax', 'gst'],
 			'ncb': ['NCB', 'No Claim Bonus', 'ncb'],
 			
 			# Registration fields
-			'rto_code': ['RTO Code', 'RTOCode', 'RTO', 'rtoCode'],
-			'vehicle_category': ['Vehicle Category', 'VehicleCategory', 'Vehicle Class', 'Category', 'vehicleCategory'],
-			'passenger_gvw': ['Passenger GVW', 'PassengerGVW', 'GVW', 'passengerGvw'],
+			'rto_code': ['RTO Code', 'RTOCode', 'RTO', 'rtoCode', 'RTO_Code'],
+			'vehicle_category': ['Vehicle Category', 'VehicleCategory', 'Vehicle Class', 'Category', 'vehicleCategory', 'Vehicle_Category'],
+			'passenger_gvw': ['Passenger GVW', 'PassengerGVW', 'GVW', 'passengerGvw', 'Passenger_GVW'],
 			
 			# Business/Customer fields (from your extracted data)
-			'customer_code': ['Customer Code', 'CustomerCode', 'customerCode', 'customer_code'],
-			'insurer_branch_code': ['Insurer Branch Code', 'InsurerBranchCode', 'insurerBranchCode', 'insurer_branch_code'],
-			'payment_mode': ['Payment Mode', 'PaymentMode', 'paymentMode', 'payment_mode'],
-			'bank_name': ['Bank Name', 'BankName', 'bankName', 'bank_name'],
-			'payment_transaction_no': ['Payment Transaction No', 'PaymentTransactionNo', 'paymentTransactionNo', 'payment_transaction_no'],
-			'branch_code': ['Branch Code', 'BranchCode', 'branchCode', 'branch_code'],
-			'customer_group': ['Customer Group', 'CustomerGroup', 'customerGroup', 'customer_group'],
-			'customer_title': ['Customer Title', 'CustomerTitle', 'customerTitle', 'customer_title'],
-			'customer_name': ['Customer Name', 'CustomerName', 'customerName', 'customer_name'],
-			'customer_id': ['Customer ID', 'CustomerID', 'customerId'],
+			'customer_code': ['Customer Code', 'CustomerCode', 'customerCode', 'customer_code', 'Customer_Code'],
+			'insurer_branch_code': ['Insurer Branch Code', 'InsurerBranchCode', 'insurerBranchCode', 'insurer_branch_code', 'Insurer_Branch_Code'],
+			'payment_mode': ['Payment Mode', 'PaymentMode', 'paymentMode', 'payment_mode', 'Payment_Mode'],
+			'bank_name': ['Bank Name', 'BankName', 'bankName', 'bank_name', 'Bank_Name'],
+			'payment_transaction_no': ['Payment Transaction No', 'PaymentTransactionNo', 'paymentTransactionNo', 'payment_transaction_no', 'Payment_Transaction_No'],
+			'branch_code': ['Branch Code', 'BranchCode', 'branchCode', 'branch_code', 'Branch_Code'],
+			'customer_group': ['Customer Group', 'CustomerGroup', 'customerGroup', 'customer_group', 'Customer_Group'],
+			'customer_title': ['Customer Title', 'CustomerTitle', 'customerTitle', 'customer_title', 'Customer_Title'],
+			'customer_name': ['Customer Name', 'CustomerName', 'customerName', 'customer_name', 'Customer_Name'],
+			'customer_id': ['Customer ID', 'CustomerID', 'customerId', 'Customer_ID'],
+			'mobile_no': ['Mobile Number', 'MobileNumber', 'Mobile No', 'MobileNo', 'mobile_no', 'Mobile_Number'],
+			'email_id': ['Email ID', 'EmailID', 'Email', 'email_id', 'Email_ID'],
+			'dob_doi': ['DOB/DOI', 'Date of Birth', 'DateOfBirth', 'DOB', 'dob_doi', 'DOB_DOI'],
+			'gender': ['Gender', 'gender'],
+			'cse_id': ['CSE ID', 'CSEID', 'cse_id', 'CSE_ID'],
+			'rm_id': ['RM ID', 'RMID', 'rm_id', 'RM_ID'],
+			'old_control_number': ['Old Control Number', 'OldControlNumber', 'old_control_number', 'Old_Control_Number'],
 			
 			# Health policy fields
 			'policy_number': ['Policy Number', 'PolicyNumber', 'Policy No'],

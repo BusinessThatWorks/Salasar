@@ -219,7 +219,7 @@ class ExtractionService:
             truncation_limit = 200000
         
         if policy_type.lower() == "motor":
-            return f"""Extract motor insurance policy information as JSON:
+            return f"""Extract motor insurance policy information as FLAT JSON:
 PolicyNumber, VehicleNumber, ChasisNo, EngineNo, Make, Model, PolicyStartDate, PolicyExpiryDate, SumInsured, NetODPremium, TPPremium, GST, NCB
 
 EXTRACTION RULES:
@@ -233,12 +233,15 @@ EXTRACTION RULES:
 EXAMPLES:
 - "Chassis no./Engine no.: MATRC4GGA91 J57810/GG91.76864" → ChasisNo: "MATRC4GGA91", EngineNo: "J57810"
 
+IMPORTANT: Return ONE FLAT JSON object with all fields at the same level.
+DO NOT group fields by categories. DO NOT create nested structures.
+
 Document: {extracted_text[:truncation_limit]}
 
-RESPOND WITH VALID JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
+RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
         
         elif policy_type.lower() == "health":
-            return f"""Extract health insurance policy information as JSON:
+            return f"""Extract health insurance policy information as FLAT JSON:
 PolicyNumber, InsuredName, PolicyStartDate, PolicyExpiryDate, SumInsured, NetPremium, CustomerCode, PolicyPeriod
 
 EXTRACTION RULES:
@@ -247,17 +250,23 @@ EXTRACTION RULES:
 - Text: Clean format
 - Missing fields: null
 
+IMPORTANT: Return ONE FLAT JSON object with all fields at the same level.
+DO NOT group fields by categories. DO NOT create nested structures.
+
 Document: {extracted_text[:truncation_limit]}
 
-RESPOND WITH VALID JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
+RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
         
         else:
-            return f"""Extract {policy_type} insurance policy information as JSON.
+            return f"""Extract {policy_type} insurance policy information as FLAT JSON.
 Return clean, structured data with dates in DD/MM/YYYY format and numbers as digits only.
+
+IMPORTANT: Return ONE FLAT JSON object with all fields at the same level.
+DO NOT group fields by categories. DO NOT create nested structures.
 
 Document: {extracted_text[:truncation_limit]}
 
-RESPOND WITH VALID JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
+RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
     
     def get_field_mapping_for_policy_type(self, policy_type):
         """Get field mapping for a policy type (for backward compatibility)"""
