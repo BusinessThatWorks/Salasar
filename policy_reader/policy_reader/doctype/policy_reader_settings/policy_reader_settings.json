@@ -127,18 +127,16 @@
    "label": "Field Mappings Cache"
   },
   {
-   "description": "Cached field mappings for Motor Policy DocType (label \u2192 fieldname)",
+   "description": "Field mappings for Motor Policy extraction (alias \u2192 fieldname). You can edit this JSON directly to customize field mapping.",
    "fieldname": "motor_policy_fields",
    "fieldtype": "JSON",
-   "label": "Motor Policy Fields",
-   "read_only": 1
+   "label": "Motor Policy Fields"
   },
   {
-   "description": "Cached field mappings for Health Policy DocType (label \u2192 fieldname)",
+   "description": "Field mappings for Health Policy extraction (alias \u2192 fieldname). You can edit this JSON directly to customize field mapping.",
    "fieldname": "health_policy_fields",
    "fieldtype": "JSON",
-   "label": "Health Policy Fields",
-   "read_only": 1
+   "label": "Health Policy Fields"
   },
   {
    "fieldname": "column_break_field_mapping",
