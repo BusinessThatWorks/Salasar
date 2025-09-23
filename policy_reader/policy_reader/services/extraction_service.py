@@ -49,33 +49,25 @@ class ExtractionService:
             }
     
     def _get_extraction_prompt(self, extracted_text, policy_type, settings):
-        """Get the appropriate extraction prompt from Policy Reader Settings"""
+        """Get the extraction prompt: always build from current mapping"""
         try:
-            # Get Policy Reader Settings
-            policy_reader_settings = frappe.get_single("Policy Reader Settings")
+            # Prefer the settings instance passed in by caller
+            policy_reader_settings = settings or frappe.get_single("Policy Reader Settings")
             
-            # Try to get cached prompt first
-            cached_prompt = policy_reader_settings.get_cached_extraction_prompt(policy_type, extracted_text)
-            if cached_prompt:
-                frappe.logger().info(f"Using cached extraction prompt for {policy_type}")
-                self._last_used_prompt = cached_prompt
-                return cached_prompt
+            # Always build prompt from mapping
+            prompt = policy_reader_settings.build_prompt_from_mapping(policy_type, extracted_text)
+            if prompt:
+                frappe.logger().info(f"Using mapping-driven extraction prompt for {policy_type}")
+                self._last_used_prompt = prompt
+                return prompt
             
-            # Build dynamic prompt if not cached
-            dynamic_prompt = policy_reader_settings.build_dynamic_extraction_prompt(policy_type, extracted_text)
-            if dynamic_prompt:
-                frappe.logger().info(f"Using dynamic extraction prompt for {policy_type}")
-                self._last_used_prompt = dynamic_prompt
-                return dynamic_prompt
-            
-            # Fallback to simple prompt
-            frappe.logger().warning(f"No specific prompt found for {policy_type}, using fallback")
+            # Fallback to simple prompt if builder returned empty
+            frappe.logger().warning(f"Mapping-driven prompt empty for {policy_type}, using fallback")
             fallback_prompt = self._build_fallback_prompt(extracted_text, policy_type, settings)
             self._last_used_prompt = fallback_prompt
             return fallback_prompt
-            
         except Exception as e:
-            frappe.log_error(f"Error getting extraction prompt: {str(e)}", "Prompt Retrieval Error")
+            frappe.log_error(f"Error building mapping-driven prompt: {str(e)}", "Prompt Retrieval Error")
             fallback_prompt = self._build_fallback_prompt(extracted_text, policy_type, settings)
             self._last_used_prompt = fallback_prompt
             return fallback_prompt

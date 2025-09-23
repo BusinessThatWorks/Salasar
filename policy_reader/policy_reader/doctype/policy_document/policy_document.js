@@ -21,6 +21,15 @@ frappe.ui.form.on("Policy Document", {
 				},
 				__("Actions")
 			);
+			
+			// Add Process with AI button
+			frm.add_custom_button(
+				__("Process with AI"),
+				function () {
+					frm.trigger("start_ai_processing");
+				},
+				__("Actions")
+			);
 		}
 
 		// Add AI-Extract button for completed documents
@@ -93,8 +102,20 @@ frappe.ui.form.on("Policy Document", {
 
 		// Show processing method if available (but don't duplicate with health status)
 		if (frm.doc.processing_method && !$(".runpod-health-status").length) {
-			let method_text = frm.doc.processing_method === "runpod" ? "RunPod API" : "Local OCR";
-			let method_color = frm.doc.processing_method === "runpod" ? "green" : "blue";
+			let method_text, method_color;
+			switch(frm.doc.processing_method) {
+				case "runpod":
+					method_text = "RunPod API";
+					method_color = "green";
+					break;
+				case "claude_vision":
+					method_text = "Claude AI (Vision)";
+					method_color = "purple";
+					break;
+				default:
+					method_text = "Local OCR";
+					method_color = "blue";
+			}
 			frm.dashboard.add_comment(
 				__("Processing Method: {0}", [method_text]),
 				method_color,
@@ -153,13 +174,23 @@ frappe.ui.form.on("Policy Document", {
 		// Set up real-time event listener for policy processing completion
 		frappe.realtime.on("policy_processing_complete", function (message) {
 			if (message.doc_name === frm.doc.name) {
-				// Hide processing indicator
+				// Hide both regular and AI processing indicators
 				frm.trigger("hide_processing_indicator");
+				frm.trigger("hide_ai_processing_indicator");
 
 				// Show completion notification
 				if (message.status === "Completed") {
-					let method_text =
-						message.processing_method === "runpod" ? "RunPod API" : "Local OCR";
+					let method_text;
+					switch(message.processing_method) {
+						case "runpod":
+							method_text = "RunPod API";
+							break;
+						case "claude_vision":
+							method_text = "Claude AI (Vision)";
+							break;
+						default:
+							method_text = "Local OCR";
+					}
 					frappe.show_alert({
 						message: __(
 							"Policy processing completed successfully via {0}! Processing time: {1}s",
@@ -210,6 +241,90 @@ frappe.ui.form.on("Policy Document", {
 					indicator: "red",
 				});
 			});
+	},
+
+	start_ai_processing: function (frm) {
+		// Show confirmation dialog
+		frappe.confirm(
+			__('Process this policy document directly with Claude AI (Vision)? This bypasses OCR and sends the PDF directly to Claude.'),
+			function() {
+				// Show processing indicator
+				frm.trigger("show_ai_processing_indicator");
+				
+				// Call the new AI processing method
+				frm.call("process_with_ai")
+					.then((r) => {
+						frm.trigger("hide_ai_processing_indicator");
+						
+						if (r.message && r.message.success) {
+							frappe.show_alert({
+								message: __("AI processing completed successfully! Processing time: {0}s", [r.message.processing_time]),
+								indicator: "green",
+							});
+							frm.reload_doc();
+						} else if (r.message) {
+							frappe.msgprint({
+								title: __("AI Processing Failed"),
+								message: r.message.message || __("Unknown error occurred"),
+								indicator: "red",
+							});
+						}
+					})
+					.catch((err) => {
+						frm.trigger("hide_ai_processing_indicator");
+						frappe.msgprint({
+							title: __("AI Processing Error"),
+							message: __("Failed to start AI processing: {0}", [err.message]),
+							indicator: "red",
+						});
+					});
+			}
+		);
+	},
+
+	show_ai_processing_indicator: function (frm) {
+		// Remove any existing indicators first
+		frm.trigger("cleanup_all_processing_indicators");
+
+		// Add visual AI processing indicator with dismiss button
+		frm.processing_indicator = $(
+			'<div class="processing-indicator" style="position: fixed; top: 60px; right: 20px; z-index: 1050; background: #9c27b0; color: white; padding: 10px 15px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); max-width: 300px;">' +
+				'<i class="fa fa-spin fa-brain"></i> Processing with Claude AI...' +
+				'<button class="btn btn-sm" style="background: none; border: none; color: white; margin-left: 10px; padding: 0 5px; font-size: 16px;" title="Dismiss notification">&times;</button>' +
+				"</div>"
+		).appendTo("body");
+
+		// Add click handler for dismiss button
+		frm.processing_indicator.find("button").on("click", function () {
+			frm.trigger("hide_ai_processing_indicator");
+		});
+
+		// Auto-hide after 5 minutes if no completion event
+		frm.processing_timeout = setTimeout(function () {
+			if (frm.processing_indicator) {
+				frm.trigger("hide_ai_processing_indicator");
+				frappe.show_alert({
+					message: __(
+						"AI processing indicator auto-hidden. Check document status for updates."
+					),
+					indicator: "orange",
+				});
+			}
+		}, 300000); // 5 minutes
+	},
+
+	hide_ai_processing_indicator: function (frm) {
+		// Remove AI processing indicator
+		if (frm.processing_indicator) {
+			frm.processing_indicator.remove();
+			frm.processing_indicator = null;
+		}
+
+		// Clear timeout if exists
+		if (frm.processing_timeout) {
+			clearTimeout(frm.processing_timeout);
+			frm.processing_timeout = null;
+		}
 	},
 
 	show_processing_indicator: function (frm) {

@@ -484,6 +484,430 @@ class PolicyDocument(Document):
                 "can_create": False,
                 "error": str(e)
             }
+    
+    @frappe.whitelist()
+    def process_with_ai(self):
+        """
+        Process the policy document directly with Claude AI (no OCR step)
+        Sends PDF directly to Claude with vision capabilities
+        """
+        if not self.policy_file:
+            frappe.throw("No file attached")
+        
+        if not self.policy_type:
+            frappe.throw("Policy type is required")
+        
+        try:
+            # Update status
+            self.status = "Processing"
+            self.processing_method = "claude_vision"
+            self.save()
+            frappe.db.commit()
+            
+            # Get settings for API access
+            settings = self.get_policy_reader_settings()
+            
+            # Get API key
+            api_key = (settings.anthropic_api_key or 
+                      frappe.conf.get('anthropic_api_key') or 
+                      os.environ.get('ANTHROPIC_API_KEY'))
+            
+            if not api_key:
+                frappe.throw("ANTHROPIC_API_KEY not configured. Please set it in Policy Reader Settings or add 'anthropic_api_key' to site_config.json or set ANTHROPIC_API_KEY environment variable")
+            
+            # Get file path and encode as base64
+            file_path = self.get_full_file_path()
+            
+            # Process with Claude Vision API
+            start_time = time.time()
+            result = self.process_with_claude_vision(file_path, api_key, settings)
+            end_time = time.time()
+            processing_time = round(end_time - start_time, 2)
+            
+            # Update document with results
+            if result.get("success"):
+                self.status = "Completed"
+                self.extracted_fields = frappe.as_json(result.get("extracted_fields", {}))
+                self.processing_time = processing_time
+                self.error_message = ""
+                
+                # Log success
+                frappe.logger().info(f"Direct Claude AI processing completed successfully for {self.name}")
+            else:
+                self.status = "Failed"
+                self.error_message = result.get("error", "Unknown error occurred")
+                
+                # Log error
+                frappe.log_error(f"Direct Claude AI processing failed for {self.name}: {self.error_message}", "Claude AI Processing Error")
+            
+            self.save()
+            frappe.db.commit()
+            
+            # Notify user via real-time updates
+            notification_message = "Direct AI processing completed successfully" if result.get("success") else self.error_message
+            
+            frappe.publish_realtime(
+                event="policy_processing_complete",
+                message={
+                    "doc_name": self.name,
+                    "status": self.status,
+                    "message": notification_message,
+                    "processing_time": processing_time,
+                    "processing_method": "claude_vision"
+                },
+                user=self.owner
+            )
+            
+            return {
+                "success": result.get("success", False),
+                "message": "Direct AI processing completed successfully" if result.get("success") else self.error_message,
+                "extracted_fields": result.get("extracted_fields", {}),
+                "processing_time": processing_time
+            }
+            
+        except Exception as e:
+            self.status = "Failed"
+            self.error_message = str(e)
+            self.save()
+            frappe.db.commit()
+            
+            frappe.log_error(f"Direct Claude AI processing system error for {self.name}: {str(e)}", "Claude AI System Error")
+            
+            # Notify user of failure
+            frappe.publish_realtime(
+                event="policy_processing_complete",
+                message={
+                    "doc_name": self.name,
+                    "status": "Failed",
+                    "message": f"Direct AI processing failed: {str(e)}",
+                    "processing_time": 0
+                },
+                user=self.owner
+            )
+            
+            frappe.throw(f"Failed to process with AI: {str(e)}")
+    
+    def process_with_claude_vision(self, file_path, api_key, settings):
+        """
+        Process PDF with Claude's vision capabilities by converting to images first
+        """
+        try:
+            import base64
+            import requests
+            
+            # Convert PDF to images first (Claude doesn't support PDF directly in vision API)
+            images = self.convert_pdf_to_images(file_path)
+            
+            if not images:
+                return {
+                    "success": False,
+                    "error": "Failed to convert PDF to images for Claude Vision processing"
+                }
+            
+            # Get extraction prompt from settings
+            prompt_text = self.get_vision_extraction_prompt(self.policy_type, settings)
+            
+            # Prepare Claude API request for vision with images
+            headers = {
+                'Content-Type': 'application/json',
+                'X-API-Key': api_key,
+                'anthropic-version': '2023-06-01'
+            }
+            
+            # Build content array with text prompt and images
+            content = [
+                {
+                    'type': 'text',
+                    'text': prompt_text
+                }
+            ]
+            
+            # Add each page image (limit to first 10 pages to stay within limits)
+            for i, image_data in enumerate(images[:10]):
+                content.append({
+                    'type': 'image',
+                    'source': {
+                        'type': 'base64',
+                        'media_type': 'image/png',
+                        'data': image_data
+                    }
+                })
+            
+            payload = {
+                'model': getattr(settings, 'claude_model', 'claude-sonnet-4-20250514'),
+                'max_tokens': 4000,
+                'messages': [
+                    {
+                        'role': 'user',
+                        'content': content
+                    }
+                ]
+            }
+            
+            # Make API call
+            response = requests.post(
+                'https://api.anthropic.com/v1/messages',
+                headers=headers,
+                json=payload,
+                timeout=settings.timeout or 180
+            )
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                content = response_data.get('content', [{}])[0].get('text', '')
+                
+                # Extract JSON from Claude's response
+                extracted_fields = self.extract_json_from_claude_response(content)
+                
+                return {
+                    "success": True,
+                    "extracted_fields": extracted_fields
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": f"Claude API error: HTTP {response.status_code} - {response.text}"
+                }
+                
+        except Exception as e:
+            frappe.log_error(f"Claude vision processing error: {str(e)}", "Claude Vision Error")
+            return {
+                "success": False,
+                "error": f"Claude vision processing failed: {str(e)}"
+            }
+    
+    def convert_pdf_to_images(self, file_path):
+        """
+        Convert PDF to images for Claude Vision API
+        """
+        try:
+            import base64
+            
+            # Try using pdf2image (requires poppler-utils)
+            try:
+                from pdf2image import convert_from_path
+                
+                # Convert PDF pages to images
+                pages = convert_from_path(file_path, dpi=200, first_page=1, last_page=10)
+                
+                images = []
+                for page in pages:
+                    # Convert PIL image to base64
+                    import io
+                    img_byte_arr = io.BytesIO()
+                    page.save(img_byte_arr, format='PNG')
+                    img_byte_arr = img_byte_arr.getvalue()
+                    img_base64 = base64.b64encode(img_byte_arr).decode('utf-8')
+                    images.append(img_base64)
+                
+                frappe.logger().info(f"Converted PDF to {len(images)} images for Claude Vision")
+                return images
+                
+            except ImportError:
+                frappe.logger().warning("pdf2image not available, trying alternative method")
+                
+                # Fallback: Try using PyMuPDF (fitz)
+                try:
+                    import fitz  # PyMuPDF
+                    import base64
+                    import io
+                    from PIL import Image
+                    
+                    doc = fitz.open(file_path)
+                    images = []
+                    
+                    # Convert first 10 pages to images
+                    for page_num in range(min(len(doc), 10)):
+                        page = doc.load_page(page_num)
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2x zoom for better quality
+                        img_data = pix.tobytes("png")
+                        img_base64 = base64.b64encode(img_data).decode('utf-8')
+                        images.append(img_base64)
+                    
+                    doc.close()
+                    frappe.logger().info(f"Converted PDF to {len(images)} images using PyMuPDF")
+                    return images
+                    
+                except ImportError:
+                    frappe.logger().error("Neither pdf2image nor PyMuPDF available for PDF conversion")
+                    return []
+                    
+        except Exception as e:
+            frappe.log_error(f"PDF to image conversion failed: {str(e)}", "PDF Conversion Error")
+            return []
+    
+    def get_vision_extraction_prompt(self, policy_type, settings):
+        """
+        Get extraction prompt optimized for Claude Vision API
+        """
+        try:
+            # Get field mapping from settings
+            policy_reader_settings = frappe.get_single("Policy Reader Settings")
+            mapping = policy_reader_settings.get_cached_field_mapping(policy_type.lower()) or {}
+            
+            # Get canonical fields (fields that map to themselves)
+            canonical_fields = [k for k, v in mapping.items() if k == v]
+            canonical_fields = sorted(set(canonical_fields))
+            
+            if canonical_fields:
+                fields_list = "\n".join([f"- {field}" for field in canonical_fields])
+                
+                prompt = f"""Analyze this {policy_type.lower()} insurance policy PDF and extract the following information as a flat JSON object:
+
+Required fields to extract:
+{fields_list}
+
+Extraction rules:
+- Dates: Convert to DD/MM/YYYY format only (e.g., "From 12-JUL-2022" → "12/07/2022")
+- Currency/Amounts: Extract digits only, remove currency symbols, commas, dashes
+- Numbers: Extract digits only, remove descriptive text
+- Text fields: Extract clean core values, remove prefixes/labels
+- Missing fields: Use null
+- Return ONLY a flat JSON object with the exact field names listed above
+
+Example output format:
+{{
+  "policy_no": "ABC123456",
+  "vehicle_no": "DL-01-AA-1234",
+  "make": "Maruti",
+  "model": "Swift",
+  ...
+}}
+
+Return only valid JSON, no explanations or markdown formatting."""
+            else:
+                # Fallback prompt if no mapping available
+                if policy_type.lower() == "motor":
+                    prompt = f"""Analyze this motor insurance policy PDF and extract the following information as a flat JSON object:
+
+Required fields to extract:
+- policy_no (Policy Number)
+- policy_type (Type of Policy)
+- policy_issuance_date (Policy Issuance Date)
+- policy_start_date (Policy Start Date, From Date)
+- policy_expiry_date (Policy Expiry Date, To Date)
+- vehicle_no (Vehicle Number, Registration Number, Registration No.)
+- make (Vehicle Make)
+- model (Vehicle Model)
+- variant (Vehicle Variant)
+- year_of_man (Year of Manufacture)
+- chasis_no (Chassis Number, Chasis Number)
+- engine_no (Engine Number)
+- cc (Engine Capacity, Cubic Capacity)
+- fuel (Fuel Type)
+- sum_insured (Sum Insured, IDV, Insured Declared Value)
+- net_od_premium (Net OD Premium, OD Premium)
+- tp_premium (TP Premium, Third Party Premium)
+- gst (GST, Tax, Service Tax)
+- ncb (NCB, No Claim Bonus)
+- rto_code (RTO Code)
+- vehicle_category (Vehicle Category, Vehicle Class)
+- customer_name (Customer Name, Insured Name)
+- customer_code (Customer Code)
+- mobile_no (Mobile Number, Mobile No)
+- email_id (Email ID, Email)
+- payment_mode (Payment Mode)
+- bank_name (Bank Name)
+
+Extraction rules:
+- Dates: Convert to DD/MM/YYYY format only (e.g., "From 12-JUL-2022" → "12/07/2022")
+- Currency/Amounts: Extract digits only, remove currency symbols, commas, dashes
+- Numbers: Extract digits only, remove descriptive text
+- Text fields: Extract clean core values, remove prefixes/labels
+- Missing fields: Use null
+- Return ONLY a flat JSON object with the exact field names listed above
+
+Example output format:
+{{
+  "policy_no": "ABC123456",
+  "vehicle_no": "DL-01-AA-1234",
+  "make": "Maruti",
+  "model": "Swift",
+  "year_of_man": "2019",
+  "sum_insured": "500000",
+  ...
+}}
+
+Return only valid JSON, no explanations or markdown formatting."""
+                else:
+                    # Health policy fallback
+                    prompt = f"""Analyze this health insurance policy PDF and extract the following information as a flat JSON object:
+
+Required fields to extract:
+- policy_number (Policy Number, Policy No)
+- insured_name (Insured Name, Name of Insured)
+- policy_start_date (Policy Start Date, Start Date, From Date)
+- policy_end_date (Policy End Date, End Date, To Date, Expiry Date)
+- customer_code (Customer Code)
+- net_premium (Net Premium, Premium Amount)
+- policy_period (Policy Period)
+- sum_insured (Sum Insured, Coverage Amount)
+- issuing_office (Issuing Office)
+- relationship_to_policyholder (Relationship to Policyholder)
+- date_of_birth (Date of Birth, DOB)
+- nominee_name (Nominee Name)
+- mobile_no (Mobile Number, Contact Number)
+- email_id (Email ID, Email)
+- gender (Gender)
+- customer_name (Customer Name)
+
+Extraction rules:
+- Dates: Convert to DD/MM/YYYY format only (e.g., "12-JUL-2022" → "12/07/2022")
+- Currency/Amounts: Extract digits only, remove currency symbols, commas, dashes
+- Numbers: Extract digits only, remove descriptive text
+- Text fields: Extract clean core values, remove prefixes/labels
+- Missing fields: Use null
+- Return ONLY a flat JSON object with the exact field names listed above
+
+Example output format:
+{{
+  "policy_number": "HEALTH123456",
+  "insured_name": "John Doe",
+  "policy_start_date": "01/01/2024",
+  "policy_end_date": "31/12/2024",
+  "sum_insured": "500000",
+  ...
+}}
+
+Return only valid JSON, no explanations or markdown formatting."""
+            
+            return prompt
+            
+        except Exception as e:
+            frappe.log_error(f"Error building vision prompt: {str(e)}", "Vision Prompt Error")
+            return f"Extract key information from this {policy_type.lower()} insurance policy as JSON."
+    
+    def extract_json_from_claude_response(self, content):
+        """
+        Extract JSON from Claude's response text
+        """
+        import re
+        
+        try:
+            # First try to parse as direct JSON
+            return frappe.parse_json(content)
+        except:
+            pass
+        
+        # Look for JSON in code blocks
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', content, re.DOTALL)
+        if json_match:
+            try:
+                return frappe.parse_json(json_match.group(1))
+            except:
+                pass
+        
+        # Look for JSON object in text
+        json_match = re.search(r'(\{.*\})', content, re.DOTALL)
+        if json_match:
+            try:
+                return frappe.parse_json(json_match.group(1))
+            except:
+                pass
+        
+        # If all parsing fails, return empty dict
+        frappe.logger().warning(f"Could not extract JSON from Claude response: {content[:500]}...")
+        return {}
 
 # API Key status checking method
 @frappe.whitelist()

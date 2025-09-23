@@ -184,54 +184,98 @@ class PolicyCreationService:
         frappe.logger().info(f"Structure detection: {simple_count}/{len(sample_values)} simple types, is_flat: {is_flat}")
         return is_flat
     
+    def _normalize_key(self, text):
+        """Normalize keys for robust alias matching (lowercase, alnum+space)"""
+        try:
+            if not text:
+                return ""
+            value = cstr(text).strip().lower()
+            import re
+            value = re.sub(r"[^a-z0-9]+", " ", value)
+            value = " ".join(part for part in value.split() if part)
+            return value
+        except Exception:
+            return cstr(text or "").strip().lower()
+
+    def _build_normalized_mapping(self, field_mapping):
+        """Build normalized mapping including normalized keys for matching"""
+        normalized = {}
+        for k, v in (field_mapping or {}).items():
+            normalized[k] = v
+            nk = self._normalize_key(k)
+            if nk not in normalized:
+                normalized[nk] = v
+        return normalized
+
+    def _find_best_match(self, key, mapping_keys):
+        """Find a fuzzy best match candidate for an unmapped key"""
+        try:
+            from difflib import get_close_matches
+            candidates = get_close_matches(key, mapping_keys, n=3, cutoff=0.75)
+            return candidates
+        except Exception:
+            return []
+
     def map_fields_dynamically(self, parsed_data, field_mapping, policy_record, policy_type):
         """
         Dynamically map fields using the field mapping from Policy Reader Settings
         """
         mapped_count = 0
         unmapped_fields = []
+        suggestions = {}
         
         frappe.logger().info(f"=== FIELD MAPPING DEBUG ===")
         frappe.logger().info(f"Parsed data keys: {list(parsed_data.keys())}")
         frappe.logger().info(f"Field mapping keys: {list(field_mapping.keys())}")
         frappe.logger().info(f"Policy record doctype: {policy_record.doctype}")
         
-        for extracted_field_name, policy_field_name in field_mapping.items():
-            value = parsed_data.get(extracted_field_name)
-            frappe.logger().info(f"Checking field '{extracted_field_name}' -> '{policy_field_name}': value = {value}")
+        # Build normalized mapping for robust matching
+        normalized_mapping = self._build_normalized_mapping(field_mapping)
+        
+        # First pass: direct and normalized-key matching over parsed_data keys
+        for raw_key, raw_value in parsed_data.items():
+            if raw_value is None or str(raw_value).strip() == "":
+                continue
             
-            if value is not None and str(value).strip():
+            # Try direct match
+            policy_field_name = normalized_mapping.get(raw_key)
+            
+            # Try normalized key match
+            if not policy_field_name:
+                nk = self._normalize_key(raw_key)
+                policy_field_name = normalized_mapping.get(nk)
+            
+            if policy_field_name:
                 try:
-                    # Convert value to appropriate type
-                    converted_value = self.convert_field_value(policy_field_name, value, policy_record.doctype)
-                    frappe.logger().info(f"Converted value for {policy_field_name}: {converted_value} (type: {type(converted_value)})")
-                    
+                    converted_value = self.convert_field_value(policy_field_name, raw_value, policy_record.doctype)
                     if converted_value is not None:
                         setattr(policy_record, policy_field_name, converted_value)
                         mapped_count += 1
-                        frappe.logger().info(f"✓ Mapped {extracted_field_name} -> {policy_field_name}: {converted_value}")
+                        frappe.logger().info(f"✓ Mapped {raw_key} -> {policy_field_name}: {converted_value}")
                     else:
-                        frappe.logger().warning(f"✗ Converted value is None for {extracted_field_name}")
-                        unmapped_fields.append(extracted_field_name)
+                        unmapped_fields.append(raw_key)
                 except Exception as e:
-                    frappe.logger().error(f"✗ Error mapping {extracted_field_name}: {str(e)}")
-                    unmapped_fields.append(extracted_field_name)
+                    frappe.logger().error(f"✗ Error mapping {raw_key}: {str(e)}")
+                    unmapped_fields.append(raw_key)
             else:
-                frappe.logger().info(f"✗ Field {extracted_field_name} has no value or empty value")
-                unmapped_fields.append(extracted_field_name)
+                unmapped_fields.append(raw_key)
+                # Collect suggestions to guide alias additions
+                nk = self._normalize_key(raw_key)
+                cands = self._find_best_match(nk, list(normalized_mapping.keys()))
+                if cands:
+                    suggestions[raw_key] = cands
         
-        # Check for extracted fields that don't have mappings
-        unmapped_extracted_fields = [key for key in parsed_data.keys() if key not in field_mapping]
-        if unmapped_extracted_fields:
-            frappe.logger().info(f"Extracted fields without mappings: {unmapped_extracted_fields}")
-        
+        # Log summary
         frappe.logger().info(f"=== FIELD MAPPING SUMMARY ===")
         frappe.logger().info(f"Mapped: {mapped_count}, Unmapped: {len(unmapped_fields)}")
         frappe.logger().info(f"Unmapped fields: {unmapped_fields}")
+        if suggestions:
+            frappe.logger().info(f"Suggestions for unmapped: {frappe.as_json(suggestions)}")
         
         return {
             "mapped_count": mapped_count,
-            "unmapped_fields": unmapped_fields
+            "unmapped_fields": unmapped_fields,
+            "suggestions": suggestions
         }
     
     def convert_field_value(self, field_name, value, doctype):

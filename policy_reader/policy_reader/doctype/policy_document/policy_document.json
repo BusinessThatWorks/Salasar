@@ -78,7 +78,7 @@
    "fieldname": "processing_method",
    "fieldtype": "Select",
    "label": "Processing Method",
-   "options": "local\nrunpod",
+   "options": "local\nrunpod\nclaude_vision",
    "read_only": 1
   },
   {

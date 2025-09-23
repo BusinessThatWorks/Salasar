@@ -7,6 +7,7 @@ import os
 import time
 from frappe.model.document import Document
 from frappe.utils import now
+from frappe.utils import cstr
 
 
 class PolicyReaderSettings(Document):
@@ -192,11 +193,11 @@ class PolicyReaderSettings(Document):
 	
 	@frappe.whitelist()
 	def refresh_field_mappings(self):
-		"""Refresh field mappings from Motor Policy and Health Policy DocTypes"""
+		"""Refresh field mappings using default, DocType-independent generator"""
 		try:
-			# Build field mappings for both policy types
-			motor_mapping = self.build_field_mapping_from_doctype("Motor Policy")
-			health_mapping = self.build_field_mapping_from_doctype("Health Policy")
+			# Build mapping for both policy types using default generator
+			motor_mapping = self.build_default_field_mapping("motor")
+			health_mapping = self.build_default_field_mapping("health")
 			
 			# Update cached mappings
 			self.motor_policy_fields = frappe.as_json(motor_mapping)
@@ -206,8 +207,10 @@ class PolicyReaderSettings(Document):
 			# Save the document
 			self.save()
 			
-			frappe.msgprint(f"Field mappings refreshed successfully. Motor: {len(motor_mapping)} fields, Health: {len(health_mapping)} fields.",
-							title="Field Mappings Refreshed", indicator="green")
+			frappe.msgprint(
+				f"Field mappings refreshed successfully (DocType-independent). Motor: {len(motor_mapping)} fields, Health: {len(health_mapping)} fields.",
+				title="Field Mappings Refreshed", indicator="green"
+			)
 			
 			return {
 				"success": True, 
@@ -218,92 +221,98 @@ class PolicyReaderSettings(Document):
 		except Exception as e:
 			frappe.log_error(f"Field mapping refresh failed: {str(e)}", "Field Mapping Refresh Error")
 			frappe.throw(f"Failed to refresh field mappings: {str(e)}")
-	
-	@frappe.whitelist()
-	def refresh_extraction_prompts(self):
-		"""Refresh extraction prompts from Motor Policy and Health Policy DocTypes"""
-		try:
-			# Build dynamic extraction prompts
-			sample_text = "Sample policy document text for prompt generation"
-			motor_prompt = self._build_motor_extraction_prompt(sample_text)
-			health_prompt = self._build_health_extraction_prompt(sample_text)
-			
-			# Update cached prompts
-			self.motor_extraction_prompt = motor_prompt
-			self.health_extraction_prompt = health_prompt
-			self.last_prompt_sync = now()
-			
-			# Save the document
-			self.save()
-			
-			frappe.msgprint(f"Extraction prompts refreshed successfully. Motor prompt: {len(motor_prompt)} chars, Health prompt: {len(health_prompt)} chars.",
-							title="Extraction Prompts Refreshed", indicator="green")
-			
-			return {
-				"success": True,
-				"motor_prompt_length": len(motor_prompt),
-				"health_prompt_length": len(health_prompt)
+
+	def build_default_field_mapping(self, policy_type):
+		"""Build a default mapping from known aliases to canonical fieldnames without DocType dependency"""
+		policy_type_lower = (policy_type or "").lower()
+		mapping = {}
+		
+		# Define canonical fieldnames and their aliases per policy type
+		if policy_type_lower == "motor":
+			alias_map = {
+				# Policy fields
+				"policy_no": ["Policy Number", "PolicyNumber", "Policy Num", "PolicyNo", "policyNo", "policyNumber", "policy_no", "Policy_No"],
+				"policy_type": ["PolicyType", "policyType", "policy_type", "Policy_Type"],
+				"policy_issuance_date": ["Policy Issuance Date", "Issuance Date", "PolicyIssuanceDate", "policyIssuanceDate", "policy_issuance_date", "Policy_Issuance_Date"],
+				"policy_start_date": ["Policy Start Date", "Start Date", "PolicyStartDate", "From Date", "policyStartDate", "policy_start_date", "Policy_Start_Date"],
+				"policy_expiry_date": ["Policy Expiry Date", "Expiry Date", "PolicyExpiryDate", "To Date", "End Date", "policyExpiryDate", "policy_expiry_date", "Policy_Expiry_Date"],
+				"policy_biz_type": ["PolicyBiz Type", "policyBizType", "PolicyBiz_Type"],
+				"new_renewal": ["New/Renewal", "newRenewal", "New_Renewal"],
+				# Vehicle fields
+				"vehicle_no": ["Vehicle Number", "VehicleNumber", "VehicleNo", "Registration Number", "Registration No", "Registration no", "Registration no.", "Registration No.", "Regn No", "Regn No.", "Regn. No", "Regn. No.", "Reg No", "Reg No.", "Reg. No", "Reg. No.", "vehicleNo", "vehicleNumber", "Vehicle_No"],
+				"make": ["Make", "Vehicle Make", "make"],
+				"model": ["Model", "Vehicle Model", "model"],
+				"variant": ["Variant", "Vehicle Variant", "variant"],
+				"year_of_man": ["Year of Manufacture", "Manufacturing Year", "YearOfManufacture", "Year", "Model Year", "yearOfManufacture", "Year_of_Manufacture", "Year of Mfg", "Year Of Manufacturing", "Year of Man"],
+				# Engine/Chassis
+				"chasis_no": ["Chassis Number", "ChassisNumber", "Chasis Number", "ChasisNumber", "Chassis No", "Chasis No", "chasisNo", "chassisNo", "ChasisNo", "chasis_no", "Chasis_No"],
+				"engine_no": ["Engine Number", "EngineNumber", "Engine No", "EngineNo", "engineNo", "engine_no", "Engine_No"],
+				"cc": ["CC", "Engine Capacity", "Cubic Capacity", "cc", "CC/KW", "Cubic Capcity", "Cubic Capacity/Kilowatt", "Cubic Capcity/Kilowatt", "CCIKW"],
+				"fuel": ["Fuel", "Fuel Type", "FuelType", "fuel"],
+				# Financial
+				"sum_insured": ["Sum Insured", "SumInsured", "Insured Amount", "Coverage Amount", "sumInsured", "sum_insured", "Sum_Insured", "Insured Declared Value", "IDV", "Total Value"],
+				"net_od_premium": ["Net Premium", "NetPremium", "Net OD Premium", "NetODPremium", "OD Premium", "netOdPremium", "net_od_premium", "Net_OD_Premium", "Total OD Premium", "Calculated OD Premium"],
+				"tp_premium": ["TP Premium", "TPPremium", "Third Party Premium", "tpPremium", "tp_premium", "TP_Premium"],
+				"gst": ["GST", "Tax", "Service Tax", "gst"],
+				"ncb": ["NCB", "No Claim Bonus", "ncb"],
+				# Registration/Category
+				"rto_code": ["RTO Code", "RTOCode", "RTO", "rtoCode", "RTO_Code"],
+				"vehicle_category": ["Vehicle Category", "VehicleCategory", "Vehicle Class", "Category", "vehicleCategory", "Vehicle_Category"],
+				"passenger_gvw": ["Passenger GVW", "PassengerGVW", "GVW", "passengerGvw", "Passenger_GVW"],
+				# Business/Customer
+				"customer_code": ["Customer Code", "CustomerCode", "customerCode", "customer_code", "Customer_Code"],
+				"insurer_branch_code": ["Insurer Branch Code", "InsurerBranchCode", "insurerBranchCode", "insurer_branch_code", "Insurer_Branch_Code"],
+				"payment_mode": ["Payment Mode", "PaymentMode", "paymentMode", "payment_mode", "Payment_Mode"],
+				"bank_name": ["Bank Name", "BankName", "bankName", "bank_name", "Bank_Name"],
+				"payment_transaction_no": ["Payment Transaction No", "PaymentTransactionNo", "paymentTransactionNo", "payment_transaction_no", "Payment_Transaction_No"],
+				"branch_code": ["Branch Code", "BranchCode", "branchCode", "branch_code", "Branch_Code"],
+				"customer_group": ["Customer Group", "CustomerGroup", "customerGroup", "customer_group", "Customer_Group"],
+				"customer_title": ["Customer Title", "CustomerTitle", "customerTitle", "customer_title", "Customer_Title"],
+				"customer_name": ["Customer Name", "CustomerName", "customerName", "customer_name", "Customer_Name"],
+				"customer_id": ["Customer ID", "CustomerID", "customerId", "Customer_ID"],
+				"mobile_no": ["Mobile Number", "MobileNumber", "Mobile No", "MobileNo", "mobile_no", "Mobile_Number"],
+				"email_id": ["Email ID", "EmailID", "Email", "email_id", "Email_ID"],
+				"dob_doi": ["DOB/DOI", "Date of Birth", "DateOfBirth", "DOB", "dob_doi", "DOB_DOI"],
+				"gender": ["Gender", "gender"],
+				"cse_id": ["CSE ID", "CSEID", "cse_id", "CSE_ID"],
+				"rm_id": ["RM ID", "RMID", "rm_id", "RM_ID"],
+				"old_control_number": ["Old Control Number", "OldControlNumber", "old_control_number", "Old_Control_Number"],
 			}
-			
-		except Exception as e:
-			frappe.log_error(f"Extraction prompt refresh failed: {str(e)}", "Extraction Prompt Refresh Error")
-			frappe.throw(f"Failed to refresh extraction prompts: {str(e)}")
-	
-	def get_cached_extraction_prompt(self, policy_type, extracted_text):
-		"""Get cached extraction prompt or build dynamically if not cached"""
-		try:
-			truncation_limit = 200000  # Use higher limit since text_truncation_limit was removed
-			if policy_type.lower() == "motor":
-				if self.motor_extraction_prompt:
-					# Replace the sample text with actual extracted text
-					return self.motor_extraction_prompt.replace("Sample policy document text for prompt generation", extracted_text[:truncation_limit])
-			elif policy_type.lower() == "health":
-				if self.health_extraction_prompt:
-					# Replace the sample text with actual extracted text
-					return self.health_extraction_prompt.replace("Sample policy document text for prompt generation", extracted_text[:truncation_limit])
-			
-			# Fallback to dynamic generation if not cached
-			return self.build_dynamic_extraction_prompt(policy_type, extracted_text)
-			
-		except Exception as e:
-			frappe.log_error(f"Error getting cached extraction prompt for {policy_type}: {str(e)}", "Cached Prompt Error")
-			return self.build_dynamic_extraction_prompt(policy_type, extracted_text)
-	
+		elif policy_type_lower == "health":
+			alias_map = {
+				"policy_number": ["Policy Number", "PolicyNumber", "Policy No"],
+				"insured_name": ["Insured Name", "InsuredName", "Name of Insured"],
+				"policy_start_date": ["Policy Start Date", "Start Date", "From Date"],
+				"policy_end_date": ["Policy End Date", "End Date", "To Date", "Expiry Date"],
+				"customer_code": ["Customer Code", "CustomerCode"],
+				"net_premium": ["Net Premium", "NetPremium", "Premium Amount"],
+				"policy_period": ["Policy Period", "PolicyPeriod", "Period"],
+				"issuing_office": ["Issuing Office", "IssuingOffice", "Office"],
+				"relationship_to_policyholder": ["Relationship", "Relation", "RelationshipToPolicyholder"],
+				"date_of_birth": ["Date of Birth", "DateOfBirth", "DOB", "Birth Date"],
+				"insured_name_2": ["Insured Name 2", "Second Insured", "InsuredName2"],
+				"nominee_name": ["Nominee Name", "NomineeName", "Nominee"],
+				"insured_code": ["Insured Code", "InsuredCode"],
+			}
+		else:
+			alias_map = {}
+		
+		# Build mapping: include alias → canonical fieldname, and also canonical fieldname as a key to itself
+		for canonical_field, aliases in alias_map.items():
+			mapping[canonical_field] = canonical_field
+			for alias in aliases:
+				mapping[alias] = canonical_field
+		
+		return mapping
+
 	def build_field_mapping_from_doctype(self, doctype_name):
-		"""Build field mapping from DocType definition"""
+		"""Deprecated: Build field mapping from DocType definition.
+		Now delegates to DocType-independent default mapping for compatibility."""
 		try:
-			# Get DocType document
-			doctype_doc = frappe.get_doc("DocType", doctype_name)
-			field_mapping = {}
-			
-			# Skip these system/layout fields when building mapping
-			skip_fields = {
-				"policy_document", "policy_file", "naming_series", "owner", "creation", 
-				"modified", "modified_by", "docstatus", "idx", "name"
-			}
-			
-			skip_fieldtypes = {
-				"Section Break", "Column Break", "Tab Break", "HTML", "Heading", "Button"
-			}
-			
-			# Build mapping from field labels to fieldnames (with aliases)
-			for field in doctype_doc.fields:
-				if (field.fieldname not in skip_fields and 
-					field.fieldtype not in skip_fieldtypes and 
-					field.label):
-					
-					# Add primary field label
-					field_mapping[field.label] = field.fieldname
-					
-					# Add common aliases for natural language variations
-					aliases = self._get_field_aliases(field.fieldname, field.label)
-					for alias in aliases:
-						field_mapping[alias] = field.fieldname
-			
-			return field_mapping
-			
+			policy_type = "motor" if "motor" in (doctype_name or "").lower() else "health"
+			return self.build_default_field_mapping(policy_type)
 		except Exception as e:
-			frappe.log_error(f"Error building field mapping for {doctype_name}: {str(e)}", "Field Mapping Build Error")
+			frappe.log_error(f"Error building default mapping for {doctype_name}: {str(e)}", "Field Mapping Build Error")
 			raise
 	
 	def get_cached_field_mapping(self, policy_type):
@@ -585,7 +594,7 @@ Return data as valid JSON:"""
 			'new_renewal': ['New/Renewal', 'newRenewal', 'New_Renewal'],
 			
 			# Vehicle fields
-			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No', 'vehicleNo', 'vehicleNumber', 'Vehicle_No'],
+			'vehicle_no': ['Vehicle Number', 'VehicleNumber', 'VehicleNo', 'Registration Number', 'Registration No', 'Registration no', 'Registration no.', 'Registration No.', 'Regn No', 'Regn No.', 'Regn. No', 'Regn. No.', 'Reg No', 'Reg No.', 'Reg. No', 'Reg. No.', 'vehicleNo', 'vehicleNumber', 'Vehicle_No'],
 			'make': ['Make', 'Vehicle Make', 'make'],
 			'model': ['Model', 'Vehicle Model', 'model'],
 			'variant': ['Variant', 'Vehicle Variant', 'variant'],
@@ -652,6 +661,153 @@ Return data as valid JSON:"""
 		aliases = [alias for alias in aliases if alias != field_label]
 		
 		return aliases
+
+	def _normalize_alias_key(self, text):
+		"""Normalize alias keys for consistent matching (lowercase, alnum+space)"""
+		try:
+			if not text:
+				return ""
+			value = cstr(text).strip().lower()
+			import re
+			value = re.sub(r"[^a-z0-9]+", " ", value)
+			value = " ".join(part for part in value.split() if part)
+			return value
+		except Exception:
+			return cstr(text or "").strip().lower()
+
+	def _get_mapping_container_and_key(self, policy_type):
+		"""Return (container_fieldname, mapping_dict) for the given policy_type"""
+		ptype = (policy_type or "").lower()
+		if ptype == "motor":
+			container = "motor_policy_fields"
+			data = frappe.parse_json(self.motor_policy_fields) if self.motor_policy_fields else {}
+		elif ptype == "health":
+			container = "health_policy_fields"
+			data = frappe.parse_json(self.health_policy_fields) if self.health_policy_fields else {}
+		else:
+			container = None
+			data = {}
+		return container, (data or {})
+
+	@frappe.whitelist()
+	def add_alias(self, policy_type, canonical_field, alias):
+		"""Add a single alias → canonical mapping and persist it"""
+		container, mapping = self._get_mapping_container_and_key(policy_type)
+		if not container:
+			frappe.throw("Unsupported policy type")
+		if not canonical_field or not alias:
+			frappe.throw("Both canonical_field and alias are required")
+		# Preserve canonical self-mapping
+		mapping.setdefault(canonical_field, canonical_field)
+		# Add alias mapping
+		mapping[alias] = canonical_field
+		# Save back
+		setattr(self, container, frappe.as_json(mapping))
+		self.last_field_sync = now()
+		self.save()
+		return {"success": True, "canonical": canonical_field, "alias": alias}
+
+	@frappe.whitelist()
+	def bulk_add_aliases(self, policy_type, aliases_json):
+		"""Bulk add aliases. aliases_json can be:
+		- dict of canonical_field -> [aliases]
+		- or dict of alias -> canonical_field
+		"""
+		container, mapping = self._get_mapping_container_and_key(policy_type)
+		if not container:
+			frappe.throw("Unsupported policy type")
+		try:
+			data = frappe.parse_json(aliases_json) if isinstance(aliases_json, str) else aliases_json
+			if not isinstance(data, dict):
+				frappe.throw("aliases_json must be a JSON object")
+			added = 0
+			# Heuristic: detect format by inspecting first value
+			items = list(data.items())
+			if items and isinstance(items[0][1], list):
+				# canonical -> [aliases]
+				for canonical, aliases in data.items():
+					mapping.setdefault(canonical, canonical)
+					for alias in aliases or []:
+						if alias:
+							mapping[alias] = canonical
+							added += 1
+			else:
+				# alias -> canonical
+				for alias, canonical in data.items():
+					if canonical:
+						mapping.setdefault(canonical, canonical)
+						mapping[alias] = canonical
+						added += 1
+			setattr(self, container, frappe.as_json(mapping))
+			self.last_field_sync = now()
+			self.save()
+			return {"success": True, "added": added}
+		except Exception as e:
+			frappe.throw(f"Failed to bulk add aliases: {str(e)}")
+
+	@frappe.whitelist()
+	def list_aliases(self, policy_type, canonical_field=None):
+		"""List all aliases for a policy type, or for a specific canonical field"""
+		_, mapping = self._get_mapping_container_and_key(policy_type)
+		if not mapping:
+			return {}
+		if canonical_field:
+			aliases = [k for k, v in mapping.items() if v == canonical_field and k != canonical_field]
+			return {canonical_field: sorted(aliases)}
+		# Build reverse index: canonical -> [aliases]
+		result = {}
+		for key, value in mapping.items():
+			if key == value:
+				result.setdefault(value, [])
+			else:
+				result.setdefault(value, []).append(key)
+		return {k: sorted(v) for k, v in result.items()}
+
+	def build_prompt_from_mapping(self, policy_type, extracted_text):
+		"""Build a full extraction prompt from the active alias→canonical mapping.
+		Always enumerates all canonical keys and provides alias guidance.
+		"""
+		try:
+			truncation_limit = 200000
+			ptype = (policy_type or "").lower()
+			# Get mapping from cache; if empty, build defaults
+			mapping = self.get_cached_field_mapping(ptype) or self.build_default_field_mapping(ptype)
+			if not isinstance(mapping, dict) or not mapping:
+				return self._build_fallback_prompt(ptype, extracted_text)
+			
+			# Canonical set (keys that map to themselves)
+			canonical_fields = [k for k, v in mapping.items() if k == v]
+			canonical_fields = sorted(set(canonical_fields))
+			
+			# Reverse index: canonical -> [aliases]
+			aliases_by_canonical = {}
+			for alias, canonical in mapping.items():
+				if alias == canonical:
+					aliases_by_canonical.setdefault(canonical, [])
+				else:
+					aliases_by_canonical.setdefault(canonical, []).append(alias)
+			
+			# Build sections
+			required_keys_section = "\n".join([f"- {key}" for key in canonical_fields])
+			
+			# Limit alias list lengths per key to keep prompt concise
+			alias_lines = []
+			for key in canonical_fields:
+				aliases = sorted(set(aliases_by_canonical.get(key, [])))
+				if aliases:
+					# Trim very long alias lists
+					alias_preview = aliases[:12]
+					more = "" if len(aliases) <= 12 else f", +{len(aliases) - 12} more"
+					alias_lines.append(f"- {key}: [" + ", ".join(alias_preview) + "]" + more)
+			
+			alias_guidance_section = "\n".join(alias_lines) if alias_lines else ""
+			
+			# Build prompt text
+			prompt = f"""Extract {ptype} insurance policy information as FLAT JSON with these canonical keys only:\n\nRequired JSON keys (exact, flat):\n{required_keys_section}\n\nAlias guidance (examples of how these fields may appear in the document):\n{alias_guidance_section}\n\nExtraction rules:\n- Dates: DD/MM/YYYY only (e.g., \"From 12-JUL-2022 15:01(Hrs)\" → \"12/07/2022\")\n- Currency/Amounts: digits only; remove ₹, Rs., commas, /-\n- Numbers: digits only; remove descriptors (e.g., \"5 seater\" → \"5\")\n- Text: clean core value, remove prefixes/suffixes and labels\n- Missing fields: null\n- Return exactly one flat JSON object with ONLY the canonical keys listed above (every key present, null when unknown). No markdown, no comments, no extra keys.\n\nDocument:\n{(extracted_text or '')[:truncation_limit]}\n"""
+			return prompt
+		except Exception as e:
+			frappe.log_error(f"Error building prompt from mapping for {policy_type}: {str(e)}", "Mapping Prompt Build Error")
+			return self._build_fallback_prompt(policy_type, extracted_text)
 
 @frappe.whitelist()
 def get_runpod_health_info():
