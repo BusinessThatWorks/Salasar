@@ -111,6 +111,8 @@ class FieldMappingService:
             # Handle different field types
             if field_meta.fieldtype == "Date":
                 return self._convert_to_date(value)
+            elif field_meta.fieldtype == "Datetime":
+                return self._convert_to_datetime(value)
             elif field_meta.fieldtype == "Float":
                 return self._convert_to_float(value)
             elif field_meta.fieldtype == "Int":
@@ -163,6 +165,33 @@ class FieldMappingService:
             
             # Fallback to Frappe's getdate
             return getdate(value)
+        except (ValueError, TypeError, AttributeError):
+            return None
+    
+    def _convert_to_datetime(self, value):
+        """Convert value to datetime format"""
+        if not value:
+            return None
+        
+        try:
+            from frappe.utils import get_datetime
+            from datetime import datetime
+            
+            # Handle DD/MM/YYYY format (common in Indian documents)
+            if isinstance(value, str) and '/' in value:
+                # Try to parse DD/MM/YYYY format
+                try:
+                    parts = value.split('/')
+                    if len(parts) == 3:
+                        day, month, year = parts
+                        # Convert DD/MM/YYYY to YYYY-MM-DD HH:MM:SS
+                        datetime_str = f"{year}-{month.zfill(2)}-{day.zfill(2)} 00:00:00"
+                        return get_datetime(datetime_str)
+                except (ValueError, IndexError):
+                    pass
+            
+            # Fallback to Frappe's get_datetime
+            return get_datetime(value)
         except (ValueError, TypeError, AttributeError):
             return None
     
