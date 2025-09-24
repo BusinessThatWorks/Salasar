@@ -10,22 +10,11 @@ dynamic = ["version"]
 dependencies = [
     # "frappe~=15.0.0" # Installed and managed by bench.
     "requests>=2.25.0",  # For RunPod API integration
-    
-    # PDF processing dependencies for Claude Vision feature
-    "pdf2image>=1.16.0",  # Primary PDF to image conversion
-    "PyMuPDF>=1.23.0",    # Fallback PDF processing library
-    "Pillow>=9.0.0",      # Image processing (required by pdf2image)
 ]
 
 [build-system]
 requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
-
-# System dependencies for Frappe Cloud deployment
-[deploy.dependencies.apt]
-packages = [
-    "poppler-utils",  # Required by pdf2image for PDF conversion
-]
 
 # These dependencies are only installed when developer mode is enabled
 [tool.bench.dev-dependencies]

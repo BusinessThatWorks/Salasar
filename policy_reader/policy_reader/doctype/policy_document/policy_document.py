@@ -589,49 +589,41 @@ class PolicyDocument(Document):
     
     def process_with_claude_vision(self, file_path, api_key, settings):
         """
-        Process PDF with Claude's vision capabilities by converting to images first
+        Process PDF directly with Claude API using native PDF support
         """
         try:
             import base64
             import requests
             
-            # Convert PDF to images first (Claude doesn't support PDF directly in vision API)
-            images = self.convert_pdf_to_images(file_path)
-            
-            if not images:
-                return {
-                    "success": False,
-                    "error": "Failed to convert PDF to images for Claude Vision processing"
-                }
+            # Read and encode PDF file directly
+            with open(file_path, 'rb') as pdf_file:
+                pdf_data = base64.standard_b64encode(pdf_file.read()).decode('utf-8')
             
             # Get extraction prompt from settings
             prompt_text = self.get_vision_extraction_prompt(self.policy_type, settings)
             
-            # Prepare Claude API request for vision with images
+            # Prepare Claude API request with direct PDF support
             headers = {
                 'Content-Type': 'application/json',
                 'X-API-Key': api_key,
                 'anthropic-version': '2023-06-01'
             }
             
-            # Build content array with text prompt and images
+            # Build content array with PDF document and text prompt
             content = [
+                {
+                    'type': 'document',
+                    'source': {
+                        'type': 'base64',
+                        'media_type': 'application/pdf',
+                        'data': pdf_data
+                    }
+                },
                 {
                     'type': 'text',
                     'text': prompt_text
                 }
             ]
-            
-            # Add each page image (limit to first 10 pages to stay within limits)
-            for i, image_data in enumerate(images[:10]):
-                content.append({
-                    'type': 'image',
-                    'source': {
-                        'type': 'base64',
-                        'media_type': 'image/png',
-                        'data': image_data
-                    }
-                })
             
             payload = {
                 'model': getattr(settings, 'claude_model', 'claude-sonnet-4-20250514'),
@@ -688,7 +680,7 @@ class PolicyDocument(Document):
                 from pdf2image import convert_from_path
                 
                 # Convert PDF pages to images
-                pages = convert_from_path(file_path, dpi=200, first_page=1, last_page=10)
+                pages = convert_from_path(file_path, dpi=200, first_page=1, last_page=12)
                 
                 images = []
                 for page in pages:
@@ -716,8 +708,8 @@ class PolicyDocument(Document):
                     doc = fitz.open(file_path)
                     images = []
                     
-                    # Convert first 10 pages to images
-                    for page_num in range(min(len(doc), 10)):
+                    # Convert first 12 pages to images
+                    for page_num in range(min(len(doc), 12)):
                         page = doc.load_page(page_num)
                         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))  # 2x zoom for better quality
                         img_data = pix.tobytes("png")
@@ -811,10 +803,15 @@ Required fields to extract:
 
 Extraction rules:
 - Dates: Convert to DD/MM/YYYY format only (e.g., "From 12-JUL-2022" → "12/07/2022")
-- Currency/Amounts: Extract digits only, remove currency symbols, commas, dashes
-- Numbers: Extract digits only, remove descriptive text
+- Currency/Amounts: Extract the exact numeric value including decimals, remove currency symbols and commas only
+  * "₹4,156,250.00" → "4156250.00"
+  * "Rs. 13,502/-" → "13502"
+  * "3,747.50" → "3747.50"
+  * Preserve decimal points (.00, .50, etc.) when present
+- Numbers: Extract digits and decimals only, remove descriptive text but keep decimal places
 - Text fields: Extract clean core values, remove prefixes/labels
 - Missing fields: Use null
+- IMPORTANT: For sum_insured, net_od_premium, tp_premium, gst - be very careful with decimal places and large numbers
 - Return ONLY a flat JSON object with the exact field names listed above
 
 Example output format:
@@ -824,48 +821,70 @@ Example output format:
   "make": "Maruti",
   "model": "Swift",
   "year_of_man": "2019",
-  "sum_insured": "500000",
+  "sum_insured": "500000.00",
+  "net_od_premium": "13502.00",
+  "tp_premium": "7317.00",
+  "gst": "3747.50",
   ...
 }}
 
 Return only valid JSON, no explanations or markdown formatting."""
                 else:
-                    # Health policy fallback
+                    # Health policy fallback - using Saiba field specifications
                     prompt = f"""Analyze this health insurance policy PDF and extract the following information as a flat JSON object:
 
 Required fields to extract:
-- policy_number (Policy Number, Policy No)
-- insured_name (Insured Name, Name of Insured)
-- policy_start_date (Policy Start Date, Start Date, From Date)
-- policy_end_date (Policy End Date, End Date, To Date, Expiry Date)
 - customer_code (Customer Code)
-- net_premium (Net Premium, Premium Amount)
-- policy_period (Policy Period)
-- sum_insured (Sum Insured, Coverage Amount)
-- issuing_office (Issuing Office)
-- relationship_to_policyholder (Relationship to Policyholder)
-- date_of_birth (Date of Birth, DOB)
-- nominee_name (Nominee Name)
-- mobile_no (Mobile Number, Contact Number)
-- email_id (Email ID, Email)
-- gender (Gender)
-- customer_name (Customer Name)
+- pos_policy (Pos Policy, POS Policy)
+- policy_biz_type (PolicyBiz Type, Policy Biz Type)
+- insurer_branch_code (Insurer Branch Code)
+- policy_issuance_date (PolicyIssuanceDate, Policy Issuance Date)
+- policy_start_date (PolicyStartDate, Policy Start Date, Start Date, From Date)
+- policy_expiry_date (PolicyExpiryDate, Policy Expiry Date, Expiry Date, To Date)
+- policy_type (Policy Type)
+- policy_no (PolicyNo, Policy No, Policy Number)
+- plan_name (Plan Name)
+- is_renewable (IsRenewable, Is Renewable, Renewable)
+- prev_policy (PrevPolicy, Previous Policy)
+- insured1name (INSURED1NAME, Insured Name, Insured 1 Name)
+- insured1gender (INSURED1GENDER, Insured Gender, Gender)
+- insured1dob (INSURED1DOB, Insured DOB, Date of Birth, DOB)
+- insured1relation (INSURED1RELATION, Insured Relation, Relationship)
+- sum_insured (Sum Insured, Insured Amount, Coverage Amount)
+- net_od_premium (Net/OD Premium, Net Premium, Premium Amount)
+- gst (GST, Tax, Service Tax)
+- stamp_duty (StampDuty, Stamp Duty)
+- payment_mode (Payment Mode)
+- bank_name (Bank Name)
+- payment_transaction_no (Payment TransactionNo, Transaction No)
+- remarks (Remarks, Comments, Notes)
+- policy_status (Policy Status, Status)
 
 Extraction rules:
 - Dates: Convert to DD/MM/YYYY format only (e.g., "12-JUL-2022" → "12/07/2022")
-- Currency/Amounts: Extract digits only, remove currency symbols, commas, dashes
-- Numbers: Extract digits only, remove descriptive text
+- Currency/Amounts: Extract the exact numeric value including decimals, remove currency symbols and commas only
+  * "₹10,000,000.00" → "10000000.00"
+  * "Rs. 1,50,000/-" → "150000"
+  * "25,000.50" → "25000.50"
+  * Preserve decimal points (.00, .50, etc.) when present
+- Numbers: Extract digits and decimals only, remove descriptive text but keep decimal places
 - Text fields: Extract clean core values, remove prefixes/labels
 - Missing fields: Use null
+- IMPORTANT: For sum_insured, net_od_premium, gst - be very careful with decimal places and large numbers
 - Return ONLY a flat JSON object with the exact field names listed above
 
 Example output format:
 {{
-  "policy_number": "HEALTH123456",
-  "insured_name": "John Doe",
+  "customer_code": "12345",
+  "policy_no": "HEALTH123456",
+  "insured1name": "John Doe",
   "policy_start_date": "01/01/2024",
-  "policy_end_date": "31/12/2024",
-  "sum_insured": "500000",
+  "policy_expiry_date": "31/12/2024",
+  "sum_insured": "10000000.00",
+  "net_od_premium": "15000.00",
+  "gst": "2700.50",
+  "insured1gender": "Male",
+  "insured1relation": "Self",
   ...
 }}
 

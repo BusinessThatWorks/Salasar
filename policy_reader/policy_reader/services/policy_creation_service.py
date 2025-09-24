@@ -25,7 +25,11 @@ class PolicyCreationService:
             # Get field mapping from Policy Reader Settings
             field_mapping = self.get_field_mapping_for_policy_type(policy_type)
             
+            frappe.logger().info(f"=== POLICY CREATION DEBUG for {policy_type} ===")
+            frappe.logger().info(f"Field mapping retrieved: {len(field_mapping) if field_mapping else 0} entries")
+            
             if not field_mapping:
+                frappe.logger().error(f"No field mapping found for {policy_type}")
                 return {
                     "success": False,
                     "error": f"No field mapping found for {policy_type}. Please refresh field mappings in Policy Reader Settings."
@@ -33,7 +37,12 @@ class PolicyCreationService:
             
             # Parse extracted data
             extracted_data = frappe.parse_json(policy_doc.extracted_fields)
+            frappe.logger().info(f"Raw extracted fields: {extracted_data}")
+            frappe.logger().info(f"Extracted fields type: {type(extracted_data)}")
+            
             parsed_data = self.parse_nested_extracted_data(extracted_data)
+            frappe.logger().info(f"Parsed data keys: {list(parsed_data.keys()) if parsed_data else 'No parsed data'}")
+            frappe.logger().info(f"Parsed data sample: {dict(list(parsed_data.items())[:5]) if parsed_data else 'No data'}")
             
             # Create policy document
             if policy_type.lower() == "motor":
@@ -296,7 +305,9 @@ class PolicyCreationService:
             
             # Convert based on field type
             if field.fieldtype == "Date":
-                return getdate(value)
+                return self.convert_date_value(value)
+            elif field.fieldtype == "Datetime":
+                return self.convert_datetime_value(value)
             elif field.fieldtype == "Float":
                 return flt(value)
             elif field.fieldtype == "Int":
@@ -310,6 +321,56 @@ class PolicyCreationService:
                 
         except Exception as e:
             frappe.logger().error(f"Error converting field {field_name}: {str(e)}")
+            return None
+    
+    def convert_date_value(self, value):
+        """
+        Convert date value from DD/MM/YYYY format to proper date object
+        """
+        try:
+            if not value or str(value).strip().upper() in ['NA', 'N/A', 'NULL', 'NONE', '']:
+                return None
+            
+            # Handle DD/MM/YYYY format specifically
+            date_str = str(value).strip()
+            if '/' in date_str and len(date_str.split('/')) == 3:
+                parts = date_str.split('/')
+                if len(parts[0]) <= 2 and len(parts[1]) <= 2 and len(parts[2]) == 4:
+                    # DD/MM/YYYY format
+                    day, month, year = parts
+                    formatted_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+                    return getdate(formatted_date)
+            
+            # Fall back to getdate for other formats
+            return getdate(value)
+        except Exception as e:
+            frappe.logger().error(f"Error converting date value {value}: {str(e)}")
+            return None
+    
+    def convert_datetime_value(self, value):
+        """
+        Convert datetime value from DD/MM/YYYY format to proper datetime object
+        """
+        try:
+            if not value or str(value).strip().upper() in ['NA', 'N/A', 'NULL', 'NONE', '']:
+                return None
+            
+            # Handle DD/MM/YYYY format specifically
+            date_str = str(value).strip()
+            if '/' in date_str and len(date_str.split('/')) == 3:
+                parts = date_str.split('/')
+                if len(parts[0]) <= 2 and len(parts[1]) <= 2 and len(parts[2]) == 4:
+                    # DD/MM/YYYY format - convert to YYYY-MM-DD HH:MM:SS
+                    day, month, year = parts
+                    formatted_datetime = f"{year}-{month.zfill(2)}-{day.zfill(2)} 00:00:00"
+                    from frappe.utils import get_datetime
+                    return get_datetime(formatted_datetime)
+            
+            # Fall back to get_datetime for other formats
+            from frappe.utils import get_datetime
+            return get_datetime(value)
+        except Exception as e:
+            frappe.logger().error(f"Error converting datetime value {value}: {str(e)}")
             return None
     
     def normalize_select_value(self, value, options):
@@ -349,9 +410,33 @@ class PolicyCreationService:
         """
         try:
             settings = frappe.get_single("Policy Reader Settings")
-            return settings.get_cached_field_mapping(policy_type)
+            mapping = settings.get_cached_field_mapping(policy_type)
+            
+            # Debug logging
+            frappe.logger().info(f"=== FIELD MAPPING DEBUG for {policy_type} ===")
+            frappe.logger().info(f"Raw motor_policy_fields: {bool(settings.motor_policy_fields)}")
+            frappe.logger().info(f"Raw health_policy_fields: {bool(settings.health_policy_fields)}")
+            frappe.logger().info(f"Retrieved mapping for {policy_type}: {len(mapping) if mapping else 0} entries")
+            
+            # If no cached mapping, try to build one
+            if not mapping:
+                frappe.logger().info(f"No cached mapping found, building default for {policy_type}")
+                mapping = settings.build_default_field_mapping(policy_type)
+                frappe.logger().info(f"Built default mapping: {len(mapping) if mapping else 0} entries")
+                
+                # Update the cache with the built mapping
+                if mapping:
+                    if policy_type.lower() == "motor":
+                        settings.motor_policy_fields = frappe.as_json(mapping)
+                    elif policy_type.lower() == "health":
+                        settings.health_policy_fields = frappe.as_json(mapping)
+                    settings.save()
+                    frappe.logger().info(f"Updated {policy_type} mapping cache")
+            
+            return mapping
         except Exception as e:
             frappe.log_error(f"Error getting field mapping for {policy_type}: {str(e)}")
+            frappe.logger().error(f"Error getting field mapping for {policy_type}: {str(e)}")
             return {}
     
     def get_available_policy_types(self):

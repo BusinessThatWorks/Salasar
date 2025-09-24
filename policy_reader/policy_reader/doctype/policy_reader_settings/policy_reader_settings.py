@@ -199,6 +199,10 @@ class PolicyReaderSettings(Document):
 			motor_mapping = self.build_default_field_mapping("motor")
 			health_mapping = self.build_default_field_mapping("health")
 			
+			frappe.logger().info(f"Built motor mapping: {len(motor_mapping)} fields")
+			frappe.logger().info(f"Built health mapping: {len(health_mapping)} fields")
+			frappe.logger().info(f"Sample health mapping: {dict(list(health_mapping.items())[:5])}")
+			
 			# Update cached mappings
 			self.motor_policy_fields = frappe.as_json(motor_mapping)
 			self.health_policy_fields = frappe.as_json(health_mapping)
@@ -206,6 +210,8 @@ class PolicyReaderSettings(Document):
 			
 			# Save the document
 			self.save()
+			
+			frappe.logger().info("Field mappings saved to database")
 			
 			frappe.msgprint(
 				f"Field mappings refreshed successfully (DocType-independent). Motor: {len(motor_mapping)} fields, Health: {len(health_mapping)} fields.",
@@ -220,6 +226,7 @@ class PolicyReaderSettings(Document):
 			
 		except Exception as e:
 			frappe.log_error(f"Field mapping refresh failed: {str(e)}", "Field Mapping Refresh Error")
+			frappe.logger().error(f"Field mapping refresh failed: {str(e)}")
 			frappe.throw(f"Failed to refresh field mappings: {str(e)}")
 
 	def build_default_field_mapping(self, policy_type):
@@ -280,19 +287,44 @@ class PolicyReaderSettings(Document):
 			}
 		elif policy_type_lower == "health":
 			alias_map = {
-				"policy_number": ["Policy Number", "PolicyNumber", "Policy No"],
-				"insured_name": ["Insured Name", "InsuredName", "Name of Insured"],
-				"policy_start_date": ["Policy Start Date", "Start Date", "From Date"],
-				"policy_end_date": ["Policy End Date", "End Date", "To Date", "Expiry Date"],
-				"customer_code": ["Customer Code", "CustomerCode"],
-				"net_premium": ["Net Premium", "NetPremium", "Premium Amount"],
-				"policy_period": ["Policy Period", "PolicyPeriod", "Period"],
-				"issuing_office": ["Issuing Office", "IssuingOffice", "Office"],
-				"relationship_to_policyholder": ["Relationship", "Relation", "RelationshipToPolicyholder"],
-				"date_of_birth": ["Date of Birth", "DateOfBirth", "DOB", "Birth Date"],
-				"insured_name_2": ["Insured Name 2", "Second Insured", "InsuredName2"],
-				"nominee_name": ["Nominee Name", "NomineeName", "Nominee"],
-				"insured_code": ["Insured Code", "InsuredCode"],
+				# Customer and Policy Info
+				"customer_code": ["Customer Code", "CustomerCode", "customer_code"],
+				"pos_policy": ["Pos Policy", "POS Policy", "pos_policy"],
+				"policy_biz_type": ["PolicyBiz Type", "Policy Biz Type", "PolicyBizType", "policy_biz_type"],
+				"insurer_branch_code": ["Insurer Branch Code", "InsurerBranchCode", "insurer_branch_code"],
+				
+				# Policy Dates
+				"policy_issuance_date": ["PolicyIssuanceDate", "Policy Issuance Date", "Issuance Date", "policy_issuance_date"],
+				"policy_start_date": ["PolicyStartDate", "Policy Start Date", "Start Date", "From Date", "policy_start_date"],
+				"policy_expiry_date": ["PolicyExpiryDate", "Policy Expiry Date", "Expiry Date", "To Date", "End Date", "policy_expiry_date"],
+				
+				# Policy Details
+				"policy_type": ["Policy Type", "PolicyType", "policy_type"],
+				"policy_no": ["PolicyNo", "Policy No", "Policy Number", "PolicyNumber", "policy_no"],
+				"plan_name": ["Plan Name", "PlanName", "plan_name"],
+				"is_renewable": ["IsRenewable", "Is Renewable", "Renewable", "is_renewable"],
+				"prev_policy": ["PrevPolicy", "Previous Policy", "Prev Policy", "prev_policy"],
+				
+				# Insured Person Details
+				"insured1name": ["INSURED1NAME", "Insured Name", "Insured 1 Name", "Insured1Name", "insured1name"],
+				"insured1gender": ["INSURED1GENDER", "Insured Gender", "Insured 1 Gender", "Gender", "insured1gender"],
+				"insured1dob": ["INSURED1DOB", "Insured DOB", "Insured 1 DOB", "Date of Birth", "DOB", "insured1dob"],
+				"insured1relation": ["INSURED1RELATION", "Insured Relation", "Insured 1 Relation", "Relationship", "Relation", "insured1relation"],
+				
+				# Financial Details
+				"sum_insured": ["Sum Insured", "SumInsured", "Insured Amount", "Coverage Amount", "sum_insured"],
+				"net_od_premium": ["Net/OD Premium", "Net Premium", "NetPremium", "Premium Amount", "net_od_premium"],
+				"gst": ["GST", "Tax", "Service Tax", "gst"],
+				"stamp_duty": ["StampDuty", "Stamp Duty", "stamp_duty"],
+				
+				# Payment Details
+				"payment_mode": ["Payment Mode", "PaymentMode", "payment_mode"],
+				"bank_name": ["Bank Name", "BankName", "bank_name"],
+				"payment_transaction_no": ["Payment TransactionNo", "Payment Transaction No", "Transaction No", "payment_transaction_no"],
+				
+				# Additional Fields
+				"remarks": ["Remarks", "Comments", "Notes", "remarks"],
+				"policy_status": ["Policy Status", "PolicyStatus", "Status", "policy_status"],
 			}
 		else:
 			alias_map = {}
@@ -318,18 +350,27 @@ class PolicyReaderSettings(Document):
 	def get_cached_field_mapping(self, policy_type):
 		"""Get cached field mapping for policy type"""
 		try:
+			frappe.logger().info(f"Getting cached field mapping for {policy_type}")
 			if policy_type.lower() == "motor":
+				frappe.logger().info(f"Motor policy fields exist: {bool(self.motor_policy_fields)}")
 				if self.motor_policy_fields:
-					return frappe.parse_json(self.motor_policy_fields)
+					mapping = frappe.parse_json(self.motor_policy_fields)
+					frappe.logger().info(f"Motor mapping loaded: {len(mapping)} entries")
+					return mapping
 			elif policy_type.lower() == "health":
+				frappe.logger().info(f"Health policy fields exist: {bool(self.health_policy_fields)}")
 				if self.health_policy_fields:
-					return frappe.parse_json(self.health_policy_fields)
+					mapping = frappe.parse_json(self.health_policy_fields)
+					frappe.logger().info(f"Health mapping loaded: {len(mapping)} entries")
+					return mapping
 			
 			# Return empty dict if no cached mapping found
+			frappe.logger().info(f"No cached mapping found for {policy_type}")
 			return {}
 			
 		except Exception as e:
 			frappe.log_error(f"Error getting cached field mapping for {policy_type}: {str(e)}", "Field Mapping Cache Error")
+			frappe.logger().error(f"Error getting cached field mapping for {policy_type}: {str(e)}")
 			return {}
 	
 	def build_dynamic_extraction_prompt(self, policy_type, extracted_text):

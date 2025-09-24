@@ -216,14 +216,19 @@ PolicyNumber, VehicleNumber, ChasisNo, EngineNo, Make, Model, PolicyStartDate, P
 
 EXTRACTION RULES:
 - Dates: DD/MM/YYYY format only
-- Currency: Extract digits only (remove currency symbols)
-- Numbers: Digits only (remove descriptive text)
+- Currency/Amounts: Extract exact numeric value including decimals, remove currency symbols and commas only
+  * "₹4,156,250.00" → "4156250.00"
+  * "Rs. 13,502/-" → "13502"
+  * Preserve decimal points when present
+- Numbers: Extract digits and decimals, remove descriptive text but keep decimal places
 - Text: Clean format
 - Missing fields: null
 - Chassis/Engine: Extract from combined formats like "Chassis no./Engine no.: ABC123 DEF456"
+- IMPORTANT: For SumInsured, NetODPremium, TPPremium, GST - be careful with decimal places and large numbers
 
 EXAMPLES:
 - "Chassis no./Engine no.: MATRC4GGA91 J57810/GG91.76864" → ChasisNo: "MATRC4GGA91", EngineNo: "J57810"
+- "₹4,156,250.00" → "4156250.00"
 
 IMPORTANT: Return ONE FLAT JSON object with all fields at the same level.
 DO NOT group fields by categories. DO NOT create nested structures.
@@ -238,9 +243,14 @@ PolicyNumber, InsuredName, PolicyStartDate, PolicyExpiryDate, SumInsured, NetPre
 
 EXTRACTION RULES:
 - Dates: DD/MM/YYYY format only
-- Currency: Extract digits only (remove currency symbols)
+- Currency/Amounts: Extract exact numeric value including decimals, remove currency symbols and commas only
+  * "₹10,000,000.00" → "10000000.00"
+  * "Rs. 15,000/-" → "15000"
+  * Preserve decimal points when present
+- Numbers: Extract digits and decimals, remove descriptive text but keep decimal places
 - Text: Clean format
 - Missing fields: null
+- IMPORTANT: For SumInsured, NetPremium - be very careful with decimal places and large numbers
 
 IMPORTANT: Return ONE FLAT JSON object with all fields at the same level.
 DO NOT group fields by categories. DO NOT create nested structures.
