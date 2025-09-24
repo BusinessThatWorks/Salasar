@@ -42,8 +42,8 @@ function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 			args: {
 				doctype: "Policy Document",
 				name: policyDocumentId,
-			}
-		})
+			},
+		}),
 	];
 
 	// Add Motor Policy call if ID is provided
@@ -54,7 +54,7 @@ function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 				args: {
 					doctype: "Motor Policy",
 					name: motorPolicyId,
-				}
+				},
 			})
 		);
 	}
@@ -89,21 +89,21 @@ function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 			doctype: "Policy Document",
 			name: policyDocumentId,
 		},
-		callback: function(r) {
+		callback: function (r) {
 			if (r.message) {
 				policyDoc = r.message;
 			}
 			checkComplete();
 		},
-		error: function(err) {
-			console.error('Policy Document load error:', err);
+		error: function (err) {
+			console.error("Policy Document load error:", err);
 			page.main.html(`
 				<div class="text-center" style="padding: 50px;">
 					<h3>Error Loading Policy Document</h3>
 					<p>Failed to load policy document: ${err.message || "Unknown error"}</p>
 				</div>
 			`);
-		}
+		},
 	});
 
 	// Load Motor Policy if ID provided
@@ -114,26 +114,28 @@ function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 				doctype: "Motor Policy",
 				name: motorPolicyId,
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
 					motorPolicy = r.message;
 				}
 				checkComplete();
 			},
-			error: function(err) {
-				console.error('Motor Policy load error:', err);
+			error: function (err) {
+				console.error("Motor Policy load error:", err);
 				// Don't fail completely, just proceed without Motor Policy
 				checkComplete();
-			}
+			},
 		});
 	}
 }
 
 function renderSplitPane(page, policyDoc, motorPolicy) {
 	// Generate content for the right pane
-	const rightPaneContent = motorPolicy ? renderMotorPolicyFields(motorPolicy, policyDoc) : formatExtractedFields(policyDoc);
-	console.log('Right pane content length:', rightPaneContent.length);
-	
+	const rightPaneContent = motorPolicy
+		? renderMotorPolicyFields(motorPolicy, policyDoc)
+		: formatExtractedFields(policyDoc);
+	console.log("Right pane content length:", rightPaneContent.length);
+
 	// Create split pane layout
 	page.main.html(`
 		<!-- Header with Policy Document Link -->
@@ -143,9 +145,6 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 					<div class="d-flex align-items-center mb-2">
 						<button class="btn btn-outline-secondary btn-sm mr-3" onclick="window.close()" title="Close this tab">
 							<i class="fa fa-times"></i> Close
-						</button>
-						<button class="btn btn-outline-info btn-sm mr-3" onclick="restoreNavigation(); window.location.href='/app'" title="Back to Frappe">
-							<i class="fa fa-home"></i> Back to Frappe
 						</button>
 						<h4 class="mb-0">${policyDoc.title || "Policy Document"}</h4>
 					</div>
@@ -200,13 +199,14 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 			<!-- Motor Policy Fields Pane -->
 			<div class="fields-pane" style="flex: 1; min-width: 0; position: relative;">
 				<div class="pane-header" style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #d1d5db; display: flex; justify-content: space-between; align-items: center;">
-					<h5 class="mb-0">${motorPolicy ? 'Motor Policy Fields' : 'Extracted Fields'}</h5>
+					<h5 class="mb-0">${motorPolicy ? "Motor Policy Fields" : "Extracted Fields"}</h5>
 					<div class="fields-controls">
-						${motorPolicy ? 
-							`<button class="btn btn-sm btn-outline-primary" id="save-policy">Save Changes</button>
+						${
+							motorPolicy
+								? `<button class="btn btn-sm btn-outline-primary" id="save-policy">Save Changes</button>
 							 <button class="btn btn-sm btn-outline-info" id="refresh-policy">Refresh</button>
-							 <button class="btn btn-sm btn-outline-secondary" id="toggle-extracted">Show Extracted</button>` :
-							`<button class="btn btn-sm btn-outline-secondary" id="toggle-view">Show Raw Text</button>
+							 <button class="btn btn-sm btn-outline-secondary" id="toggle-extracted">Show Extracted</button>`
+								: `<button class="btn btn-sm btn-outline-secondary" id="toggle-view">Show Raw Text</button>
 							 <button class="btn btn-sm btn-outline-secondary" id="copy-fields">Copy</button>`
 						}
 					</div>
@@ -222,13 +222,14 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 	`);
 
 	// Insert the right pane content after DOM is created with error handling
-	const contentDiv = document.getElementById('policy-fields-content');
+	const contentDiv = document.getElementById("policy-fields-content");
 	if (contentDiv) {
 		try {
 			contentDiv.innerHTML = rightPaneContent;
 		} catch (error) {
-			console.error('Error setting innerHTML:', error);
-			contentDiv.innerHTML = '<div class="alert alert-danger">Error loading form fields. Please refresh and try again.</div>';
+			console.error("Error setting innerHTML:", error);
+			contentDiv.innerHTML =
+				'<div class="alert alert-danger">Error loading form fields. Please refresh and try again.</div>';
 		}
 	}
 
@@ -433,9 +434,10 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 	let extractedData = {};
 	try {
 		if (policyDoc.extracted_fields) {
-			extractedData = typeof policyDoc.extracted_fields === "string" 
-				? JSON.parse(policyDoc.extracted_fields) 
-				: policyDoc.extracted_fields;
+			extractedData =
+				typeof policyDoc.extracted_fields === "string"
+					? JSON.parse(policyDoc.extracted_fields)
+					: policyDoc.extracted_fields;
 		}
 	} catch (e) {
 		console.warn("Could not parse extracted fields:", e);
@@ -447,57 +449,62 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 			title: "Policy Information",
 			icon: "file-text-o",
 			fields: [
-				{name: "policy_no", label: "Policy No", type: "text"},
-				{name: "policy_type", label: "Policy Type", type: "text"},
-				{name: "policy_issuance_date", label: "Policy Issuance Date", type: "date"},
-				{name: "policy_start_date", label: "Policy Start Date", type: "date"},
-				{name: "policy_expiry_date", label: "Policy Expiry Date", type: "date"}
-			]
+				{ name: "policy_no", label: "Policy No", type: "text" },
+				{ name: "policy_type", label: "Policy Type", type: "text" },
+				{ name: "policy_issuance_date", label: "Policy Issuance Date", type: "date" },
+				{ name: "policy_start_date", label: "Policy Start Date", type: "date" },
+				{ name: "policy_expiry_date", label: "Policy Expiry Date", type: "date" },
+			],
 		},
 		{
 			title: "Vehicle Information",
 			icon: "car",
 			fields: [
-				{name: "vehicle_no", label: "Vehicle No", type: "text"},
-				{name: "make", label: "Make", type: "text"},
-				{name: "model", label: "Model", type: "text"},
-				{name: "variant", label: "Variant", type: "text"},
-				{name: "year_of_man", label: "Year of Manufacture", type: "number"},
-				{name: "chasis_no", label: "Chasis No", type: "text"},
-				{name: "engine_no", label: "Engine No", type: "text"},
-				{name: "cc", label: "CC", type: "text"},
-				{name: "fuel", label: "Fuel", type: "text"}
-			]
+				{ name: "vehicle_no", label: "Vehicle No", type: "text" },
+				{ name: "make", label: "Make", type: "text" },
+				{ name: "model", label: "Model", type: "text" },
+				{ name: "variant", label: "Variant", type: "text" },
+				{ name: "year_of_man", label: "Year of Manufacture", type: "number" },
+				{ name: "chasis_no", label: "Chasis No", type: "text" },
+				{ name: "engine_no", label: "Engine No", type: "text" },
+				{ name: "cc", label: "CC", type: "text" },
+				{ name: "fuel", label: "Fuel", type: "text" },
+			],
 		},
 		{
 			title: "Business Information",
 			icon: "building",
 			fields: [
-				{name: "customer_code", label: "Customer Code", type: "text"},
-				{name: "policy_biz_type", label: "Policy Biz Type", type: "text"},
-				{name: "insurer_branch_code", label: "Insurer Branch Code", type: "number"},
-				{name: "new_renewal", label: "New/Renewal", type: "select", options: ["New", "Renewal"]},
-				{name: "payment_mode", label: "Payment Mode", type: "text"},
-				{name: "bank_name", label: "Bank Name", type: "text"},
-				{name: "payment_transaction_no", label: "Payment Transaction No", type: "text"}
-			]
+				{ name: "customer_code", label: "Customer Code", type: "text" },
+				{ name: "policy_biz_type", label: "Policy Biz Type", type: "text" },
+				{ name: "insurer_branch_code", label: "Insurer Branch Code", type: "number" },
+				{
+					name: "new_renewal",
+					label: "New/Renewal",
+					type: "select",
+					options: ["New", "Renewal"],
+				},
+				{ name: "payment_mode", label: "Payment Mode", type: "text" },
+				{ name: "bank_name", label: "Bank Name", type: "text" },
+				{ name: "payment_transaction_no", label: "Payment Transaction No", type: "text" },
+			],
 		},
 		{
 			title: "Financial Details",
 			icon: "money",
 			fields: [
-				{name: "sum_insured", label: "Sum Insured", type: "float"},
-				{name: "net_od_premium", label: "Net/OD Premium", type: "float"},
-				{name: "tp_premium", label: "TP Premium", type: "float"},
-				{name: "gst", label: "GST", type: "float"},
-				{name: "ncb", label: "NCB", type: "float"}
-			]
-		}
+				{ name: "sum_insured", label: "Sum Insured", type: "float" },
+				{ name: "net_od_premium", label: "Net/OD Premium", type: "float" },
+				{ name: "tp_premium", label: "TP Premium", type: "float" },
+				{ name: "gst", label: "GST", type: "float" },
+				{ name: "ncb", label: "NCB", type: "float" },
+			],
+		},
 	];
 
 	let html = '<div class="motor-policy-form">';
 
-	fieldGroups.forEach(group => {
+	fieldGroups.forEach((group) => {
 		html += `
 			<div class="field-group mb-4">
 				<div class="group-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 15px; border-radius: 6px 6px 0 0; margin-bottom: 0;">
@@ -512,17 +519,29 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 		group.fields.forEach((field, index) => {
 			const value = motorPolicy[field.name] || "";
 			const extractedValue = getExtractedValue(extractedData, field.name, field.label);
-			
+
 			html += `
 				<div class="col-md-6 mb-3">
 					<label class="form-label" style="font-weight: 600; color: #495057;">
 						${field.label}
-						${extractedValue ? '<i class="fa fa-lightbulb-o text-warning ml-1" title="Extracted data available"></i>' : ''}
+						${
+							extractedValue
+								? '<i class="fa fa-lightbulb-o text-warning ml-1" title="Extracted data available"></i>'
+								: ""
+						}
 					</label>
 					${renderFieldInput(field, value, extractedValue)}
-					${extractedValue && extractedValue !== value ? 
-						`<small class="text-muted">Extracted: <span class="text-info">${escapeQuotes(extractedValue)}</span> 
-						 <button class="btn btn-xs btn-link p-0 ml-1" data-field="${field.name}" data-value="${escapeQuotes(extractedValue)}" onclick="copyExtractedValueFromButton(this)">Copy</button></small>` : ''
+					${
+						extractedValue && extractedValue !== value
+							? `<small class="text-muted">Extracted: <span class="text-info">${escapeQuotes(
+									extractedValue
+							  )}</span> 
+						 <button class="btn btn-xs btn-link p-0 ml-1" data-field="${
+								field.name
+							}" data-value="${escapeQuotes(
+									extractedValue
+							  )}" onclick="copyExtractedValueFromButton(this)">Copy</button></small>`
+							: ""
 					}
 				</div>
 			`;
@@ -535,7 +554,7 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 		`;
 	});
 
-	html += '</div>';
+	html += "</div>";
 	return html;
 }
 
@@ -543,9 +562,9 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
  * Render individual field input based on field type
  */
 function renderFieldInput(field, value, extractedValue) {
-	const safeValue = escapeQuotes(value || '');
-	const safePlaceholder = escapeQuotes(extractedValue || 'Enter ' + field.label);
-	
+	const safeValue = escapeQuotes(value || "");
+	const safePlaceholder = escapeQuotes(extractedValue || "Enter " + field.label);
+
 	const commonAttrs = `
 		id="field-${field.name}" 
 		name="${field.name}" 
@@ -555,15 +574,22 @@ function renderFieldInput(field, value, extractedValue) {
 	`;
 
 	switch (field.type) {
-		case 'date':
+		case "date":
 			return `<input type="date" value="${safeValue}" ${commonAttrs}>`;
-		case 'number':
-		case 'float':
-			return `<input type="number" value="${safeValue}" ${commonAttrs} ${field.type === 'float' ? 'step="0.01"' : ''}>`;
-		case 'select':
-			const options = field.options.map(opt => 
-				`<option value="${escapeQuotes(opt)}" ${value === opt ? 'selected' : ''}>${opt}</option>`
-			).join('');
+		case "number":
+		case "float":
+			return `<input type="number" value="${safeValue}" ${commonAttrs} ${
+				field.type === "float" ? 'step="0.01"' : ""
+			}>`;
+		case "select":
+			const options = field.options
+				.map(
+					(opt) =>
+						`<option value="${escapeQuotes(opt)}" ${
+							value === opt ? "selected" : ""
+						}>${opt}</option>`
+				)
+				.join("");
 			return `<select ${commonAttrs}><option value="">Select ${field.label}</option>${options}</select>`;
 		default:
 			return `<input type="text" value="${safeValue}" ${commonAttrs}>`;
@@ -574,41 +600,43 @@ function renderFieldInput(field, value, extractedValue) {
  * Escape quotes and special characters for HTML attributes
  */
 function escapeQuotes(str) {
-	if (!str) return '';
+	if (!str) return "";
 	return String(str)
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&#39;')
-		.replace(/\$/g, '&#36;')
-		.replace(/`/g, '&#96;')
-		.replace(/\{/g, '&#123;')
-		.replace(/\}/g, '&#125;');
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;")
+		.replace(/\$/g, "&#36;")
+		.replace(/`/g, "&#96;")
+		.replace(/\{/g, "&#123;")
+		.replace(/\}/g, "&#125;");
 }
 
 /**
  * Get extracted value for a field by trying different key variations
  */
 function getExtractedValue(extractedData, fieldName, fieldLabel) {
-	if (!extractedData || typeof extractedData !== 'object') return null;
-	
+	if (!extractedData || typeof extractedData !== "object") return null;
+
 	// Try different key variations
 	const keys = [
 		fieldName,
 		fieldLabel,
-		fieldLabel.replace(/\s/g, ''),
-		fieldName.replace(/_/g, ' '),
-		fieldName.replace(/_/g, '')
+		fieldLabel.replace(/\s/g, ""),
+		fieldName.replace(/_/g, " "),
+		fieldName.replace(/_/g, ""),
 	];
-	
+
 	for (const key of keys) {
 		if (extractedData[key]) return extractedData[key];
 		// Check case-insensitive
-		const found = Object.keys(extractedData).find(k => k.toLowerCase() === key.toLowerCase());
+		const found = Object.keys(extractedData).find(
+			(k) => k.toLowerCase() === key.toLowerCase()
+		);
 		if (found && extractedData[found]) return extractedData[found];
 	}
-	
+
 	return null;
 }
 
@@ -831,76 +859,81 @@ function setupEventHandlers(policyDoc, motorPolicy) {
 		const saveStatus = createSaveStatusIndicator();
 
 		// Add change listeners to all Motor Policy fields
-		document.addEventListener('change', function(e) {
-			if (e.target.classList.contains('motor-policy-field')) {
+		document.addEventListener("change", function (e) {
+			if (e.target.classList.contains("motor-policy-field")) {
 				clearTimeout(saveTimeout);
-				saveStatus.show('saving');
-				
+				saveStatus.show("saving");
+
 				saveTimeout = setTimeout(() => {
-					saveMotorPolicyField(motorPolicy.name, e.target.dataset.fieldname, e.target.value, saveStatus);
+					saveMotorPolicyField(
+						motorPolicy.name,
+						e.target.dataset.fieldname,
+						e.target.value,
+						saveStatus
+					);
 				}, 500); // Debounce saves by 500ms
 			}
 		});
 
 		// Handle copy extracted value buttons
-		window.copyExtractedValue = function(fieldName, extractedValue) {
+		window.copyExtractedValue = function (fieldName, extractedValue) {
 			const field = document.getElementById(`field-${fieldName}`);
 			if (field) {
 				field.value = extractedValue;
-				field.dispatchEvent(new Event('change')); // Trigger save
-				frappe.show_alert({message: 'Value copied!', indicator: 'green'});
+				field.dispatchEvent(new Event("change")); // Trigger save
+				frappe.show_alert({ message: "Value copied!", indicator: "green" });
 			}
 		};
 
 		// Handle copy from button data attributes (safer approach)
-		window.copyExtractedValueFromButton = function(button) {
-			const fieldName = button.getAttribute('data-field');
-			const extractedValue = button.getAttribute('data-value');
+		window.copyExtractedValueFromButton = function (button) {
+			const fieldName = button.getAttribute("data-field");
+			const extractedValue = button.getAttribute("data-value");
 			const field = document.getElementById(`field-${fieldName}`);
 			if (field && extractedValue) {
 				field.value = extractedValue;
-				field.dispatchEvent(new Event('change')); // Trigger save
-				frappe.show_alert({message: 'Value copied!', indicator: 'green'});
+				field.dispatchEvent(new Event("change")); // Trigger save
+				frappe.show_alert({ message: "Value copied!", indicator: "green" });
 			}
 		};
 
 		// Handle save all button
-		const saveBtn = document.getElementById('save-policy');
+		const saveBtn = document.getElementById("save-policy");
 		if (saveBtn) {
-			saveBtn.addEventListener('click', function() {
+			saveBtn.addEventListener("click", function () {
 				saveAllMotorPolicyChanges(motorPolicy.name, saveStatus);
 			});
 		}
 
 		// Handle refresh button
-		const refreshBtn = document.getElementById('refresh-policy');
+		const refreshBtn = document.getElementById("refresh-policy");
 		if (refreshBtn) {
-			refreshBtn.addEventListener('click', function() {
+			refreshBtn.addEventListener("click", function () {
 				// Reset button appearance if it was showing warning state
-				this.classList.remove('btn-warning');
-				this.classList.add('btn-outline-info');
+				this.classList.remove("btn-warning");
+				this.classList.add("btn-outline-info");
 				this.innerHTML = '<i class="fa fa-refresh"></i> Refresh';
-				
+
 				// Reload the page with same parameters to get fresh data
 				window.location.reload();
 			});
 		}
 
 		// Handle toggle extracted fields button
-		const toggleBtn = document.getElementById('toggle-extracted');
+		const toggleBtn = document.getElementById("toggle-extracted");
 		if (toggleBtn) {
-			toggleBtn.addEventListener('click', function() {
-				const content = document.getElementById('policy-fields-content');
-				if (this.textContent === 'Show Extracted') {
+			toggleBtn.addEventListener("click", function () {
+				const content = document.getElementById("policy-fields-content");
+				if (this.textContent === "Show Extracted") {
 					content.innerHTML = formatExtractedFields(policyDoc);
-					this.textContent = 'Show Form Fields';
-					this.classList.remove('btn-outline-secondary');
-					this.classList.add('btn-outline-primary');
+					this.textContent = "Show Form Fields";
+					this.classList.remove("btn-outline-secondary");
+					this.classList.add("btn-outline-primary");
 				} else {
 					content.innerHTML = renderMotorPolicyFields(motorPolicy, policyDoc);
-					this.textContent = 'Show Extracted';
-					this.classList.remove('btn-outline-primary');
-					this.classList.add('btn-outline-secondary');
+					this.textContent = "Show Extracted";
+					this.classList.remove("btn-outline-primary");
+					this.classList.add("btn-outline-secondary");
 					// Re-attach event listeners after re-rendering
 					setupMotorPolicyFieldListeners(motorPolicy.name, saveStatus);
 				}
@@ -948,25 +981,25 @@ function setupEventHandlers(policyDoc, motorPolicy) {
 	const toggleViewBtn = document.getElementById("toggle-view");
 	if (toggleViewBtn) {
 		toggleViewBtn.addEventListener("click", function () {
-		const button = this;
-		const content = document.getElementById("extracted-fields-content");
-		const container = document.querySelector(".fields-container");
+			const button = this;
+			const content = document.getElementById("extracted-fields-content");
+			const container = document.querySelector(".fields-container");
 
-		if (button.textContent === "Show Raw Text") {
-			// Switch to raw text view
-			content.innerHTML = policyDoc.raw_ocr_text
-				? formatExtractedText(policyDoc.raw_ocr_text)
-				: '<p class="text-muted">No raw text available</p>';
-			button.textContent = "Show Extracted Fields";
-			button.classList.remove("btn-outline-secondary");
-			button.classList.add("btn-outline-primary");
-		} else {
-			// Switch to fields view
-			content.innerHTML = formatExtractedFields(policyDoc);
-			button.textContent = "Show Raw Text";
-			button.classList.remove("btn-outline-primary");
-			button.classList.add("btn-outline-secondary");
-		}
+			if (button.textContent === "Show Raw Text") {
+				// Switch to raw text view
+				content.innerHTML = policyDoc.raw_ocr_text
+					? formatExtractedText(policyDoc.raw_ocr_text)
+					: '<p class="text-muted">No raw text available</p>';
+				button.textContent = "Show Extracted Fields";
+				button.classList.remove("btn-outline-secondary");
+				button.classList.add("btn-outline-primary");
+			} else {
+				// Switch to fields view
+				content.innerHTML = formatExtractedFields(policyDoc);
+				button.textContent = "Show Raw Text";
+				button.classList.remove("btn-outline-primary");
+				button.classList.add("btn-outline-secondary");
+			}
 		});
 	}
 
@@ -974,32 +1007,32 @@ function setupEventHandlers(policyDoc, motorPolicy) {
 	const copyFieldsBtn = document.getElementById("copy-fields");
 	if (copyFieldsBtn) {
 		copyFieldsBtn.addEventListener("click", function () {
-		const content = document.getElementById("extracted-fields-content");
-		let textToCopy = "";
+			const content = document.getElementById("extracted-fields-content");
+			let textToCopy = "";
 
-		// Check if we're showing fields or raw text
-		const tableRows = content.querySelectorAll("table tbody tr");
-		if (tableRows.length > 0) {
-			// Copy table data as text
-			tableRows.forEach((row) => {
-				const cells = row.querySelectorAll("td");
-				if (cells.length >= 2) {
-					const label = cells[0].textContent.trim();
-					const value = cells[1].textContent.trim();
-					textToCopy += `${label}: ${value}\n`;
-				}
-			});
-		} else {
-			// Copy raw text
-			textToCopy = content.textContent.trim();
-		}
+			// Check if we're showing fields or raw text
+			const tableRows = content.querySelectorAll("table tbody tr");
+			if (tableRows.length > 0) {
+				// Copy table data as text
+				tableRows.forEach((row) => {
+					const cells = row.querySelectorAll("td");
+					if (cells.length >= 2) {
+						const label = cells[0].textContent.trim();
+						const value = cells[1].textContent.trim();
+						textToCopy += `${label}: ${value}\n`;
+					}
+				});
+			} else {
+				// Copy raw text
+				textToCopy = content.textContent.trim();
+			}
 
-		navigator.clipboard.writeText(textToCopy).then(function () {
-			frappe.show_alert({
-				message: "Content copied to clipboard!",
-				indicator: "green",
+			navigator.clipboard.writeText(textToCopy).then(function () {
+				frappe.show_alert({
+					message: "Content copied to clipboard!",
+					indicator: "green",
+				});
 			});
-		});
 		});
 	}
 
@@ -1007,30 +1040,30 @@ function setupEventHandlers(policyDoc, motorPolicy) {
 	const zoomInBtn = document.getElementById("zoom-in");
 	if (zoomInBtn) {
 		zoomInBtn.addEventListener("click", function () {
-		if (window.currentPDF && window.currentScale < 3.0) {
-			window.currentScale += 0.25;
-			const canvas = document.querySelector("#pdf-viewer canvas");
-			if (canvas) {
-				const context = canvas.getContext("2d");
-				renderPage(window.currentPDF, window.currentPage, canvas, context);
-				updateZoomDisplay();
+			if (window.currentPDF && window.currentScale < 3.0) {
+				window.currentScale += 0.25;
+				const canvas = document.querySelector("#pdf-viewer canvas");
+				if (canvas) {
+					const context = canvas.getContext("2d");
+					renderPage(window.currentPDF, window.currentPage, canvas, context);
+					updateZoomDisplay();
+				}
 			}
-		}
 		});
 	}
 
 	const zoomOutBtn = document.getElementById("zoom-out");
 	if (zoomOutBtn) {
 		zoomOutBtn.addEventListener("click", function () {
-		if (window.currentPDF && window.currentScale > 0.5) {
-			window.currentScale -= 0.25;
-			const canvas = document.querySelector("#pdf-viewer canvas");
-			if (canvas) {
-				const context = canvas.getContext("2d");
-				renderPage(window.currentPDF, window.currentPage, canvas, context);
-				updateZoomDisplay();
+			if (window.currentPDF && window.currentScale > 0.5) {
+				window.currentScale -= 0.25;
+				const canvas = document.querySelector("#pdf-viewer canvas");
+				if (canvas) {
+					const context = canvas.getContext("2d");
+					renderPage(window.currentPDF, window.currentPage, canvas, context);
+					updateZoomDisplay();
+				}
 			}
-		}
 		});
 	}
 }
@@ -1040,10 +1073,10 @@ function setupEventHandlers(policyDoc, motorPolicy) {
  */
 function createSaveStatusIndicator() {
 	// Create status element if it doesn't exist
-	let statusEl = document.getElementById('save-status');
+	let statusEl = document.getElementById("save-status");
 	if (!statusEl) {
-		statusEl = document.createElement('div');
-		statusEl.id = 'save-status';
+		statusEl = document.createElement("div");
+		statusEl.id = "save-status";
 		statusEl.style.cssText = `
 			position: fixed;
 			top: 20px;
@@ -1058,25 +1091,25 @@ function createSaveStatusIndicator() {
 	}
 
 	return {
-		show: function(type) {
+		show: function (type) {
 			const messages = {
-				saving: { text: 'Saving...', class: 'bg-warning text-dark' },
-				saved: { text: 'Saved!', class: 'bg-success text-white' },
-				error: { text: 'Save failed', class: 'bg-danger text-white' }
+				saving: { text: "Saving...", class: "bg-warning text-dark" },
+				saved: { text: "Saved!", class: "bg-success text-white" },
+				error: { text: "Save failed", class: "bg-danger text-white" },
 			};
 
 			const msg = messages[type] || messages.error;
 			statusEl.textContent = msg.text;
 			statusEl.className = msg.class;
-			statusEl.style.display = 'block';
+			statusEl.style.display = "block";
 
-			if (type === 'saved') {
-				setTimeout(() => statusEl.style.display = 'none', 2000);
+			if (type === "saved") {
+				setTimeout(() => (statusEl.style.display = "none"), 2000);
 			}
 		},
-		hide: function() {
-			statusEl.style.display = 'none';
-		}
+		hide: function () {
+			statusEl.style.display = "none";
+		},
 	};
 }
 
@@ -1089,49 +1122,49 @@ function saveMotorPolicyField(motorPolicyName, fieldName, value, saveStatus) {
 		method: "frappe.client.get",
 		args: {
 			doctype: "Motor Policy",
-			name: motorPolicyName
+			name: motorPolicyName,
 		},
-		callback: function(response) {
+		callback: function (response) {
 			if (response.message) {
 				const latestDoc = response.message;
-				
+
 				// Update the specific field with our value
 				latestDoc[fieldName] = value;
-				
+
 				// Save the updated document
 				frappe.call({
 					method: "frappe.client.save",
 					args: {
-						doc: latestDoc
+						doc: latestDoc,
 					},
-					callback: function(saveResponse) {
+					callback: function (saveResponse) {
 						if (saveResponse.message) {
-							saveStatus.show('saved');
-							
+							saveStatus.show("saved");
+
 							// Update the form field with any server-side modifications
 							const field = document.getElementById(`field-${fieldName}`);
 							if (field && saveResponse.message[fieldName] !== undefined) {
 								field.value = saveResponse.message[fieldName];
 							}
 						} else {
-							saveStatus.show('error');
+							saveStatus.show("error");
 						}
 					},
-					error: function(err) {
-						console.error('Save error:', err);
+					error: function (err) {
+						console.error("Save error:", err);
 						handleSaveError(err, saveStatus);
-					}
+					},
 				});
 			}
 		},
-		error: function(err) {
-			console.error('Fetch latest document error:', err);
-			saveStatus.show('error');
+		error: function (err) {
+			console.error("Fetch latest document error:", err);
+			saveStatus.show("error");
 			frappe.show_alert({
-				message: 'Failed to fetch latest document. Please refresh the page.',
-				indicator: 'red'
+				message: "Failed to fetch latest document. Please refresh the page.",
+				indicator: "red",
 			});
-		}
+		},
 	});
 }
 
@@ -1139,36 +1172,36 @@ function saveMotorPolicyField(motorPolicyName, fieldName, value, saveStatus) {
  * Handle save errors with appropriate user feedback
  */
 function handleSaveError(err, saveStatus) {
-	saveStatus.show('error');
-	
+	saveStatus.show("error");
+
 	if (err.message) {
-		if (err.message.includes('has been modified')) {
+		if (err.message.includes("has been modified")) {
 			frappe.show_alert({
-				message: 'Document was modified. Please refresh to get the latest version.',
-				indicator: 'orange'
+				message: "Document was modified. Please refresh to get the latest version.",
+				indicator: "orange",
 			});
-			
+
 			// Add a refresh button to the fields pane header if it doesn't exist
-			const refreshBtn = document.getElementById('refresh-policy');
+			const refreshBtn = document.getElementById("refresh-policy");
 			if (refreshBtn) {
-				refreshBtn.classList.add('btn-warning');
+				refreshBtn.classList.add("btn-warning");
 				refreshBtn.innerHTML = '<i class="fa fa-refresh"></i> Refresh Required';
 			}
-		} else if (err.message.includes('Permission')) {
+		} else if (err.message.includes("Permission")) {
 			frappe.show_alert({
-				message: 'You do not have permission to modify this document.',
-				indicator: 'red'
+				message: "You do not have permission to modify this document.",
+				indicator: "red",
 			});
 		} else {
 			frappe.show_alert({
 				message: `Save failed: ${err.message}`,
-				indicator: 'red'
+				indicator: "red",
 			});
 		}
 	} else {
 		frappe.show_alert({
-			message: 'Save failed due to an unknown error',
-			indicator: 'red'
+			message: "Save failed due to an unknown error",
+			indicator: "red",
 		});
 	}
 }
@@ -1177,29 +1210,29 @@ function handleSaveError(err, saveStatus) {
  * Save all Motor Policy changes at once with improved error handling
  */
 function saveAllMotorPolicyChanges(motorPolicyName, saveStatus) {
-	const fields = document.querySelectorAll('.motor-policy-field');
+	const fields = document.querySelectorAll(".motor-policy-field");
 	const updates = {};
 
 	// Collect all field values
-	fields.forEach(field => {
+	fields.forEach((field) => {
 		updates[field.dataset.fieldname] = field.value;
 	});
 
-	saveStatus.show('saving');
+	saveStatus.show("saving");
 
 	// Get the latest document version first
 	frappe.call({
 		method: "frappe.client.get",
 		args: {
 			doctype: "Motor Policy",
-			name: motorPolicyName
+			name: motorPolicyName,
 		},
-		callback: function(response) {
+		callback: function (response) {
 			if (response.message) {
 				const latestDoc = response.message;
-				
+
 				// Merge updates with the latest document
-				Object.keys(updates).forEach(fieldName => {
+				Object.keys(updates).forEach((fieldName) => {
 					latestDoc[fieldName] = updates[fieldName];
 				});
 
@@ -1207,41 +1240,41 @@ function saveAllMotorPolicyChanges(motorPolicyName, saveStatus) {
 				frappe.call({
 					method: "frappe.client.save",
 					args: {
-						doc: latestDoc
+						doc: latestDoc,
 					},
-					callback: function(saveResponse) {
+					callback: function (saveResponse) {
 						if (saveResponse.message) {
-							saveStatus.show('saved');
+							saveStatus.show("saved");
 							frappe.show_alert({
-								message: 'All changes saved successfully!',
-								indicator: 'green'
+								message: "All changes saved successfully!",
+								indicator: "green",
 							});
-							
+
 							// Update form fields with any server-side modifications
 							updateFormFieldsFromDocument(saveResponse.message);
 						} else {
-							saveStatus.show('error');
+							saveStatus.show("error");
 							frappe.show_alert({
-								message: 'Save failed - no response from server',
-								indicator: 'red'
+								message: "Save failed - no response from server",
+								indicator: "red",
 							});
 						}
 					},
-					error: function(err) {
-						console.error('Save all error:', err);
+					error: function (err) {
+						console.error("Save all error:", err);
 						handleSaveError(err, saveStatus);
-					}
+					},
 				});
 			}
 		},
-		error: function(err) {
-			console.error('Fetch document error:', err);
-			saveStatus.show('error');
+		error: function (err) {
+			console.error("Fetch document error:", err);
+			saveStatus.show("error");
 			frappe.show_alert({
-				message: 'Failed to fetch latest document. Please refresh the page.',
-				indicator: 'red'
+				message: "Failed to fetch latest document. Please refresh the page.",
+				indicator: "red",
 			});
-		}
+		},
 	});
 }
 
@@ -1249,10 +1282,10 @@ function saveAllMotorPolicyChanges(motorPolicyName, saveStatus) {
  * Update form fields with values from saved document
  */
 function updateFormFieldsFromDocument(doc) {
-	document.querySelectorAll('.motor-policy-field').forEach(field => {
+	document.querySelectorAll(".motor-policy-field").forEach((field) => {
 		const fieldName = field.dataset.fieldname;
 		if (doc[fieldName] !== undefined) {
-			field.value = doc[fieldName] || '';
+			field.value = doc[fieldName] || "";
 		}
 	});
 }

@@ -49,9 +49,9 @@ class MotorPolicy(Document):
 			# Use the existing PolicyCreationService
 			policy_service = PolicyCreationService()
 			
-			# Parse extracted data using existing service method
+			# Use extracted data directly (already parsed by Claude Vision Service)
 			extracted_data = frappe.parse_json(policy_doc.extracted_fields)
-			parsed_data = policy_service.parse_nested_extracted_data(extracted_data)
+			parsed_data = extracted_data if isinstance(extracted_data, dict) else {}
 			
 			# Refresh field mappings to include latest aliases (including ChasisNo)
 			try:

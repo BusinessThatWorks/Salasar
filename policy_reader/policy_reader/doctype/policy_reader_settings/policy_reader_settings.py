@@ -8,6 +8,8 @@ import time
 from frappe.model.document import Document
 from frappe.utils import now
 from frappe.utils import cstr
+from policy_reader.policy_reader.services.common_service import CommonService
+from policy_reader.policy_reader.services.prompt_service import PromptService
 
 
 class PolicyReaderSettings(Document):
@@ -20,19 +22,19 @@ class PolicyReaderSettings(Document):
 		"""Validate Anthropic API key format"""
 		if self.anthropic_api_key:
 			if not self.anthropic_api_key.startswith('sk-ant-'):
-				frappe.throw("Invalid Anthropic API key format. Key should start with 'sk-ant-'")
+				frappe.throw("Invalid input: Anthropic API key format. Key should start with 'sk-ant-'")
 	
 	def validate_numeric_fields(self):
 		"""Validate numeric field ranges"""
 		if self.timeout:
 			if not (60 <= self.timeout <= 600):
-				frappe.throw("Timeout must be between 60 and 600 seconds")
+				frappe.throw("Invalid input: timeout must be between 60 and 600 seconds")
 	
 	@frappe.whitelist()
 	def test_api_connection(self):
 		"""Test API key connectivity (optional feature)"""
 		if not self.anthropic_api_key:
-			frappe.throw("Please enter an API key to test")
+			frappe.throw("Invalid input: please enter an API key to test")
 		
 		try:
 			# This is a basic test - in a real implementation you might want to make a test API call
@@ -40,7 +42,8 @@ class PolicyReaderSettings(Document):
 							title="API Key Test", indicator="green")
 			return {"success": True, "message": "API key format valid"}
 		except Exception as e:
-			frappe.throw(f"API connection test failed: {str(e)}")
+			frappe.log_error(f"API connection test failed: {str(e)}", frappe.get_traceback())
+			frappe.throw("Unexpected error occurred while testing API connection. Please contact support.")
 	
 	@frappe.whitelist()
 	def refresh_field_mappings(self):
@@ -76,9 +79,9 @@ class PolicyReaderSettings(Document):
 			}
 			
 		except Exception as e:
-			frappe.log_error(f"Field mapping refresh failed: {str(e)}", "Field Mapping Refresh Error")
+			frappe.log_error(f"Unexpected error while refreshing field mappings: {str(e)}", frappe.get_traceback())
 			frappe.logger().error(f"Field mapping refresh failed: {str(e)}")
-			frappe.throw(f"Failed to refresh field mappings: {str(e)}")
+			frappe.throw("Unexpected error occurred while refreshing field mappings. Please contact support.")
 
 	def build_default_field_mapping(self, policy_type):
 		"""Build a default mapping from known aliases to canonical fieldnames without DocType dependency"""
@@ -199,28 +202,37 @@ class PolicyReaderSettings(Document):
 			raise
 	
 	def get_cached_field_mapping(self, policy_type):
-		"""Get cached field mapping for policy type"""
+		"""Get cached field mapping for policy type with Frappe caching"""
+		cache_key = f"field_mapping_{policy_type.lower()}"
+		
+		# Try to get from Frappe cache first
+		cached_mapping = frappe.cache().get_value(cache_key)
+		if cached_mapping:
+			frappe.logger().info(f"Field mapping cache hit for {policy_type}")
+			return cached_mapping
+		
 		try:
 			frappe.logger().info(f"Getting cached field mapping for {policy_type}")
+			mapping = {}
+			
 			if policy_type.lower() == "motor":
 				frappe.logger().info(f"Motor policy fields exist: {bool(self.motor_policy_fields)}")
 				if self.motor_policy_fields:
 					mapping = frappe.parse_json(self.motor_policy_fields)
 					frappe.logger().info(f"Motor mapping loaded: {len(mapping)} entries")
-					return mapping
 			elif policy_type.lower() == "health":
 				frappe.logger().info(f"Health policy fields exist: {bool(self.health_policy_fields)}")
 				if self.health_policy_fields:
 					mapping = frappe.parse_json(self.health_policy_fields)
 					frappe.logger().info(f"Health mapping loaded: {len(mapping)} entries")
-					return mapping
 			
-			# Return empty dict if no cached mapping found
-			frappe.logger().info(f"No cached mapping found for {policy_type}")
-			return {}
+			# Cache for 1 hour
+			frappe.cache().set_value(cache_key, mapping, expires_in_sec=3600)
+			frappe.logger().info(f"Field mapping cached for {policy_type}")
+			return mapping
 			
 		except Exception as e:
-			frappe.log_error(f"Error getting cached field mapping for {policy_type}: {str(e)}", "Field Mapping Cache Error")
+			frappe.log_error(f"Unexpected error while getting cached field mapping for {policy_type}: {str(e)}", frappe.get_traceback())
 			frappe.logger().error(f"Error getting cached field mapping for {policy_type}: {str(e)}")
 			return {}
 	
@@ -659,45 +671,5 @@ Return data as valid JSON:"""
 		"""Build a full extraction prompt from the active alias→canonical mapping.
 		Always enumerates all canonical keys and provides alias guidance.
 		"""
-		try:
-			truncation_limit = 200000
-			ptype = (policy_type or "").lower()
-			# Get mapping from cache; if empty, build defaults
-			mapping = self.get_cached_field_mapping(ptype) or self.build_default_field_mapping(ptype)
-			if not isinstance(mapping, dict) or not mapping:
-				return self._build_fallback_prompt(ptype, extracted_text)
-			
-			# Canonical set (keys that map to themselves)
-			canonical_fields = [k for k, v in mapping.items() if k == v]
-			canonical_fields = sorted(set(canonical_fields))
-			
-			# Reverse index: canonical -> [aliases]
-			aliases_by_canonical = {}
-			for alias, canonical in mapping.items():
-				if alias == canonical:
-					aliases_by_canonical.setdefault(canonical, [])
-				else:
-					aliases_by_canonical.setdefault(canonical, []).append(alias)
-			
-			# Build sections
-			required_keys_section = "\n".join([f"- {key}" for key in canonical_fields])
-			
-			# Limit alias list lengths per key to keep prompt concise
-			alias_lines = []
-			for key in canonical_fields:
-				aliases = sorted(set(aliases_by_canonical.get(key, [])))
-				if aliases:
-					# Trim very long alias lists
-					alias_preview = aliases[:12]
-					more = "" if len(aliases) <= 12 else f", +{len(aliases) - 12} more"
-					alias_lines.append(f"- {key}: [" + ", ".join(alias_preview) + "]" + more)
-			
-			alias_guidance_section = "\n".join(alias_lines) if alias_lines else ""
-			
-			# Build prompt text
-			prompt = f"""Extract {ptype} insurance policy information as FLAT JSON with these canonical keys only:\n\nRequired JSON keys (exact, flat):\n{required_keys_section}\n\nAlias guidance (examples of how these fields may appear in the document):\n{alias_guidance_section}\n\nExtraction rules:\n- Dates: DD/MM/YYYY only (e.g., \"From 12-JUL-2022 15:01(Hrs)\" → \"12/07/2022\")\n- Currency/Amounts: digits only; remove ₹, Rs., commas, /-\n- Numbers: digits only; remove descriptors (e.g., \"5 seater\" → \"5\")\n- Text: clean core value, remove prefixes/suffixes and labels\n- Missing fields: null\n- Return exactly one flat JSON object with ONLY the canonical keys listed above (every key present, null when unknown). No markdown, no comments, no extra keys.\n\nDocument:\n{(extracted_text or '')[:truncation_limit]}\n"""
-			return prompt
-		except Exception as e:
-			frappe.log_error(f"Error building prompt from mapping for {policy_type}: {str(e)}", "Mapping Prompt Build Error")
-			return self._build_fallback_prompt(policy_type, extracted_text)
+		return PromptService.build_prompt_from_mapping(policy_type, extracted_text, self)
 

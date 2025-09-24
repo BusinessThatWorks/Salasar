@@ -42,9 +42,8 @@ def refresh_field_mappings_if_policy_doctype(doc, method):
 
 def get_field_mapping_for_policy_type(policy_type):
 	"""Get field mapping for a policy type with fallback to hardcoded mappings"""
-	from policy_reader.policy_reader.services.extraction_service import ExtractionService
-	extraction_service = ExtractionService()
-	return extraction_service.get_field_mapping_for_policy_type(policy_type)
+	from policy_reader.policy_reader.services.common_service import CommonService
+	return CommonService.get_field_mapping_for_policy_type(policy_type)
 
 
 

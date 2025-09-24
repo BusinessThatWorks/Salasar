@@ -87,7 +87,7 @@ def execute():
                                 else:
                                     updates['make'] = old_value
                                 updated = True
-                            except:
+                            except Exception:
                                 updates['make'] = old_value
                                 updated = True
                         

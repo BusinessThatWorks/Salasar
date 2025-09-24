@@ -3,6 +3,8 @@ import ast
 import json
 from frappe.utils import getdate, cstr, flt, cint
 from frappe import _
+from policy_reader.policy_reader.services.common_service import CommonService
+from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
 
 class PolicyCreationService:
     def __init__(self):
@@ -12,35 +14,40 @@ class PolicyCreationService:
         """
         Create a policy record (Motor/Health) from Policy Document using dynamic field mapping
         """
+        # Input validation using common service
+        CommonService.validate_required_fields({"policy_document_name": policy_document_name}, ["policy_document_name"])
+        if not isinstance(policy_document_name, str):
+            frappe.throw(f"Invalid input: policy document name must be a string, got {type(policy_document_name).__name__}: {policy_document_name}")
+        
+        policy_type = CommonService.validate_policy_type(policy_type)
+        
         try:
             # Get Policy Document
             policy_doc = frappe.get_doc("Policy Document", policy_document_name)
             
             if not policy_doc.extracted_fields:
-                return {
-                    "success": False,
-                    "error": "No extracted fields found. Please extract fields first."
-                }
+                frappe.throw("No extracted fields found. Please extract fields first.")
             
             # Get field mapping from Policy Reader Settings
-            field_mapping = self.get_field_mapping_for_policy_type(policy_type)
+            field_mapping = CommonService.get_field_mapping_for_policy_type(policy_type)
             
             frappe.logger().info(f"=== POLICY CREATION DEBUG for {policy_type} ===")
             frappe.logger().info(f"Field mapping retrieved: {len(field_mapping) if field_mapping else 0} entries")
             
             if not field_mapping:
                 frappe.logger().error(f"No field mapping found for {policy_type}")
-                return {
-                    "success": False,
-                    "error": f"No field mapping found for {policy_type}. Please refresh field mappings in Policy Reader Settings."
-                }
+                frappe.throw(f"No field mapping found for {policy_type}. Please refresh field mappings in Policy Reader Settings.")
             
-            # Parse extracted data
-            extracted_data = frappe.parse_json(policy_doc.extracted_fields)
+            # Parse extracted data with validation using common service
+            extracted_data = CommonService.safe_parse_json(policy_doc.extracted_fields)
+            if not isinstance(extracted_data, dict):
+                frappe.throw("Invalid input: extracted fields must be a valid JSON object")
+            
             frappe.logger().info(f"Raw extracted fields: {extracted_data}")
             frappe.logger().info(f"Extracted fields type: {type(extracted_data)}")
             
-            parsed_data = self.parse_nested_extracted_data(extracted_data)
+            # Use extracted data directly (already parsed by Claude Vision Service)
+            parsed_data = extracted_data if isinstance(extracted_data, dict) else {}
             frappe.logger().info(f"Parsed data keys: {list(parsed_data.keys()) if parsed_data else 'No parsed data'}")
             frappe.logger().info(f"Parsed data sample: {dict(list(parsed_data.items())[:5]) if parsed_data else 'No data'}")
             
@@ -50,17 +57,15 @@ class PolicyCreationService:
             elif policy_type.lower() == "health":
                 policy_record = frappe.new_doc("Health Policy")
             else:
-                return {
-                    "success": False,
-                    "error": f"Unsupported policy type: {policy_type}"
-                }
+                frappe.throw(f"Unsupported policy type: {policy_type}")
             
             # Set document link
             policy_record.policy_document = policy_doc.name
             policy_record.policy_file = policy_doc.policy_file
             
             # Dynamic field mapping
-            mapping_results = self.map_fields_dynamically(
+            field_mapping_service = FieldMappingService()
+            mapping_results = field_mapping_service.map_fields_dynamically(
                 parsed_data, field_mapping, policy_record, policy_type
             )
             
@@ -88,110 +93,8 @@ class PolicyCreationService:
             
         except Exception as e:
             frappe.db.rollback()
-            frappe.log_error(f"Policy creation failed: {str(e)}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            CommonService.handle_processing_exception("creating policy record", e)
     
-    def parse_nested_extracted_data(self, extracted_data):
-        """
-        Parse the extracted JSON structure - handles both flat and nested formats
-        """
-        parsed_data = {}
-        
-        frappe.logger().info(f"Parsing extracted data structure: {type(extracted_data)}")
-        frappe.logger().info(f"Sample data keys: {list(extracted_data.keys())[:10] if isinstance(extracted_data, dict) else 'Not a dict'}")
-        
-        # Handle flat JSON structure (direct field->value mapping)
-        if self._is_flat_structure(extracted_data):
-            frappe.logger().info("Detected flat JSON structure")
-            for field_name, field_value in extracted_data.items():
-                parsed_data[field_name] = field_value
-                frappe.logger().info(f"Parsed flat field: {field_name} = {field_value}")
-        else:
-            # Handle nested JSON structure (category->fields mapping)
-            frappe.logger().info("Detected nested JSON structure")
-            for category_name, category_data in extracted_data.items():
-                try:
-                    category_dict = None
-                    
-                    # Multiple parsing strategies for robustness
-                    if isinstance(category_data, str):
-                        # Strategy 1: Try ast.literal_eval (handles {'key': 'value'} format)
-                        try:
-                            category_dict = ast.literal_eval(category_data)
-                            frappe.logger().info(f"Parsed {category_name} using ast.literal_eval")
-                        except:
-                            # Strategy 2: Try json.loads (handles {"key": "value"} format)
-                            try:
-                                category_dict = frappe.parse_json(category_data)
-                                frappe.logger().info(f"Parsed {category_name} using json.loads")
-                            except:
-                                # Strategy 3: Try cleaning and parsing again
-                                try:
-                                    cleaned = category_data.strip().strip("'\"")
-                                    category_dict = ast.literal_eval(cleaned)
-                                    frappe.logger().info(f"Parsed {category_name} after cleaning")
-                                except:
-                                    frappe.logger().error(f"Failed to parse {category_name}: {category_data[:100]}...")
-                                    continue
-                    elif isinstance(category_data, dict):
-                        category_dict = category_data
-                        frappe.logger().info(f"Category {category_name} already a dict")
-                    else:
-                        frappe.logger().warning(f"Unexpected data type for {category_name}: {type(category_data)}")
-                        continue
-                    
-                    # Add all fields from this category to parsed_data
-                    if category_dict:
-                        for field_name, field_value in category_dict.items():
-                            parsed_data[field_name] = field_value
-                            frappe.logger().info(f"Parsed nested field: {field_name} = {field_value}")
-                        frappe.logger().info(f"Successfully flattened {len(category_dict)} fields from {category_name}")
-                        
-                except Exception as e:
-                    frappe.logger().error(f"Error parsing category {category_name}: {str(e)}")
-                    continue
-        
-        frappe.logger().info(f"Parsed {len(parsed_data)} total fields")
-        return parsed_data
-    
-    def _is_flat_structure(self, data):
-        """
-        Check if the extracted data is a flat structure (field->value) 
-        vs nested structure (category->fields)
-        """
-        if not isinstance(data, dict):
-            return False
-        
-        # Sample a few values to determine structure
-        sample_values = list(data.values())[:5]
-        
-        # Check for string-encoded dictionaries (nested structure indicators)
-        nested_indicators = 0
-        for value in sample_values:
-            if isinstance(value, str):
-                # Check if it looks like a serialized dictionary
-                stripped = value.strip()
-                if (stripped.startswith('{') and stripped.endswith('}')) or \
-                   (stripped.startswith("'{") and stripped.endswith("'}")) or \
-                   (stripped.startswith('"{') and stripped.endswith('}"')):
-                    nested_indicators += 1
-        
-        # If we have nested indicators, it's definitely nested
-        if nested_indicators > 0:
-            frappe.logger().info(f"Detected nested structure: {nested_indicators} string-encoded dictionaries found")
-            return False
-        
-        # If most values are simple types, it's likely flat
-        simple_types = (str, int, float, type(None), bool)
-        simple_count = sum(1 for v in sample_values if isinstance(v, simple_types))
-        
-        # If 80% or more are simple types, consider it flat
-        is_flat = simple_count >= len(sample_values) * 0.8
-        frappe.logger().info(f"Structure detection: {simple_count}/{len(sample_values)} simple types, is_flat: {is_flat}")
-        return is_flat
     
     def _normalize_key(self, text):
         """Normalize keys for robust alias matching (lowercase, alnum+space)"""
@@ -404,40 +307,6 @@ class PolicyCreationService:
         # If no match found, return None to avoid validation errors
         return None
     
-    def get_field_mapping_for_policy_type(self, policy_type):
-        """
-        Get field mapping from Policy Reader Settings cache
-        """
-        try:
-            settings = frappe.get_single("Policy Reader Settings")
-            mapping = settings.get_cached_field_mapping(policy_type)
-            
-            # Debug logging
-            frappe.logger().info(f"=== FIELD MAPPING DEBUG for {policy_type} ===")
-            frappe.logger().info(f"Raw motor_policy_fields: {bool(settings.motor_policy_fields)}")
-            frappe.logger().info(f"Raw health_policy_fields: {bool(settings.health_policy_fields)}")
-            frappe.logger().info(f"Retrieved mapping for {policy_type}: {len(mapping) if mapping else 0} entries")
-            
-            # If no cached mapping, try to build one
-            if not mapping:
-                frappe.logger().info(f"No cached mapping found, building default for {policy_type}")
-                mapping = settings.build_default_field_mapping(policy_type)
-                frappe.logger().info(f"Built default mapping: {len(mapping) if mapping else 0} entries")
-                
-                # Update the cache with the built mapping
-                if mapping:
-                    if policy_type.lower() == "motor":
-                        settings.motor_policy_fields = frappe.as_json(mapping)
-                    elif policy_type.lower() == "health":
-                        settings.health_policy_fields = frappe.as_json(mapping)
-                    settings.save()
-                    frappe.logger().info(f"Updated {policy_type} mapping cache")
-            
-            return mapping
-        except Exception as e:
-            frappe.log_error(f"Error getting field mapping for {policy_type}: {str(e)}")
-            frappe.logger().error(f"Error getting field mapping for {policy_type}: {str(e)}")
-            return {}
     
     def get_available_policy_types(self):
         """
@@ -462,6 +331,8 @@ class PolicyCreationService:
         Validate that all prerequisites are met for policy creation
         """
         try:
+            # Ensure policy_document_name is a string
+            policy_document_name = str(policy_document_name)
             policy_doc = frappe.get_doc("Policy Document", policy_document_name)
             
             # Check if fields are extracted

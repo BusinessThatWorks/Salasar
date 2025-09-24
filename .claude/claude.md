@@ -132,3 +132,88 @@
 - Background execution: `process_policy_background(doc_name)`.
 - Create mapped policy: `Policy Document.create_policy_entry()` or via `Motor Policy.populate_fields_from_policy_document()`.
 - Refresh mappings/prompts: `Policy Reader Settings.refresh_field_mappings()` / `refresh_extraction_prompts()`.
+
+You're writing code for a Frappe app. Follow these minimal but powerful guidelines to ensure the output is clean, idiomatic, and production-grade — on par or better than the Frappe/ERPNext codebase.
+
+## 🧠 PRIORITIZE FRAPPE-NATIVE FUNCTIONS
+
+Always prefer Frappe's built-in utilities over writing custom logic:
+
+- Use `frappe.get_doc()`, `frappe.db.get_value()`, `frappe.db.insert()` etc. for CRUD
+- Use `frappe.db.exists()` instead of manual SELECTs
+- Use `frappe.enqueue()` for async tasks — never threads
+- Use `frappe.utils.getdate()`, `now()`, `add_days()` for date ops
+- Use `frappe.throw()` for validation errors
+- Use `@frappe.whitelist()` to expose backend safely to JS or API
+- Use `frappe.cache()` for caching logic
+- Use `frappe.logger()` for clean logging
+
+📌 Never reimplement functionality already provided by Frappe — wrap if needed, don’t rewrite.
+
+---
+
+## 🐍 PYTHON BEST PRACTICES (Frappe Context)
+
+- Use `snake_case` for all function/variable names, `PascalCase` for classes
+- Favor **pure functions**, small methods (< 40 LOC)
+- Use `as_dict=True` when returning data unless returning full docs
+- Always validate input and throw meaningful errors (`frappe.throw()`)
+- Avoid raw SQL unless strictly necessary — prefer `frappe.db.get_all()` etc.
+- Separate concerns: logic in `utils/`, integrations in `integrations/`, API in `api/`
+
+---
+
+## 🌐 JS / CLIENT CODE (Desk / React)
+
+- Use `frappe.call()` for all backend interaction (handles CSRF/auth)
+- Use `frappe.ui.form.on('Doctype', { refresh(frm) {} })` for form logic
+- Avoid `$.ajax`, use modern JS/React patterns if in Doppio
+- Use Chakra UI or Tailwind CSS for layout and styling in React
+- Organize code into `pages/` and `components/`, favor `.tsx` with TypeScript
+- Don't hardcode Doctype names — pass as context when possible
+
+---
+
+## ✅ AI OUTPUT CHECKLIST
+
+Make sure generated code:
+
+- [ ] Uses Frappe built-ins for core operations
+- [ ] Follows clean Python/JS structure and naming
+- [ ] Handles errors gracefully
+- [ ] Is modular, < 40 lines per method
+- [ ] Avoids business logic inside `on_submit`/`validate` unless necessary
+- [ ] Avoids re-implementing what Frappe already solves
+
+When writing Frappe backend code, always follow this error handling pattern for consistency and debuggability:
+
+## 🛠️ Frappe Error Handling Guidelines
+
+- Use `frappe.throw("message")` for user-facing errors (shows a dialog in UI)
+- Use `frappe.log_error("error message", reference_object_or_dict)` to log exceptions
+- Wrap risky blocks in try/except and re-raise errors with context
+- Avoid printing or silent failures — always log or throw
+- Use standard messages like:
+  - "Invalid input: missing <field>"
+  - "Record not found for <doctype> with filters <filters>"
+  - "Unexpected error while <operation>"
+
+## 🔧 Example Pattern
+
+```python
+import frappe
+
+@frappe.whitelist()
+def get_policy(policy_no):
+    if not policy_no:
+        frappe.throw("Missing policy number")
+
+    try:
+        policy = frappe.db.get_value("Insurance Policy", {"name": policy_no}, ["insured_name", "expiry_date"], as_dict=True)
+        if not policy:
+            frappe.throw(f"No policy found with number {policy_no}")
+        return policy
+    except Exception as e:
+        frappe.log_error(f"Failed to fetch policy {policy_no}", frappe.get_traceback())
+        frappe.throw("Unexpected error occurred. Please contact support.")
+```

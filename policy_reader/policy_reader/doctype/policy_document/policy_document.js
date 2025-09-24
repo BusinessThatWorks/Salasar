@@ -37,18 +37,6 @@ frappe.ui.form.on("Policy Document", {
 		// Policy creation buttons
 		frm.trigger("setup_policy_creation_button");
 
-		// Show processing method
-		if (frm.doc.processing_method) {
-			const method_text =
-				frm.doc.processing_method === "claude_vision" ? "Claude AI (Vision)" : "Local OCR";
-			const method_color = frm.doc.processing_method === "claude_vision" ? "purple" : "blue";
-			frm.dashboard.add_comment(
-				__("Processing Method: {0}", [method_text]),
-				method_color,
-				true
-			);
-		}
-
 		// Field indicators and cleanup
 		frm.trigger("add_field_state_indicators");
 		$(window)
@@ -102,7 +90,7 @@ frappe.ui.form.on("Policy Document", {
 			),
 			() => {
 				frm.trigger("show_processing_indicator");
-				frm.call("process_with_ai")
+				frm.call("process_policy", { background: false })
 					.then((r) => {
 						$(".processing-indicator").remove();
 						if (r.message && r.message.success) {
@@ -369,8 +357,23 @@ frappe.ui.form.on("Policy Document", {
 	},
 
 	execute_policy_creation: function (frm) {
+		// Ensure document is saved first
+		if (!frm.doc.name) {
+			frappe.msgprint(
+				__("Please save the document first before creating a policy."),
+				__("Document Not Saved")
+			);
+			return;
+		}
+
 		frm.dashboard.add_comment(__("Creating {0} policy...", [frm.doc.policy_type]), "blue");
-		frm.call("create_policy_entry")
+		frappe
+			.call({
+				method: "policy_reader.policy_reader.doctype.policy_document.policy_creation_endpoints.create_policy_entry",
+				args: {
+					policy_document_name: frm.doc.name,
+				},
+			})
 			.then((r) => {
 				frm.dashboard.clear_comment();
 				if (r.message && r.message.success) {

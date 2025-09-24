@@ -1,199 +1,193 @@
 {
-  "actions": [],
-  "allow_rename": 1,
-  "autoname": "autoincrement",
-  "creation": "2025-08-01 07:59:23.913137",
-  "doctype": "DocType",
-  "engine": "InnoDB",
-  "field_order": [
-    "document_info",
-    "title",
-    "policy_file",
-    "policy_type",
-    "status",
-    "column_break_1",
-    "processing_method",
-    "processing_time",
-    "tokens_used",
-    "policy_links_section",
-    "motor_policy",
-    "health_policy",
-    "extracted_fields",
-    "raw_ocr_text",
-    "used_prompt",
-    "technical_details",
-    "error_message",
-    "confidence_data"
-  ],
-  "fields": [
-    {
-      "fieldname": "document_info",
-      "fieldtype": "Tab Break",
-      "label": "Document Information",
-      "options": "fa fa-file-text-o"
-    },
-    {
-      "fieldname": "title",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Document Title",
-      "reqd": 1
-    },
-    {
-      "fieldname": "policy_file",
-      "fieldtype": "Attach",
-      "label": "Policy File",
-      "options": "file_types:pdf",
-      "reqd": 1
-    },
-    {
-      "fieldname": "policy_type",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Policy Type",
-      "options": "Health\nMotor",
-      "reqd": 1
-    },
-    {
-      "default": "Draft",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Status",
-      "options": "Draft\nProcessing\nCompleted\nFailed",
-      "read_only": 1,
-      "reqd": 1
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "default": "claude_vision",
-      "description": "Method used for text extraction",
-      "fieldname": "processing_method",
-      "fieldtype": "Select",
-      "label": "Processing Method",
-      "options": "claude_vision",
-      "read_only": 1
-    },
-    {
-      "fieldname": "processing_time",
-      "fieldtype": "Float",
-      "label": "Processing Time (seconds)",
-      "precision": "2",
-      "read_only": 1
-    },
-    {
-      "fieldname": "tokens_used",
-      "fieldtype": "Int",
-      "label": "Tokens Used",
-      "read_only": 1
-    },
-    {
-      "fieldname": "policy_links_section",
-      "fieldtype": "Section Break",
-      "label": "Created Policy Records"
-    },
-    {
-      "fieldname": "motor_policy",
-      "fieldtype": "Link",
-      "label": "Motor Policy",
-      "options": "Motor Policy"
-    },
-    {
-      "fieldname": "health_policy",
-      "fieldtype": "Link",
-      "label": "Health Policy",
-      "options": "Health Policy"
-    },
-    {
-      "fieldname": "extracted_fields",
-      "fieldtype": "JSON",
-      "label": "Extracted Fields",
-      "read_only": 1
-    },
-    {
-      "description": "Raw OCR text extracted from the document",
-      "fieldname": "raw_ocr_text",
-      "fieldtype": "Long Text",
-      "label": "Raw OCR Text",
-      "read_only": 1
-    },
-    {
-      "description": "The prompt that was used for AI extraction",
-      "fieldname": "used_prompt",
-      "fieldtype": "Long Text",
-      "label": "Used Prompt",
-      "read_only": 1
-    },
-    {
-      "fieldname": "technical_details",
-      "fieldtype": "Tab Break",
-      "label": "Technical Details",
-      "options": "fa fa-cogs"
-    },
-    {
-      "fieldname": "error_message",
-      "fieldtype": "Long Text",
-      "label": "Error Message",
-      "read_only": 1
-    },
-    {
-      "fieldname": "confidence_data",
-      "fieldtype": "JSON",
-      "label": "Detailed Confidence Data",
-      "read_only": 1
-    }
-  ],
-  "grid_page_length": 50,
-  "index_web_pages_for_search": 1,
-  "links": [],
-  "modified": "2025-09-08 21:41:48.487118",
-  "modified_by": "Administrator",
-  "module": "Policy Reader",
-  "name": "Policy Document",
-  "naming_rule": "Autoincrement",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "share": 1,
-      "write": 1
-    },
-    {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Policy Manager",
-      "share": 1,
-      "write": 1
-    },
-    {
-      "create": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Policy Data Entry",
-      "share": 1,
-      "write": 1
-    }
-  ],
-  "row_format": "Dynamic",
-  "sort_field": "creation",
-  "sort_order": "DESC",
-  "states": []
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "autoincrement",
+ "creation": "2025-08-01 07:59:23.913137",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "document_info",
+  "title",
+  "policy_file",
+  "policy_type",
+  "extraction_policy_type",
+  "status",
+  "column_break_1",
+  "processing_method",
+  "processing_time",
+  "tokens_used",
+  "policy_links_section",
+  "motor_policy",
+  "health_policy",
+  "extracted_fields",
+  "raw_ocr_text",
+  "used_prompt",
+  "error_message"
+ ],
+ "fields": [
+  {
+   "fieldname": "document_info",
+   "fieldtype": "Tab Break",
+   "label": "Document Information",
+   "options": "fa fa-file-text-o"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Document Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "policy_file",
+   "fieldtype": "Attach",
+   "label": "Policy File",
+   "options": "file_types:pdf",
+   "reqd": 1
+  },
+  {
+   "fieldname": "policy_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type of Policy",
+   "options": "Motor\nHealth",
+   "sort_options": 1
+  },
+  {
+   "description": "Policy type used during extraction (cannot be changed after extraction)",
+   "fieldname": "extraction_policy_type",
+   "fieldtype": "Data",
+   "label": "Extraction Policy Type",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nProcessing\nCompleted\nFailed",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "claude_vision",
+   "description": "Method used for text extraction",
+   "fieldname": "processing_method",
+   "fieldtype": "Select",
+   "label": "Processing Method",
+   "options": "claude_vision",
+   "read_only": 1
+  },
+  {
+   "fieldname": "processing_time",
+   "fieldtype": "Float",
+   "label": "Processing Time (seconds)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tokens_used",
+   "fieldtype": "Int",
+   "label": "Tokens Used",
+   "read_only": 1
+  },
+  {
+   "fieldname": "policy_links_section",
+   "fieldtype": "Section Break",
+   "label": "Created Policy Records"
+  },
+  {
+   "fieldname": "motor_policy",
+   "fieldtype": "Link",
+   "label": "Motor Policy",
+   "options": "Motor Policy"
+  },
+  {
+   "fieldname": "health_policy",
+   "fieldtype": "Link",
+   "label": "Health Policy",
+   "options": "Health Policy"
+  },
+  {
+   "fieldname": "extracted_fields",
+   "fieldtype": "JSON",
+   "label": "Extracted Fields",
+   "read_only": 1
+  },
+  {
+   "description": "Raw OCR text extracted from the document",
+   "fieldname": "raw_ocr_text",
+   "fieldtype": "Long Text",
+   "label": "Raw OCR Text",
+   "read_only": 1
+  },
+  {
+   "description": "The prompt that was used for AI extraction",
+   "fieldname": "used_prompt",
+   "fieldtype": "Long Text",
+   "label": "Used Prompt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error_message",
+   "fieldtype": "Long Text",
+   "label": "Error Message",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-09-24 09:45:34.466575",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "Policy Document",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Policy Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Policy Data Entry",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }
