@@ -117,38 +117,6 @@ def monitor_stuck_policy_documents():
         )
 
 
-def check_runpod_health():
-    """Check RunPod API health every 10 minutes"""
-    try:
-        # Get Policy Reader Settings
-        settings = frappe.get_single("Policy Reader Settings")
-        if not settings:
-            return
-        
-        # Only check if RunPod is configured
-        if not (settings.runpod_pod_id and settings.runpod_port and settings.runpod_api_secret):
-            frappe.logger().info("RunPod not configured, skipping health check")
-            return
-        
-        # Perform health check
-        health_result = settings._check_runpod_health()
-        
-        # Update health status
-        settings.update_runpod_health_status(health_result)
-        
-        # Log health status
-        if health_result.get("status") == "healthy":
-            frappe.logger().info(f"RunPod API health check passed: {health_result.get('response_time', 0):.2f}s")
-        else:
-            frappe.logger().warning(f"RunPod API health check failed: {health_result.get('error', 'Unknown error')}")
-        
-    except Exception as e:
-        frappe.log_error(
-            f"Error in check_runpod_health: {str(e)}", 
-            "RunPod Health Check Error"
-        )
-
-
 def cleanup_old_processing_jobs():
     """Cleanup function to remove very old jobs - can be called manually if needed"""
     try:

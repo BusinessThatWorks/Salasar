@@ -8,7 +8,6 @@ import time
 from frappe.model.document import Document
 from frappe.utils import getdate, cstr, flt, cint
 from policy_reader.policy_reader.services.processing_service import ProcessingService
-from policy_reader.policy_reader.services.runpod_service import RunPodService  
 from policy_reader.policy_reader.services.extraction_service import ExtractionService
 from policy_reader.policy_reader.services.policy_creation_service import PolicyCreationService
 
@@ -98,7 +97,7 @@ class PolicyDocument(Document):
         }
     
     def process_policy_internal(self):
-        """Internal method for actual policy processing (runs in background)"""
+        """Internal method for actual policy processing (runs in background) - uses Claude Vision"""
         try:
             # Check for timeout before starting processing
             if self.check_processing_timeout():
@@ -113,102 +112,51 @@ class PolicyDocument(Document):
             # Get settings for processing configuration
             settings = self.get_policy_reader_settings()
             
+            # Get API key
+            api_key = (settings.anthropic_api_key or 
+                      frappe.conf.get('anthropic_api_key') or 
+                      os.environ.get('ANTHROPIC_API_KEY'))
+            
+            if not api_key:
+                frappe.throw("ANTHROPIC_API_KEY not configured. Please set it in Policy Reader Settings")
+            
+            # Process with Claude Vision API
             start_time = time.time()
-            
-            # Choose processing method: RunPod or Local
-            processing_method = self.choose_processing_method(settings)
-            
-            # Step 1: Extract text using chosen method
-            if processing_method == "runpod":
-                # Use RunPod API for text extraction
-                result = self.extract_text_with_runpod(file_path, settings)
-                if not result.get("success"):
-                    frappe.logger().warning(f"RunPod processing failed, falling back to local: {result.get('error')}")
-                    # Fallback to local processing
-                    result = self.extract_text_with_local(file_path, settings)
-            else:
-                # Use local document_reader library
-                result = self.extract_text_with_local(file_path, settings)
-            
-            extracted_text = result.get('text', '')
-            confidence_data = result.get('confidence_data', {})
-            runpod_endpoint = result.get('runpod_endpoint', '')
-            
-            # Store RunPod endpoint immediately after RunPod call (before Claude extraction)
-            self.runpod_endpoint = runpod_endpoint
-            
-            # Step 2: Extract structured fields using Claude API
-            claude_result = self.extract_fields_with_claude(extracted_text, self.policy_type.lower(), settings)
-            
+            result = self.process_with_claude_vision(file_path, api_key, settings)
             end_time = time.time()
             processing_time = round(end_time - start_time, 2)
             
-            if claude_result.get("success"):
-                # Extract confidence metrics with error handling
-                try:
-                    avg_confidence = confidence_data.get('average_confidence', 0.0)
-                    enhancement_applied = any(
-                        m.get('enhancement_applied', False) 
-                        for m in confidence_data.get('enhancement_metrics', [])
-                    )
-                    
-                    # Determine if manual review is recommended (confidence < 70%)
-                    manual_review_recommended = avg_confidence < 0.7
-                except Exception as confidence_error:
-                    frappe.logger().warning(f"Error extracting confidence metrics: {str(confidence_error)}")
-                    # Fallback values
-                    avg_confidence = 0.0
-                    enhancement_applied = False
-                    manual_review_recommended = True  # Default to recommending review if we can't determine confidence
-                
+            # Update document with results
+            if result.get("success"):
                 self.status = "Completed"
-                self.extracted_fields = frappe.as_json(claude_result.get("extracted_fields", {}))
-                self.raw_ocr_text = extracted_text  # Store raw OCR text for re-extraction
+                self.extracted_fields = frappe.as_json(result.get("extracted_fields", {}))
                 self.processing_time = processing_time
+                self.processing_method = "claude_vision"
+                self.tokens_used = result.get("tokens_used", 0)
                 self.error_message = ""
                 
-                # Store processing method used
-                self.processing_method = processing_method
-                
-                # Store confidence metrics
-                # The document reader returns confidence as decimal (0.72 = 72%)
-                # Frappe Percent field expects percentage value (72 for 72%)
-                self.ocr_confidence = float(avg_confidence) * 100
-                self.manual_review_recommended = 1 if manual_review_recommended else 0
-                self.enhancement_applied = 1 if enhancement_applied else 0
-                self.confidence_data = frappe.as_json(confidence_data)
-                
-                # Field extraction completed successfully
+                frappe.logger().info(f"Claude Vision processing completed for {self.name}")
             else:
                 self.status = "Failed"
-                self.error_message = claude_result.get("error", "Unknown error occurred")
+                self.error_message = result.get("error", "Unknown error occurred")
                 
-                frappe.log_error(f"Policy OCR processing failed for {self.name}: {self.error_message}", "Policy OCR Processing Error")
+                frappe.log_error(f"Claude Vision processing failed for {self.name}: {self.error_message}", "Claude Vision Processing Error")
             
             self.save()
             frappe.db.commit()
             
             # Notify user via real-time updates
-            notification_message = "Processing completed successfully"
-            if self.status == "Completed" and hasattr(self, 'ocr_confidence'):
-                confidence_pct = int(self.ocr_confidence)  # Already stored as percentage
-                method_text = "RunPod API" if processing_method == "runpod" else "Local OCR"
-                notification_message = f"Processing completed successfully via {method_text} (OCR confidence: {confidence_pct}%)"
-                if self.manual_review_recommended:
-                    notification_message += " - Manual review recommended"
-            elif self.status != "Completed":
-                notification_message = self.error_message
-                
+            notification_message = "Claude Vision processing completed successfully" if result.get("success") else self.error_message
+            
             frappe.publish_realtime(
                 event="policy_processing_complete",
                 message={
                     "doc_name": self.name,
                     "status": self.status,
                     "message": notification_message,
-                    "processing_time": processing_time if hasattr(self, 'processing_time') else 0,
-                    "ocr_confidence": getattr(self, 'ocr_confidence', 0),  # Already stored as percentage
-                    "manual_review_recommended": getattr(self, 'manual_review_recommended', 0),
-                    "processing_method": processing_method
+                    "processing_time": processing_time,
+                    "processing_method": "claude_vision",
+                    "tokens_used": self.tokens_used if hasattr(self, 'tokens_used') else 0
                 },
                 user=self.owner
             )
@@ -219,7 +167,7 @@ class PolicyDocument(Document):
             self.save()
             frappe.db.commit()
             
-            frappe.log_error(f"Policy processing system error for {self.name}: {str(e)}", "Policy OCR System Error")
+            frappe.log_error(f"Claude Vision processing system error for {self.name}: {str(e)}", "Claude Vision System Error")
             
             # Notify user of failure
             frappe.publish_realtime(
@@ -232,31 +180,6 @@ class PolicyDocument(Document):
                 },
                 user=self.owner
             )
-    
-    def choose_processing_method(self, settings):
-        """Choose between RunPod and local processing based on health and configuration"""
-        processing_service = ProcessingService(self)
-        return processing_service.choose_processing_method(settings)
-    
-    def get_recommended_processing_method(self, settings):
-        """Get the recommended processing method for display purposes (doesn't actually process)"""
-        processing_service = ProcessingService(self)
-        return processing_service.get_recommended_processing_method(settings)
-    
-    def set_initial_processing_method(self, settings):
-        """Set the initial processing method based on RunPod health"""
-        try:
-            recommended = self.get_recommended_processing_method(settings)
-            self.processing_method = recommended
-            return recommended
-        except Exception as e:
-            self.processing_method = "local"
-            return "local"
-    
-    def extract_text_with_runpod(self, file_path, settings):
-        """Extract text using RunPod API"""
-        processing_service = ProcessingService(self)
-        return processing_service.extract_text_with_runpod(file_path, self.policy_type, settings)
     
     def extract_text_with_local(self, file_path, settings):
         """Extract text using local document_reader library (fallback method)"""
@@ -646,19 +569,52 @@ class PolicyDocument(Document):
             
             if response.status_code == 200:
                 response_data = response.json()
+                
+                # Log the full response for debugging
+                frappe.logger().info(f"Claude API Response: {response_data}")
+                
                 content = response_data.get('content', [{}])[0].get('text', '')
                 
                 # Extract JSON from Claude's response
                 extracted_fields = self.extract_json_from_claude_response(content)
                 
+                # Get token usage from response
+                usage = response_data.get('usage', {})
+                input_tokens = usage.get('input_tokens', 0)
+                output_tokens = usage.get('output_tokens', 0)
+                tokens_used = input_tokens + output_tokens
+                
+                frappe.logger().info(f"Token Usage - Input: {input_tokens}, Output: {output_tokens}, Total: {tokens_used}")
+                
                 return {
                     "success": True,
-                    "extracted_fields": extracted_fields
+                    "extracted_fields": extracted_fields,
+                    "tokens_used": tokens_used,
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens
                 }
-            else:
+            elif response.status_code == 429:
+                # Rate limit or insufficient balance
+                error_data = response.json() if response.text else {}
+                error_message = error_data.get('error', {}).get('message', response.text)
                 return {
                     "success": False,
-                    "error": f"Claude API error: HTTP {response.status_code} - {response.text}"
+                    "error": f"API Rate Limit or Insufficient Balance: {error_message}",
+                    "error_type": "rate_limit"
+                }
+            elif response.status_code == 401:
+                return {
+                    "success": False,
+                    "error": "API Authentication Failed - Check your API key",
+                    "error_type": "auth_error"
+                }
+            else:
+                error_data = response.json() if response.text else {}
+                error_message = error_data.get('error', {}).get('message', response.text[:200])
+                return {
+                    "success": False,
+                    "error": f"Claude API error: HTTP {response.status_code} - {error_message}",
+                    "error_type": "api_error"
                 }
                 
         except Exception as e:
@@ -975,6 +931,100 @@ def check_api_key_status():
         return {
             "configured": False,
             "message": f"Error checking API key: {str(e)}"
+        }
+
+@frappe.whitelist()
+def test_claude_api_health():
+    """Test Claude API connectivity with a simple health check"""
+    import time
+    import requests
+    
+    try:
+        settings = frappe.get_single("Policy Reader Settings")
+        api_key = (settings.anthropic_api_key or 
+                  frappe.conf.get('anthropic_api_key') or 
+                  os.environ.get('ANTHROPIC_API_KEY'))
+        
+        if not api_key:
+            return {
+                "success": False,
+                "error": "API key not configured"
+            }
+        
+        # Simple test request to Claude API
+        headers = {
+            'Content-Type': 'application/json',
+            'X-API-Key': api_key,
+            'anthropic-version': '2023-06-01'
+        }
+        
+        payload = {
+            'model': getattr(settings, 'claude_model', 'claude-sonnet-4-20250514'),
+            'max_tokens': 10,
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': 'Hi'
+                }
+            ]
+        }
+        
+        start_time = time.time()
+        response = requests.post(
+            'https://api.anthropic.com/v1/messages',
+            headers=headers,
+            json=payload,
+            timeout=10
+        )
+        response_time = int((time.time() - start_time) * 1000)  # Convert to ms
+        
+        if response.status_code == 200:
+            # Check token usage from response
+            response_data = response.json()
+            usage = response_data.get('usage', {})
+            tokens_used = usage.get('input_tokens', 0) + usage.get('output_tokens', 0)
+            
+            return {
+                "success": True,
+                "response_time": response_time,
+                "message": "API is healthy",
+                "tokens_used": tokens_used
+            }
+        elif response.status_code == 429:
+            error_data = response.json() if response.text else {}
+            error_msg = error_data.get('error', {}).get('message', 'Rate limit exceeded or insufficient credits')
+            return {
+                "success": False,
+                "error": f"Rate Limit/Insufficient Balance: {error_msg}"
+            }
+        elif response.status_code == 401:
+            return {
+                "success": False,
+                "error": "Authentication Failed - Invalid API Key"
+            }
+        else:
+            error_data = response.json() if response.text else {}
+            error_msg = error_data.get('error', {}).get('message', response.text[:100])
+            return {
+                "success": False,
+                "error": f"HTTP {response.status_code}: {error_msg}"
+            }
+            
+    except requests.exceptions.Timeout:
+        return {
+            "success": False,
+            "error": "Request timeout - API took too long to respond"
+        }
+    except requests.exceptions.ConnectionError:
+        return {
+            "success": False,
+            "error": "Connection failed - cannot reach Claude API"
+        }
+    except Exception as e:
+        frappe.log_error(f"Claude API health check error: {str(e)}", "API Health Check Error")
+        return {
+            "success": False,
+            "error": str(e)
         }
 
 # Background job method - must be module level for frappe.enqueue

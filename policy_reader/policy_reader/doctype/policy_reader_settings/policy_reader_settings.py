@@ -14,7 +14,6 @@ class PolicyReaderSettings(Document):
 	def validate(self):
 		"""Validate Policy Reader Settings"""
 		self.validate_api_key()
-		self.validate_runpod_config()
 		self.validate_numeric_fields()
 	
 	def validate_api_key(self):
@@ -22,21 +21,6 @@ class PolicyReaderSettings(Document):
 		if self.anthropic_api_key:
 			if not self.anthropic_api_key.startswith('sk-ant-'):
 				frappe.throw("Invalid Anthropic API key format. Key should start with 'sk-ant-'")
-	
-	def validate_runpod_config(self):
-		"""Validate RunPod configuration"""
-		if self.runpod_pod_id and self.runpod_port:
-			# Validate pod ID format (alphanumeric and hyphens only)
-			if not self.runpod_pod_id.replace('-', '').replace('_', '').isalnum():
-				frappe.throw("Invalid RunPod Pod ID format. Use only letters, numbers, hyphens, and underscores.")
-			
-			# Validate port range
-			if not (1 <= self.runpod_port <= 65535):
-				frappe.throw("Invalid RunPod port. Port must be between 1 and 65535.")
-			
-			# Validate endpoint format
-			if self.runpod_endpoint and not self.runpod_endpoint.startswith('/'):
-				frappe.throw("RunPod endpoint must start with '/' (e.g., '/extract')")
 	
 	def validate_numeric_fields(self):
 		"""Validate numeric field ranges"""
@@ -57,139 +41,6 @@ class PolicyReaderSettings(Document):
 			return {"success": True, "message": "API key format valid"}
 		except Exception as e:
 			frappe.throw(f"API connection test failed: {str(e)}")
-	
-	@frappe.whitelist()
-	def test_runpod_connection(self):
-		"""Test RunPod API connection and health"""
-		if not self.runpod_pod_id or not self.runpod_port or not self.runpod_api_secret:
-			frappe.throw("Please configure RunPod Pod ID, Port, and API Secret first")
-		
-		try:
-			# Perform health check
-			health_result = self._check_runpod_health()
-			
-			# Update health status
-			self.update_runpod_health_status(health_result)
-			
-			# Show result to user
-			if health_result.get("status") == "healthy":
-				frappe.msgprint(
-					f"✅ RunPod API is healthy! Response time: {health_result.get('response_time', 0):.2f}s",
-					title="RunPod Connection Test",
-					indicator="green"
-				)
-			else:
-				frappe.msgprint(
-					f"❌ RunPod API is unhealthy: {health_result.get('error', 'Unknown error')}",
-					title="RunPod Connection Test",
-					indicator="red"
-				)
-			
-			return health_result
-			
-		except Exception as e:
-			frappe.log_error(f"RunPod connection test failed: {str(e)}", "RunPod Test Error")
-			frappe.throw(f"RunPod connection test failed: {str(e)}")
-	
-	def _check_runpod_health(self):
-		"""Check RunPod API health status"""
-		try:
-			import requests
-			
-			health_url = self.get_runpod_health_url()
-			start_time = time.time()
-			
-			response = requests.get(health_url, timeout=10)
-			response_time = time.time() - start_time
-			
-			if response.status_code == 200:
-				try:
-					health_data = response.json()
-					return {
-						"status": "healthy",
-						"response_time": response_time,
-						"details": health_data,
-						"status_code": response.status_code
-					}
-				except ValueError:
-					# Response is not JSON, but status is 200
-					return {
-						"status": "healthy",
-						"response_time": response_time,
-						"details": {"raw_response": response.text},
-						"status_code": response.status_code
-					}
-			else:
-				return {
-					"status": "unhealthy",
-					"response_time": response_time,
-					"status_code": response.status_code,
-					"error": f"HTTP {response.status_code}: {response.text}"
-				}
-				
-		except requests.exceptions.Timeout:
-			return {
-				"status": "error",
-				"error": "Request timeout - API took too long to respond",
-				"response_time": 10.0
-			}
-		except requests.exceptions.ConnectionError:
-			return {
-				"status": "error",
-				"error": "Connection failed - cannot reach RunPod API",
-				"response_time": 0.0
-			}
-		except Exception as e:
-			return {
-				"status": "error",
-				"error": f"Unexpected error: {str(e)}",
-				"response_time": 0.0
-			}
-	
-	def update_runpod_health_status(self, health_result):
-		"""Update stored health status and timestamp"""
-		self.runpod_health_status = health_result.get("status", "unknown")
-		self.runpod_last_health_check = now()
-		self.runpod_response_time = health_result.get("response_time", 0)
-		self.runpod_health_details = frappe.as_json(health_result)
-		self.save()
-	
-	def get_runpod_base_url(self):
-		"""Get RunPod base URL"""
-		if not self.runpod_pod_id or not self.runpod_port:
-			return None
-		return f"https://{self.runpod_pod_id}-{self.runpod_port}.proxy.runpod.net"
-	
-	def get_runpod_health_url(self):
-		"""Get RunPod health check URL"""
-		base_url = self.get_runpod_base_url()
-		if not base_url:
-			return None
-		return f"{base_url}/health"
-	
-	def get_runpod_extract_url(self):
-		"""Get RunPod extract API URL"""
-		base_url = self.get_runpod_base_url()
-		if not base_url:
-			return None
-		endpoint = self.runpod_endpoint or "/extract"
-		return f"{base_url}{endpoint}"
-	
-	def get_runpod_ocr_url(self):
-		"""Get RunPod OCR-only API URL"""
-		base_url = self.get_runpod_base_url()
-		if not base_url:
-			return None
-		# Use OCR endpoint if configured, otherwise use the configured endpoint
-		endpoint = self.runpod_endpoint or "/ocr-detailed"
-		return f"{base_url}{endpoint}"
-	
-	def is_runpod_available(self):
-		"""Check if RunPod is configured and healthy"""
-		return (self.runpod_pod_id and 
-				self.runpod_port and 
-				self.runpod_api_secret and
-				self.runpod_health_status == "healthy")
 	
 	@frappe.whitelist()
 	def refresh_field_mappings(self):
@@ -850,23 +701,3 @@ Return data as valid JSON:"""
 			frappe.log_error(f"Error building prompt from mapping for {policy_type}: {str(e)}", "Mapping Prompt Build Error")
 			return self._build_fallback_prompt(policy_type, extracted_text)
 
-@frappe.whitelist()
-def get_runpod_health_info():
-	"""Get RunPod health information for JavaScript"""
-	try:
-		settings = frappe.get_single("Policy Reader Settings")
-		
-		return {
-			"status": settings.runpod_health_status or "unknown",
-			"response_time": settings.runpod_response_time or 0.0,
-			"last_check": settings.runpod_last_health_check,
-			"configured": bool(settings.runpod_pod_id and settings.runpod_port and settings.runpod_api_secret)
-		}
-	except Exception as e:
-		frappe.log_error(f"Error getting RunPod health info: {str(e)}", "RunPod Health Info Error")
-		return {
-			"status": "error",
-			"response_time": 0.0,
-			"last_check": None,
-			"configured": False
-		}

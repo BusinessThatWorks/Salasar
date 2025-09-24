@@ -2,14 +2,14 @@
 
 ### Purpose
 
-- Read insurance PDF files, extract OCR text (RunPod or local), use Claude Sonnet to parse structured fields, then create Frappe DocTypes (`Motor Policy`, `Health Policy`) using dynamic field mappings configured/cached in `Policy Reader Settings`.
+- Read insurance PDF files, extract OCR text using local document_reader, use Claude Sonnet to parse structured fields, then create Frappe DocTypes (`Motor Policy`, `Health Policy`) using dynamic field mappings configured/cached in `Policy Reader Settings`.
 
 ### High-level Flow
 
 1. User uploads a file and selects `policy_type` on `Policy Document`.
 2. User triggers processing → background job enqueued.
 3. OCR text extraction:
-   - Prefer RunPod OCR if configured and healthy; else fallback to local `document_reader`.
+   - Uses local `document_reader` for text extraction with confidence scoring.
 4. AI field extraction:
    - Build prompt from `Policy Reader Settings` (cached dynamic prompt per policy type or fallback); call Anthropic Claude; parse JSON from response.
 5. Store results on `Policy Document`:
@@ -22,14 +22,14 @@
 
   - `doc_events["DocType"].on_update`: `refresh_field_mappings_if_policy_doctype` auto-refreshes field-mapping cache when `Motor Policy` or `Health Policy` DocTypes change.
   - `patches`: runs `v1_0.migrate_motor_policy_schema` during installs/updates.
-  - `scheduler_events (cron)`: every 3 minutes monitor stuck `Policy Document`; every 10 minutes check RunPod health.
+  - `scheduler_events (cron)`: every 3 minutes monitor stuck `Policy Document`.
 
 - `Policy Document` (`policy_reader/doctype/policy_document/policy_document.py`)
 
   - Orchestrates processing.
   - `process_policy()` enqueues `process_policy_background` job.
   - `process_policy_internal()` executes:
-    - Choose processing method (`RunPod` vs `local`).
+    - Uses local processing method.
     - Extract text.
     - Call Claude through `ExtractionService` to get structured fields.
     - Persist status, extracted fields, raw OCR text, processing time, confidence metrics, processing method; publish realtime events.
@@ -37,16 +37,8 @@
 
 - `ProcessingService` (`services/processing_service.py`)
 
-  - Picks processing method based on `Policy Reader Settings` RunPod config and health/latency (<5s threshold).
-  - `extract_text_with_runpod()` → delegates OCR-only to `RunPodService`.
   - `extract_text_with_local()` → uses `document_reader.extract_text_with_confidence` for OCR + confidence.
   - Validates uploaded file accessibility.
-
-- `RunPodService` (`services/runpod_service.py`)
-
-  - Computes base/health/extract/OCR URLs from settings.
-  - `check_health()` and `update_health_status()` helpers.
-  - `extract_document_text()` performs OCR-only POST; returns normalized `{ success, text, confidence_data, runpod_endpoint }`.
 
 - `ExtractionService` (`services/extraction_service.py`)
 
@@ -65,9 +57,8 @@
 
 - `Policy Reader Settings` (`doctype/policy_reader_settings/policy_reader_settings.py`)
 
-  - Validations: Anthropic key format (`sk-ant-`), RunPod config format/ranges, timeout range.
-  - Test actions: API key format test; RunPod health check with persisted health fields.
-  - RunPod helpers: build URLs, availability checks, scheduled health status update endpoint (`get_runpod_health_info`).
+  - Validations: Anthropic key format (`sk-ant-`), timeout range.
+  - Test actions: API key format test.
   - Field-mapping lifecycle:
     - `refresh_field_mappings()`: builds mapping from DocType metadata; stores JSON in `motor_policy_fields`/`health_policy_fields`.
     - `build_field_mapping_from_doctype(doctype)`: builds `{ label/aliases → fieldname }` skipping layout/system fields; adds alias sets for natural variants (e.g., `Policy Number`, `PolicyNumber`, etc.).
@@ -88,7 +79,6 @@
 
 - Background Tasks (`policy_reader/tasks.py`)
   - `monitor_stuck_policy_documents()` finds processing docs older than 5 minutes → retries; 30+ minutes → mark failed; notifies user via realtime events.
-  - `check_runpod_health()` every 10 minutes updates settings health fields using the same internal health method.
   - `cleanup_old_processing_jobs()` utility to mark abandoned jobs failed (>1 hour).
 
 ### Field Mapping Strategy
@@ -106,15 +96,14 @@
 ### Error Handling & Observability
 
 - Extensive `frappe.logger()` info/warning/error logs across services.
-- `frappe.log_error()` with contextual titles for critical failures (Claude API, RunPod, parsing, timeouts).
+- `frappe.log_error()` with contextual titles for critical failures (Claude API, parsing, timeouts).
 - Realtime events published on completion/failure and on retries.
-- Graceful fallbacks: RunPod → local, cached prompt → dynamic → fallback, health checks with persisted status.
+- Graceful fallbacks: cached prompt → dynamic → fallback.
 
 ### Configuration
 
 - Anthropic API key precedence: Settings → `site_config.json` (`frappe.conf`) → `ANTHROPIC_API_KEY` env var.
 - Claude model customizable via settings (`claude_model`), default `claude-sonnet-4-20250514`.
-- RunPod: `runpod_pod_id`, `runpod_port`, `runpod_api_secret`, optional `runpod_endpoint`. Health status and response time stored and used for routing decisions.
 - Background queues: `queue_type` and `timeout` from settings used during enqueue.
 
 ### Notable UX Behaviors
@@ -129,13 +118,13 @@
   - Adding a new policy DocType with fields.
   - Extending `Policy Reader Settings` prompt builders and field alias dictionary for that type.
   - Ensuring hooks refresh field mappings when the new DocType updates.
-- External OCR providers can be added by implementing a new service analogous to `RunPodService` and extending `ProcessingService` selection logic.
+- External OCR providers can be added by implementing a new service and integrating with `ProcessingService`.
 
 ### Known Trade-offs / Considerations
 
 - JSON extraction from LLM responses uses tolerant regex/code-fence parsing; malformed outputs may still slip through as empty dicts.
 - Value conversion relies on Frappe field metadata; select normalization attempts exact/case-insensitive/partial matching—may need insurer-specific canonicalization tables.
-- `document_reader` is an external dependency for local OCR; ensure it’s available in the environment.
+- `document_reader` is an external dependency for OCR; ensure it's available in the environment.
 
 ### Key Entry Points
 

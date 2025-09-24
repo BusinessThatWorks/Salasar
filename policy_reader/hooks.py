@@ -145,9 +145,6 @@ scheduler_events = {
 	"cron": {
 		"*/3 * * * *": [  # Every 3 minutes
 			"policy_reader.tasks.monitor_stuck_policy_documents"
-		],
-		"*/10 * * * *": [  # Every 10 minutes
-			"policy_reader.tasks.check_runpod_health"
 		]
 	}
 }

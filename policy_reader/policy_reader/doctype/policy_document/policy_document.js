@@ -100,14 +100,10 @@ frappe.ui.form.on("Policy Document", {
 			// It will only show when user explicitly starts processing
 		}
 
-		// Show processing method if available (but don't duplicate with health status)
-		if (frm.doc.processing_method && !$(".runpod-health-status").length) {
+		// Show processing method if available
+		if (frm.doc.processing_method) {
 			let method_text, method_color;
 			switch(frm.doc.processing_method) {
-				case "runpod":
-					method_text = "RunPod API";
-					method_color = "green";
-					break;
 				case "claude_vision":
 					method_text = "Claude AI (Vision)";
 					method_color = "purple";
@@ -123,8 +119,7 @@ frappe.ui.form.on("Policy Document", {
 			);
 		}
 
-		// Show RunPod health status to inform processing method choice
-		frm.trigger("check_runpod_health_status");
+		// Processing method selection logic removed
 
 		// Policy type changed - no special handling needed
 
@@ -182,9 +177,6 @@ frappe.ui.form.on("Policy Document", {
 				if (message.status === "Completed") {
 					let method_text;
 					switch(message.processing_method) {
-						case "runpod":
-							method_text = "RunPod API";
-							break;
 						case "claude_vision":
 							method_text = "Claude AI (Vision)";
 							break;
@@ -487,115 +479,101 @@ frappe.ui.form.on("Policy Document", {
 	},
 
 	check_api_key_status: function (frm) {
-		// Check API key status and display in dashboard
+		// Check API key status and display as a clean status bubble
 		frappe.call({
 			method: "policy_reader.policy_reader.doctype.policy_document.policy_document.check_api_key_status",
 			callback: function (r) {
 				if (r.message) {
 					let status = r.message;
-					let color = status.configured ? "green" : "red";
-					let icon = status.configured ? "✓" : "✗";
-					let message = `${icon} API Key: ${status.message}`;
+					
+					// Remove existing API status indicators
+					$(".api-status-bubble").remove();
 
-					// Remove existing API key status
-					$(".api-key-status").remove();
-
-					// Add to dashboard
-					frm.dashboard.add_comment(message, color, true);
-
-					// Also add a small indicator near the form title
-					let indicator = $(
-						`<span class="api-key-status" style="margin-left: 10px; color: ${
-							color === "green" ? "#28a745" : "#dc3545"
-						}; font-size: 12px;">${message}</span>`
-					);
-					$(".form-layout .title-area h1").append(indicator);
-				}
-			},
-		});
-	},
-
-	check_runpod_health_status: function (frm) {
-		// Check RunPod health status and show recommendations
-		frappe.call({
-			method: "policy_reader.policy_reader.doctype.policy_reader_settings.policy_reader_settings.get_runpod_health_info",
-			callback: function (r) {
-				if (r.message) {
-					let health = r.message;
-
-					// Remove existing health status display
-					$(".runpod-health-status").remove();
-
-					// Create clean health status display
-					let healthHtml = "";
-					let methodRecommendation = "";
-
-					if (health.status === "healthy" && health.response_time < 5) {
-						healthHtml = `
-							<div class="runpod-health-status" style="margin: 10px 0; padding: 12px; border-radius: 6px; background: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
-								<div style="font-weight: 600; margin-bottom: 5px;">✅ RunPod API Status: Healthy</div>
-								<div style="font-size: 13px; color: #0f5132;">Response time: ${health.response_time.toFixed(
-									2
-								)}s | 🚀 Recommended for processing</div>
+					// Create status bubble HTML
+					let bubbleHtml = '';
+					if (status.configured) {
+						// API key configured - show health check
+						bubbleHtml = `
+							<div class="api-status-bubble" style="display: inline-flex; align-items: center; gap: 12px; padding: 8px 16px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 6px; margin-left: 12px;">
+								<div style="display: flex; align-items: center; gap: 6px;">
+									<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
+									<span style="color: #065f46; font-weight: 500; font-size: 13px;">Claude API Ready</span>
+								</div>
+								<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: white; border: 1px solid #d1d5db; color: #374151; padding: 2px 8px; font-size: 11px;">
+									Test Connection
+								</button>
 							</div>
 						`;
-						methodRecommendation = "runpod";
-
-						// Auto-set to runpod if not already set
-						if (!frm.doc.processing_method || frm.doc.processing_method === "local") {
-							frm.set_value("processing_method", "runpod");
-						}
-					} else if (health.status === "healthy" && health.response_time >= 5) {
-						healthHtml = `
-							<div class="runpod-health-status" style="margin: 10px 0; padding: 12px; border-radius: 6px; background: #fff3cd; border: 1px solid #ffeaa7; color: #856404;">
-								<div style="font-weight: 600; margin-bottom: 5px;">⚠️ RunPod API Status: Slow</div>
-								<div style="font-size: 13px; color: #856404;">Response time: ${health.response_time.toFixed(
-									2
-								)}s | 💻 Local processing recommended</div>
-							</div>
-						`;
-						methodRecommendation = "local";
-
-						// Auto-set to local if RunPod is slow
-						if (frm.doc.processing_method === "runpod") {
-							frm.set_value("processing_method", "local");
-						}
 					} else {
-						healthHtml = `
-							<div class="runpod-health-status" style="margin: 10px 0; padding: 12px; border-radius: 6px; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
-								<div style="font-weight: 600; margin-bottom: 5px;">❌ RunPod API Status: ${
-									health.status || "Unavailable"
-								}</div>
-								<div style="font-size: 13px; color: #721c24;">💻 Local processing only available</div>
+						// API key not configured
+						bubbleHtml = `
+							<div class="api-status-bubble" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: #fef2f2; border: 1px solid #ef4444; border-radius: 6px; margin-left: 12px;">
+								<span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
+								<span style="color: #991b1b; font-weight: 500; font-size: 13px;">API Key Not Configured</span>
 							</div>
 						`;
-						methodRecommendation = "local";
-
-						// Auto-set to local if RunPod is unhealthy
-						if (frm.doc.processing_method === "runpod") {
-							frm.set_value("processing_method", "local");
-						}
 					}
 
-					// Add health status after the policy information section
-					let policyInfoSection = frm
-						.get_field("policy_type")
-						.$wrapper.closest(".form-section");
-					if (policyInfoSection.length) {
-						policyInfoSection.after(healthHtml);
-					}
-
-					// Update processing method field with recommendation
-					if (
-						methodRecommendation &&
-						frm.doc.processing_method !== methodRecommendation
-					) {
-						frm.set_value("processing_method", methodRecommendation);
-					}
+					// Add status bubble after the page title
+					let statusBubble = $(bubbleHtml);
+					$(".form-layout .title-area h1").after(statusBubble);
 				}
 			},
 		});
 	},
+
+	test_api_health: function(frm) {
+		// Test Claude API connectivity
+		frappe.show_alert({
+			message: __('Testing Claude API connection...'),
+			indicator: 'blue'
+		});
+
+		frappe.call({
+			method: "policy_reader.policy_reader.doctype.policy_document.policy_document.test_claude_api_health",
+			callback: function(r) {
+				if (r.message && r.message.success) {
+					// Update bubble to show healthy status
+					$(".api-status-bubble").html(`
+						<div style="display: flex; align-items: center; gap: 12px;">
+							<div style="display: flex; align-items: center; gap: 6px;">
+								<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span>
+								<span style="color: #065f46; font-weight: 500; font-size: 13px;">Claude API Healthy</span>
+							</div>
+							<span style="color: #6b7280; font-size: 11px;">Response: ${r.message.response_time}ms</span>
+							<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: white; border: 1px solid #d1d5db; color: #374151; padding: 2px 8px; font-size: 11px;">
+								Retest
+							</button>
+						</div>
+					`);
+					
+					frappe.show_alert({
+						message: __('Claude API is healthy! Response time: {0}ms', [r.message.response_time]),
+						indicator: 'green'
+					});
+				} else {
+					// Update bubble to show error status
+					$(".api-status-bubble").html(`
+						<div style="display: flex; align-items: center; gap: 12px;">
+							<div style="display: flex; align-items: center; gap: 6px;">
+								<span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
+								<span style="color: #991b1b; font-weight: 500; font-size: 13px;">API Connection Failed</span>
+							</div>
+							<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: white; border: 1px solid #d1d5db; color: #374151; padding: 2px 8px; font-size: 11px;">
+								Retry
+							</button>
+						</div>
+					`);
+					
+					frappe.show_alert({
+						message: __('Claude API test failed: {0}', [r.message.error || 'Unknown error']),
+						indicator: 'red'
+					});
+				}
+			}
+		});
+	},
+
 
 	policy_type: function (frm) {
 		// Policy type changed - no special handling needed
