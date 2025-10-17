@@ -11,7 +11,7 @@ frappe.ui.form.on("Health Policy", {
 				window.open(url, '_blank');
 			}, __('Actions'));
 		}
-		
+
 		// Add "Populate Fields" button if policy_document is linked
 		if (frm.doc.policy_document && !frm.doc.__islocal) {
 			frm.add_custom_button(__('Populate Fields'), function() {

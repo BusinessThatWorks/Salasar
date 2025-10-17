@@ -38,7 +38,14 @@
   "bank_name",
   "payment_transaction_no",
   "remarks",
-  "policy_status"
+  "policy_status",
+  "internal_information_tab",
+  "processor_information_section",
+  "insurance_employee",
+  "processor_employee_name",
+  "processor_employee_code",
+  "processor_employee_type",
+  "processor_branch_name"
  ],
  "fields": [
   {
@@ -221,6 +228,50 @@
    "fieldtype": "Data",
    "label": "Policy Status",
    "length": 50
+  },
+  {
+   "fieldname": "internal_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Internal Information"
+  },
+  {
+   "fieldname": "processor_information_section",
+   "fieldtype": "Section Break",
+   "label": "Processor Information"
+  },
+  {
+   "fieldname": "insurance_employee",
+   "fieldtype": "Link",
+   "label": "Insurance Employee",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "insurance_employee.employee_name",
+   "fieldname": "processor_employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.employee_code",
+   "fieldname": "processor_employee_code",
+   "fieldtype": "Data",
+   "label": "Employee Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.employee_type",
+   "fieldname": "processor_employee_type",
+   "fieldtype": "Data",
+   "label": "Employee Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.branch_name",
+   "fieldname": "processor_branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,

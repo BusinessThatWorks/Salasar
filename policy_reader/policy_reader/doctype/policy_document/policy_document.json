@@ -22,7 +22,12 @@
   "extracted_fields",
   "raw_ocr_text",
   "used_prompt",
-  "error_message"
+  "error_message",
+  "processor_info_tab",
+  "processor_info_section",
+  "processor_employee_name",
+  "processor_employee_code",
+  "processor_employee_type"
  ],
  "fields": [
   {
@@ -137,6 +142,37 @@
    "fieldname": "error_message",
    "fieldtype": "Long Text",
    "label": "Error Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "processor_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Processor Information"
+  },
+  {
+   "fieldname": "processor_info_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "description": "Auto-populated employee name from logged-in user",
+   "fieldname": "processor_employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "description": "Auto-populated employee code from logged-in user",
+   "fieldname": "processor_employee_code",
+   "fieldtype": "Data",
+   "label": "Employee Code",
+   "read_only": 1
+  },
+  {
+   "description": "Auto-populated employee type (CSC or RM)",
+   "fieldname": "processor_employee_type",
+   "fieldtype": "Data",
+   "label": "Employee Type",
    "read_only": 1
   }
  ],

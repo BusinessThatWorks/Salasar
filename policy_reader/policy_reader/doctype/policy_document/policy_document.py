@@ -19,7 +19,10 @@ class PolicyDocument(Document):
             # Check if this is a new document or if the file has changed
             if not self.title or (self.has_value_changed('policy_file') and self.policy_file):
                 self.title = self.get_filename_from_attachment()
-    
+
+        # Auto-populate processor information
+        self._populate_processor_info()
+
     def validate(self):
         if self.status == "Completed" and not self.extracted_fields:
             frappe.throw("Invalid input: extracted fields cannot be empty for completed documents")
@@ -45,7 +48,39 @@ class PolicyDocument(Document):
             
             return cleaned_name if cleaned_name else "Policy Document"
         return "New Policy Document"
-    
+
+    def _populate_processor_info(self):
+        """Auto-populate processor information from logged-in user's Insurance Employee record"""
+        try:
+            # Skip if already populated or for system users
+            current_user = frappe.session.user
+            if current_user in ["Administrator", "Guest"]:
+                return
+
+            # Only populate on new documents or if not already set
+            if self.processor_employee_code:
+                return
+
+            # Query Insurance Employee record for logged-in user
+            employee = frappe.db.get_value(
+                "Insurance Employee",
+                {"user": current_user},
+                ["employee_code", "employee_type", "employee_name"],
+                as_dict=True
+            )
+
+            if employee:
+                self.processor_employee_code = employee.get("employee_code")
+                self.processor_employee_type = employee.get("employee_type")
+                self.processor_employee_name = employee.get("employee_name")
+                frappe.logger().info(f"Auto-populated processor info for Policy Document: {employee}")
+            else:
+                frappe.logger().info(f"No Insurance Employee record found for user {current_user}")
+
+        except Exception as e:
+            frappe.logger().error(f"Error populating processor info: {str(e)}")
+            # Don't throw - this is a non-critical operation
+
     def get_policy_reader_settings(self):
         """Get Policy Reader Settings with fallback to defaults"""
         return CommonService.get_policy_reader_settings()
@@ -328,6 +363,42 @@ def check_api_key_status():
 def test_claude_api_health():
     """Test Claude API connectivity with a simple health check"""
     return APIHealthService.test_claude_api_health()
+
+@frappe.whitelist()
+def get_current_user_employee_info():
+    """Get Insurance Employee info for the current logged-in user"""
+    try:
+        current_user = frappe.session.user
+
+        frappe.logger().info(f"=== GET CURRENT USER EMPLOYEE INFO DEBUG ===")
+        frappe.logger().info(f"Current logged-in user: {current_user}")
+        frappe.logger().info(f"Session user email: {frappe.session.user}")
+
+        # Skip for Guest only (allow Administrator for now for testing)
+        if current_user == "Guest":
+            frappe.logger().info(f"Skipping for Guest user")
+            return {"employee": None}
+
+        # Query Insurance Employee record
+        frappe.logger().info(f"Querying Insurance Employee with user={current_user}")
+
+        employee = frappe.db.get_value(
+            "Insurance Employee",
+            {"user": current_user},
+            ["employee_code", "employee_type", "employee_name"],
+            as_dict=True
+        )
+
+        if employee:
+            frappe.logger().info(f"Found Insurance Employee: {employee}")
+        else:
+            frappe.logger().warning(f"No Insurance Employee found for user: {current_user}")
+
+        return {"employee": employee}
+    except Exception as e:
+        frappe.logger().error(f"Error fetching current user employee info: {str(e)}")
+        frappe.log_error(f"Error in get_current_user_employee_info: {str(e)}", frappe.get_traceback())
+        return {"employee": None}
 
 # Background job method - must be module level for frappe.enqueue
 @frappe.whitelist()

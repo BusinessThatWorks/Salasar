@@ -68,7 +68,10 @@ class PolicyCreationService:
             mapping_results = field_mapping_service.map_fields_dynamically(
                 parsed_data, field_mapping, policy_record, policy_type
             )
-            
+
+            # Auto-populate processor information based on logged-in user
+            self._populate_processor_fields(policy_record)
+
             # Validate and save
             policy_record.validate()
             policy_record.insert()
@@ -94,8 +97,60 @@ class PolicyCreationService:
         except Exception as e:
             frappe.db.rollback()
             CommonService.handle_processing_exception("creating policy record", e)
-    
-    
+
+    def _get_current_user_employee_info(self):
+        """Get Insurance Employee record for the logged-in user"""
+        try:
+            current_user = frappe.session.user
+
+            frappe.logger().info(f"Checking employee info for user: {current_user}")
+
+            # Skip for Guest only (Administrator might have an employee record)
+            if current_user == "Guest":
+                frappe.logger().info("Skipping Guest user")
+                return None
+
+            # Query Insurance Employee where user matches
+            employee = frappe.db.get_value(
+                "Insurance Employee",
+                {"user": current_user},
+                ["name", "employee_name", "employee_code", "employee_type"],
+                as_dict=True
+            )
+
+            if employee:
+                frappe.logger().info(f"Found employee info for user {current_user}: {employee}")
+                return employee
+            else:
+                frappe.logger().warning(f"No Insurance Employee record found for user {current_user}")
+                return None
+
+        except Exception as e:
+            frappe.logger().error(f"Error fetching employee info for user {frappe.session.user}: {str(e)}")
+            return None
+
+    def _populate_processor_fields(self, policy_record):
+        """Auto-populate processor fields via Insurance Employee link"""
+        try:
+            employee_info = self._get_current_user_employee_info()
+
+            if not employee_info:
+                frappe.logger().info("No employee info found, skipping processor field population")
+                return
+
+            # Set the link field directly - Frappe will auto-fetch all related fields
+            # (employee_name, employee_code, employee_type, branch_name)
+            policy_record.insurance_employee = employee_info.get("name")
+            frappe.logger().info(f"Auto-populated insurance_employee link: {employee_info.get('name')}")
+            frappe.logger().info(f"Frappe will auto-fetch: name, code, type, branch name")
+            frappe.logger().info(f"Successfully set processor link field for {policy_record.doctype}")
+
+        except Exception as e:
+            frappe.logger().error(f"Error populating processor fields: {str(e)}")
+            frappe.log_error(f"Failed to populate processor fields: {str(e)}", "Processor Field Population")
+            # Don't throw - this is a non-critical operation
+
+
     def _normalize_key(self, text):
         """Normalize keys for robust alias matching (lowercase, alnum+space)"""
         try:
@@ -218,7 +273,7 @@ class PolicyCreationService:
             elif field.fieldtype == "Check":
                 return bool(value)
             elif field.fieldtype == "Select":
-                return self.normalize_select_value(value, field.options)
+                return self.normalize_select_value(value, field.options, field_name=field_name, field_label=field.label)
             else:
                 return cstr(value)
                 
@@ -276,35 +331,72 @@ class PolicyCreationService:
             frappe.logger().error(f"Error converting datetime value {value}: {str(e)}")
             return None
     
-    def normalize_select_value(self, value, options):
+    def _get_select_field_default(self, field_name, field_label):
+        """
+        Get default value for select fields when extracted value doesn't match options
+
+        Returns None if no default should be applied (field will be left empty)
+        Returns a string value if a default should be used
+        """
+        # Define defaults for specific fields
+        # Key can be fieldname or label (lowercase)
+        defaults = {
+            # Customer Title defaults to "Mr." for unrecognized values
+            'customer_title': 'Mr.',
+            'title': 'Mr.',
+
+            # Add more field defaults here as needed
+            # 'field_name': 'default_value',
+        }
+
+        # Check by fieldname first, then by label
+        field_key = field_name.lower() if field_name else None
+        label_key = field_label.lower() if field_label else None
+
+        if field_key and field_key in defaults:
+            return defaults[field_key]
+        if label_key and label_key in defaults:
+            return defaults[label_key]
+
+        return None
+
+    def normalize_select_value(self, value, options, field_name=None, field_label=None):
         """
         Normalize select field value to match available options
+        If no match found, apply field-specific defaults
         """
         if not value or not options:
             return None
-        
+
         # Handle NA values
         if str(value).strip().upper() in ['NA', 'N/A', 'NULL', 'NONE', '']:
             return None
-        
+
         # Split options by newline
         available_options = [opt.strip() for opt in options.split('\n') if opt.strip()]
-        
+
         # Try exact match first
         if value in available_options:
             return value
-        
+
         # Try case-insensitive match
         for option in available_options:
             if option.lower() == value.lower():
                 return option
-        
+
         # Try partial match
         for option in available_options:
             if value.lower() in option.lower() or option.lower() in value.lower():
                 return option
-        
-        # If no match found, return None to avoid validation errors
+
+        # No match found - check if we should apply a default
+        default_value = self._get_select_field_default(field_name, field_label)
+        if default_value:
+            frappe.logger().warning(f"Select field '{field_name or field_label}' value '{value}' not found in options. Using default: '{default_value}'")
+            return default_value
+
+        # If no default defined, return None to leave field empty
+        frappe.logger().warning(f"Select field '{field_name or field_label}' value '{value}' not found in options. Leaving empty.")
         return None
     
     

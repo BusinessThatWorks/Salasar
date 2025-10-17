@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Policy Document", {
+	onload: function (frm) {
+		// Populate processor info on form load
+		frm.trigger("populate_processor_info");
+	},
+
 	refresh: function (frm) {
 		// Cleanup and setup
 		$(".processing-indicator").remove();
@@ -402,6 +407,45 @@ frappe.ui.form.on("Policy Document", {
 
 	open_policy_viewer: function (frm) {
 		window.open(`/app/policy-file-view?policy_document=${frm.doc.name}`, "_blank");
+	},
+
+	populate_processor_info: function (frm) {
+		console.log("=== POPULATE PROCESSOR INFO DEBUG ===");
+		console.log("Current logged-in user:", frappe.session.user);
+		console.log("Current user's full name:", frappe.session.user_fullname);
+		console.log("Processor employee code already set?:", frm.doc.processor_employee_code);
+
+		// Only populate if fields are empty (not already set)
+		if (!frm.doc.processor_employee_code) {
+			console.log("Fetching Insurance Employee info for user:", frappe.session.user);
+			frappe.call({
+				method: "policy_reader.policy_reader.doctype.policy_document.policy_document.get_current_user_employee_info",
+				callback: function (r) {
+					console.log("API Response:", r);
+					if (r.message && r.message.employee) {
+						const emp = r.message.employee;
+						console.log("Found Insurance Employee:", emp);
+						console.log("Employee Code:", emp.employee_code);
+						console.log("Employee Type:", emp.employee_type);
+						console.log("Employee Full Name:", emp.employee_name);
+
+						frm.set_value("processor_employee_name", emp.employee_name);
+						frm.set_value("processor_employee_code", emp.employee_code);
+						frm.set_value("processor_employee_type", emp.employee_type);
+
+						console.log("Successfully populated processor fields");
+					} else {
+						console.warn("No Insurance Employee found for user:", frappe.session.user);
+						console.log("Full response:", r.message);
+					}
+				},
+				error: function(err) {
+					console.error("Error fetching Insurance Employee:", err);
+				}
+			});
+		} else {
+			console.log("Processor fields already populated, skipping auto-population");
+		}
 	},
 });
 

@@ -29,6 +29,12 @@
   "bank_name",
   "column_break_payment",
   "payment_transaction_no",
+  "business_information_section",
+  "old_control_number",
+  "column_break_business_info",
+  "payment_mode_internal",
+  "bank_name_internal",
+  "dated",
   "vehicle_information_tab",
   "basic_vehicle_section",
   "vehicle_no",
@@ -71,15 +77,13 @@
   "mobile_number",
   "column_break_customer_info_2",
   "email_id",
-  "cse_id",
-  "rm_id",
   "insurer_branch_code_internal",
-  "business_information_section",
-  "old_control_number",
-  "column_break_business_info",
-  "payment_mode_internal",
-  "bank_name_internal",
-  "dated"
+  "processor_info_section",
+  "insurance_employee",
+  "processor_employee_name",
+  "processor_employee_code",
+  "processor_employee_type",
+  "processor_branch_name"
  ],
  "fields": [
   {
@@ -170,6 +174,45 @@
    "fieldtype": "Select",
    "label": "New/Renewal",
    "options": "New\nRenewal"
+  },
+  {
+   "fieldname": "processor_info_section",
+   "fieldtype": "Section Break",
+   "label": "Processor Information"
+  },
+  {
+   "fieldname": "insurance_employee",
+   "fieldtype": "Link",
+   "label": "Insurance Employee",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "insurance_employee.employee_name",
+   "fieldname": "processor_employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.employee_code",
+   "fieldname": "processor_employee_code",
+   "fieldtype": "Data",
+   "label": "Employee Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.employee_type",
+   "fieldname": "processor_employee_type",
+   "fieldtype": "Data",
+   "label": "Employee Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.branch_name",
+   "fieldname": "processor_branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name",
+   "read_only": 1
   },
   {
    "fieldname": "payment_section",
@@ -463,18 +506,6 @@
    "fieldname": "email_id",
    "fieldtype": "Data",
    "label": "Email ID"
-  },
-  {
-   "description": "Enter the ID, Not the name",
-   "fieldname": "cse_id",
-   "fieldtype": "Data",
-   "label": "CSE ID"
-  },
-  {
-   "description": "Enter the ID, Not the name",
-   "fieldname": "rm_id",
-   "fieldtype": "Data",
-   "label": "RM ID"
   },
   {
    "description": "Enter the ID, Not the name",

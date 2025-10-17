@@ -120,7 +120,7 @@ class FieldMappingService:
             elif field_meta.fieldtype == "Check":
                 return self._convert_to_check(value)
             elif field_meta.fieldtype == "Select":
-                return self._convert_to_select(value, field_meta.options)
+                return self._convert_to_select(value, field_meta.options, field_name=field_name)
             else:
                 # Default: return as string
                 return str(value).strip() if value else None
@@ -232,30 +232,61 @@ class FieldMappingService:
         else:
             return 0
     
-    def _convert_to_select(self, value, options):
-        """Convert value to select option"""
+    def _convert_to_select(self, value, options, field_name=None):
+        """Convert value to select option with default value handling"""
         if not value or not options:
             return None
-        
+
         value_str = str(value).strip()
         options_list = [opt.strip() for opt in options.split('\n') if opt.strip()]
-        
+
         # Try exact match first
         if value_str in options_list:
             return value_str
-        
+
         # Try case-insensitive match
         for option in options_list:
             if option.lower() == value_str.lower():
                 return option
-        
+
         # Try partial match
         for option in options_list:
             if value_str.lower() in option.lower() or option.lower() in value_str.lower():
                 return option
-        
-        # Return original value if no match found
-        return value_str
+
+        # No match found - check for field-specific defaults
+        default_value = self._get_select_field_default(field_name)
+        if default_value:
+            frappe.logger().warning(f"Select field '{field_name}' value '{value_str}' not found in options. Using default: '{default_value}'")
+            return default_value
+
+        # If no default defined, return None to leave field empty
+        frappe.logger().warning(f"Select field '{field_name}' value '{value_str}' not found in options. Leaving empty.")
+        return None
+
+    def _get_select_field_default(self, field_name):
+        """
+        Get default value for select fields when extracted value doesn't match options
+
+        Returns None if no default should be applied (field will be left empty)
+        Returns a string value if a default should be used
+        """
+        if not field_name:
+            return None
+
+        # Define defaults for specific fields (case-insensitive)
+        defaults = {
+            'customer_title': 'Mr.',
+            'title': 'Mr.',
+            # Add more field defaults here as needed
+        }
+
+        # Check by fieldname (case-insensitive)
+        field_key = field_name.lower() if field_name else None
+        if field_key and field_key in defaults:
+            return defaults[field_key]
+
+        return None
     
     def _find_best_match(self, key, candidates):
         """Find best matching candidates for a key"""
