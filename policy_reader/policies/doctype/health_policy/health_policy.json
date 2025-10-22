@@ -6,20 +6,17 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "policy_information_section",
+  "policy_information_tab",
   "policy_document",
   "policy_file",
-  "customer_code",
-  "pos_policy",
-  "policy_biz_type",
-  "insurer_branch_code",
+  "policy_information_section",
+  "policy_no",
+  "policy_type",
   "column_break_1",
   "policy_issuance_date",
   "policy_start_date",
   "policy_expiry_date",
-  "policy_type",
   "policy_dates_section",
-  "policy_no",
   "plan_name",
   "is_renewable",
   "prev_policy",
@@ -28,6 +25,14 @@
   "insured1gender",
   "insured1dob",
   "insured1relation",
+  "business_information_tab",
+  "customer_info_section",
+  "customer_code",
+  "policy_biz_type",
+  "column_break_business",
+  "insurer_branch_code",
+  "pos_policy",
+  "financial_details_tab",
   "financial_details_section",
   "sum_insured",
   "net_od_premium",
@@ -49,79 +54,72 @@
  ],
  "fields": [
   {
-   "fieldname": "policy_information_section",
-   "fieldtype": "Section Break",
+   "fieldname": "policy_information_tab",
+   "fieldtype": "Tab Break",
    "label": "Policy Information"
   },
   {
    "fieldname": "policy_document",
    "fieldtype": "Link",
    "label": "Policy Document",
-   "options": "Policy Document"
+   "options": "Policy Document",
+   "read_only": 1
   },
   {
+   "description": "Upload policy PDF document for processing",
    "fieldname": "policy_file",
    "fieldtype": "Attach",
    "label": "Policy File",
    "options": "file_types:pdf"
   },
   {
-   "fieldname": "customer_code",
+   "fieldname": "policy_information_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Information"
+  },
+  {
+   "description": "SAIBA(PolicyNo)",
+   "fieldname": "policy_no",
    "fieldtype": "Data",
-   "label": "Customer Code"
+   "in_list_view": 1,
+   "label": "Policy No",
+   "length": 100
   },
   {
-   "fieldname": "pos_policy",
-   "fieldtype": "Data",
-   "label": "Pos Policy",
-   "length": 20
-  },
-  {
-   "fieldname": "policy_biz_type",
-   "fieldtype": "Data",
-   "label": "PolicyBiz Type",
-   "length": 50
-  },
-  {
-   "fieldname": "insurer_branch_code",
-   "fieldtype": "Data",
-   "label": "Insurer Branch Code"
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "policy_issuance_date",
-   "fieldtype": "Datetime",
-   "label": "PolicyIssuanceDate"
-  },
-  {
-   "fieldname": "policy_start_date",
-   "fieldtype": "Datetime",
-   "label": "PolicyStartDate"
-  },
-  {
-   "fieldname": "policy_expiry_date",
-   "fieldtype": "Datetime",
-   "label": "PolicyExpiryDate"
-  },
-  {
+   "description": "SAIBA(Policy Type)",
    "fieldname": "policy_type",
    "fieldtype": "Data",
    "label": "Policy Type",
    "length": 75
   },
   {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(PolicyIssuanceDate)",
+   "fieldname": "policy_issuance_date",
+   "fieldtype": "Date",
+   "label": "Policy Issuance Date"
+  },
+  {
+   "description": "SAIBA(PolicyStartDate)",
+   "fieldname": "policy_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Policy Start Date"
+  },
+  {
+   "description": "SAIBA(PolicyExpiryDate)",
+   "fieldname": "policy_expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Policy Expiry Date"
+  },
+  {
    "fieldname": "policy_dates_section",
    "fieldtype": "Section Break",
    "label": "Policy Details"
-  },
-  {
-   "fieldname": "policy_no",
-   "fieldtype": "Data",
-   "label": "PolicyNo",
-   "length": 100
   },
   {
    "fieldname": "plan_name",
@@ -167,6 +165,51 @@
    "fieldtype": "Data",
    "label": "INSURED1RELATION",
    "length": 50
+  },
+  {
+   "fieldname": "business_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Business Information"
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "description": "SAIBA(Customer Code)",
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Customer Code",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(PolicyBiz Type)",
+   "fieldname": "policy_biz_type",
+   "fieldtype": "Data",
+   "label": "PolicyBiz Type",
+   "length": 100
+  },
+  {
+   "fieldname": "column_break_business",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(Insurer Branch Code)",
+   "fieldname": "insurer_branch_code",
+   "fieldtype": "Data",
+   "label": "Insurer Branch Code"
+  },
+  {
+   "fieldname": "pos_policy",
+   "fieldtype": "Data",
+   "label": "Pos Policy",
+   "length": 20
+  },
+  {
+   "fieldname": "financial_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Financial Information"
   },
   {
    "fieldname": "financial_details_section",
@@ -276,7 +319,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-24 11:45:09.497921",
+ "modified": "2025-10-22 16:59:32.472408",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",

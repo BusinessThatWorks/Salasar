@@ -375,7 +375,7 @@
   {
    "fieldname": "financial_details_tab",
    "fieldtype": "Tab Break",
-   "label": "Financial Details"
+   "label": "Financial Information"
   },
   {
    "fieldname": "premium_section",
@@ -552,7 +552,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-08 23:28:17.770206",
+ "modified": "2025-10-22 17:00:26.672941",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
