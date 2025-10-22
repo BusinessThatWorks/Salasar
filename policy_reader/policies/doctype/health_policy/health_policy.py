@@ -9,10 +9,15 @@ from policy_reader.policy_reader.services.policy_creation_service import PolicyC
 
 
 class HealthPolicy(Document):
+	def before_save(self):
+		"""Auto-populate RM/CE1 Code with current user's Insurance Employee"""
+		self._populate_rm_ce1_code()
+
 	def validate(self):
 		"""Basic validation for Health Policy"""
 		self.validate_policy_dates()
 		self.validate_required_fields()
+		self.validate_renewable_policy()
 	
 	def validate_policy_dates(self):
 		"""Validate policy date logic"""
@@ -27,6 +32,39 @@ class HealthPolicy(Document):
 		"""Validate critical Health Policy fields"""
 		# Allow document creation without all fields for flexibility
 		pass
+
+	def validate_renewable_policy(self):
+		"""Validate that renewable policies have Old Control Number"""
+		if self.is_renewable == "Yes" and not self.old_control_number:
+			frappe.throw("Old Control Number is required when policy is marked as Renewable")
+
+	def _populate_rm_ce1_code(self):
+		"""Auto-set RM/CE1 Code to current user's Insurance Employee if not already set"""
+		try:
+			# Only auto-populate if empty (allows manual override)
+			if not self.rm_ce1_code:
+				current_user = frappe.session.user
+
+				# Skip for system users
+				if current_user in ["Guest", "Administrator"]:
+					return
+
+				# Get Insurance Employee record for current user
+				employee = frappe.db.get_value(
+					"Insurance Employee",
+					{"user": current_user},
+					"name"
+				)
+
+				if employee:
+					self.rm_ce1_code = employee
+					frappe.logger().info(f"Auto-populated rm_ce1_code with Insurance Employee: {employee}")
+				else:
+					frappe.logger().info(f"No Insurance Employee record found for user {current_user}")
+
+		except Exception as e:
+			frappe.logger().error(f"Error auto-populating rm_ce1_code: {str(e)}")
+			# Don't throw - this is a non-critical operation
 	
 	@frappe.whitelist()
 	def populate_fields_from_policy_document(self, policy_document_name):

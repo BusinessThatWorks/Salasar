@@ -17,6 +17,7 @@ class MotorPolicy(Document):
 		"""Basic validation for SAIBA ERP compliance"""
 		self.validate_policy_dates()
 		self.validate_required_fields()
+		self.validate_renewable_policy()
 	
 	def validate_policy_dates(self):
 		"""Validate policy date logic"""
@@ -32,6 +33,11 @@ class MotorPolicy(Document):
 		# Removed mandatory validation to allow document creation without all fields
 		# Fields can be populated later through AI extraction or manual entry
 		pass
+
+	def validate_renewable_policy(self):
+		"""Validate that renewable policies have Old Control Number"""
+		if self.is_renewable == "Yes" and not self.old_control_number:
+			frappe.throw("Old Control Number is required when policy is marked as Renewable")
 
 	def _populate_rm_csc_ref(self):
 		"""Auto-set RM/CSC/REF to current user's Insurance Employee if not already set"""

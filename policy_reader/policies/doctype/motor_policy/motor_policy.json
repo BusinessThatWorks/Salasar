@@ -761,14 +761,16 @@
    "options": "Insurance Employee"
   },
   {
-   "description": "Brokerage rate",
+   "default": "15",
+   "description": "Brokerage rate (default 15%)",
    "fieldname": "brok_rate",
    "fieldtype": "Float",
    "label": "Brok Rate",
    "precision": "2"
   },
   {
-   "description": "Third party rate",
+   "default": "2.00",
+   "description": "Third party rate (default 2.00%)",
    "fieldname": "tp_rate",
    "fieldtype": "Float",
    "label": "TP Rate",
@@ -779,21 +781,24 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Reward basis",
+   "default": "Premium",
+   "description": "Reward basis (default Premium)",
    "fieldname": "reward_on",
    "fieldtype": "Data",
    "label": "Reward On",
    "length": 100
   },
   {
-   "description": "Reward rate percentage",
+   "default": "0",
+   "description": "Reward rate percentage (default 0%)",
    "fieldname": "reward_rate",
    "fieldtype": "Float",
    "label": "Reward Rate",
    "precision": "2"
   },
   {
-   "description": "Third party reward amount",
+   "default": "0",
+   "description": "Third party reward amount (default 0)",
    "fieldname": "tp_reward",
    "fieldtype": "Float",
    "label": "TP Reward",
