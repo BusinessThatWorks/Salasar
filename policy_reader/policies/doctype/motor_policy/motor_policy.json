@@ -13,17 +13,27 @@
   "policy_section",
   "policy_no",
   "policy_type",
+  "insured_proposer_name",
+  "is_renewable",
   "column_break_policy_basic",
   "policy_issuance_date",
   "policy_start_date",
   "policy_expiry_date",
+  "receive_date",
+  "policy_receive_format",
   "business_information_tab",
   "customer_info_section",
   "customer_code",
   "policy_biz_type",
+  "insurer_name",
+  "insurer_city",
+  "insurer_branch",
   "column_break_customer",
   "insurer_branch_code",
   "new_renewal",
+  "department",
+  "coverage_type",
+  "policy_vertical",
   "payment_section",
   "payment_mode",
   "bank_name",
@@ -31,15 +41,21 @@
   "payment_transaction_no",
   "business_information_section",
   "old_control_number",
+  "bus_book_date",
+  "policy_enquiry_remarks",
   "column_break_business_info",
   "payment_mode_internal",
   "bank_name_internal",
   "dated",
+  "cvr_note_rcv_date",
+  "policy_status_nr",
   "vehicle_information_tab",
   "basic_vehicle_section",
   "vehicle_no",
   "make",
   "model",
+  "type_of_vehicle",
+  "vehicle_class",
   "column_break_vehicle_basic",
   "variant",
   "year_of_man",
@@ -49,19 +65,26 @@
   "column_break_specs",
   "cc",
   "fuel",
+  "seats",
   "vehicle_registration_section",
   "rto_code",
   "vehicle_category",
+  "category",
   "column_break_registration",
   "passenger_gvw",
+  "gvw_ton_kg",
+  "no_of_passenger",
   "financial_details_tab",
   "premium_section",
   "sum_insured",
   "net_od_premium",
+  "coverage_tp",
   "column_break_premium",
   "tp_premium",
+  "prem_rate",
   "tax_section",
   "gst",
+  "gst_tax_percent",
   "column_break_tax",
   "ncb",
   "internal_information_tab",
@@ -83,7 +106,19 @@
   "processor_employee_name",
   "processor_employee_code",
   "processor_employee_type",
-  "processor_branch_name"
+  "processor_branch_name",
+  "internal_business_section",
+  "payment_mode_1",
+  "rm_csc_ref",
+  "brok_rate",
+  "tp_rate",
+  "column_break_internal_business",
+  "reward_on",
+  "reward_rate",
+  "tp_reward",
+  "campaign_name",
+  "policy_status_na",
+  "mandate"
  ],
  "fields": [
   {
@@ -111,6 +146,36 @@
    "label": "Policy Information"
   },
   {
+   "description": "SAIBA(PolicyNo)",
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Policy No",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(Policy Type)",
+   "fieldname": "policy_type",
+   "fieldtype": "Data",
+   "label": "Policy Type",
+   "length": 75
+  },
+  {
+   "description": "SAIBA(Insured/Proposer Name)",
+   "fieldname": "insured_proposer_name",
+   "fieldtype": "Data",
+   "label": "Insured/Proposer Name",
+   "length": 200
+  },
+  {
+   "default": "YES",
+   "description": "SAIBA(IsRenewable)",
+   "fieldname": "is_renewable",
+   "fieldtype": "Select",
+   "label": "Is Renewable",
+   "options": "YES\nNO"
+  },
+  {
    "fieldname": "column_break_policy_basic",
    "fieldtype": "Column Break"
   },
@@ -133,6 +198,20 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Policy Expiry Date"
+  },
+  {
+   "description": "Date when policy document was received",
+   "fieldname": "receive_date",
+   "fieldtype": "Date",
+   "label": "Receive Date"
+  },
+  {
+   "default": "Recd. In Soft Copy",
+   "description": "Format in which policy was received",
+   "fieldname": "policy_receive_format",
+   "fieldtype": "Select",
+   "label": "Policy Receive Format",
+   "options": "Recd. In Hard Copy\nRecd. In Soft Copy"
   },
   {
    "fieldname": "business_information_tab",
@@ -159,6 +238,27 @@
    "length": 100
   },
   {
+   "description": "SAIBA(Insurer Name)",
+   "fieldname": "insurer_name",
+   "fieldtype": "Data",
+   "label": "Insurer Name",
+   "length": 150
+  },
+  {
+   "description": "SAIBA(Insurer City)",
+   "fieldname": "insurer_city",
+   "fieldtype": "Data",
+   "label": "Insurer City",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(Insurer Branch)",
+   "fieldname": "insurer_branch",
+   "fieldtype": "Data",
+   "label": "Insurer Branch",
+   "length": 100
+  },
+  {
    "fieldname": "column_break_customer",
    "fieldtype": "Column Break"
   },
@@ -174,6 +274,28 @@
    "fieldtype": "Select",
    "label": "New/Renewal",
    "options": "New\nRenewal"
+  },
+  {
+   "default": "Motor",
+   "description": "Department handling this policy",
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "label": "Department",
+   "options": "Health\nMotor"
+  },
+  {
+   "description": "SAIBA(Coverage Type)",
+   "fieldname": "coverage_type",
+   "fieldtype": "Data",
+   "label": "Coverage Type",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(Policy Vertical)",
+   "fieldname": "policy_vertical",
+   "fieldtype": "Select",
+   "label": "Policy Vertical",
+   "options": "Accident & Health\nCorporate Fleet\nCorporate Individual\nIndividual"
   },
   {
    "fieldname": "processor_info_section",
@@ -254,21 +376,6 @@
    "label": "Basic Vehicle Details"
   },
   {
-   "description": "SAIBA(PolicyNo)",
-   "fieldname": "policy_no",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Policy No",
-   "length": 100
-  },
-  {
-   "description": "SAIBA(Policy Type)",
-   "fieldname": "policy_type",
-   "fieldtype": "Data",
-   "label": "Policy Type",
-   "length": 75
-  },
-  {
    "description": "SAIBA(VehicleNo)",
    "fieldname": "vehicle_no",
    "fieldtype": "Data",
@@ -287,6 +394,20 @@
    "fieldname": "model",
    "fieldtype": "Data",
    "label": "Model",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(Type of Vehicle)",
+   "fieldname": "type_of_vehicle",
+   "fieldtype": "Select",
+   "label": "Type of Vehicle",
+   "options": "PRIVATE\nCOMMERCIAL"
+  },
+  {
+   "description": "SAIBA(Vehicle Class)",
+   "fieldname": "vehicle_class",
+   "fieldtype": "Data",
+   "label": "Vehicle Class",
    "length": 100
   },
   {
@@ -344,6 +465,12 @@
    "length": 100
   },
   {
+   "description": "SAIBA(Seats) - Number of seats",
+   "fieldname": "seats",
+   "fieldtype": "Int",
+   "label": "Seats"
+  },
+  {
    "fieldname": "vehicle_registration_section",
    "fieldtype": "Section Break",
    "label": "Registration Details"
@@ -363,6 +490,13 @@
    "length": 100
   },
   {
+   "description": "SAIBA(Category)",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "PCV\nGSV\nMISC."
+  },
+  {
    "fieldname": "column_break_registration",
    "fieldtype": "Column Break"
   },
@@ -371,6 +505,19 @@
    "fieldname": "passenger_gvw",
    "fieldtype": "Text",
    "label": "Passenger GVW"
+  },
+  {
+   "description": "SAIBA(GVW) - Gross Vehicle Weight",
+   "fieldname": "gvw_ton_kg",
+   "fieldtype": "Data",
+   "label": "GVW (Ton. or Kg.)",
+   "length": 50
+  },
+  {
+   "description": "SAIBA(No. of Passenger)",
+   "fieldname": "no_of_passenger",
+   "fieldtype": "Int",
+   "label": "No. of Passenger"
   },
   {
    "fieldname": "financial_details_tab",
@@ -397,6 +544,13 @@
    "precision": "2"
   },
   {
+   "description": "Coverage type - If OD premium extracted select 'Extension-Coverage', if TP extracted select 'ThirdParty(TP)'",
+   "fieldname": "coverage_tp",
+   "fieldtype": "Select",
+   "label": "Coverage/TP",
+   "options": "Extension-Coverage\nThirdParty(TP)\nOwnerDriver(LPD)\nRoadside Assistance"
+  },
+  {
    "fieldname": "column_break_premium",
    "fieldtype": "Column Break"
   },
@@ -405,6 +559,14 @@
    "fieldname": "tp_premium",
    "fieldtype": "Float",
    "label": "TP Premium",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "description": "Premium rate percentage",
+   "fieldname": "prem_rate",
+   "fieldtype": "Float",
+   "label": "Prem. Rate",
    "precision": "2"
   },
   {
@@ -417,6 +579,13 @@
    "fieldname": "gst",
    "fieldtype": "Float",
    "label": "GST",
+   "precision": "2"
+  },
+  {
+   "description": "SAIBA(GST/Tax%) - GST or tax percentage",
+   "fieldname": "gst_tax_percent",
+   "fieldtype": "Float",
+   "label": "GST/Tax%",
    "precision": "2"
   },
   {
@@ -525,6 +694,18 @@
    "label": "Old Control Number"
   },
   {
+   "description": "Business booking date",
+   "fieldname": "bus_book_date",
+   "fieldtype": "Date",
+   "label": "Bus. Book Date"
+  },
+  {
+   "description": "Additional remarks or notes about the policy",
+   "fieldname": "policy_enquiry_remarks",
+   "fieldtype": "Long Text",
+   "label": "Policy/Enquiry Remarks"
+  },
+  {
    "fieldname": "column_break_business_info",
    "fieldtype": "Column Break"
   },
@@ -546,6 +727,101 @@
    "fieldname": "dated",
    "fieldtype": "Date",
    "label": "Dated"
+  },
+  {
+   "description": "Cover note received date",
+   "fieldname": "cvr_note_rcv_date",
+   "fieldtype": "Date",
+   "label": "Cvr Note Rcv. Date"
+  },
+  {
+   "description": "Policy status - New or Renewal",
+   "fieldname": "policy_status_nr",
+   "fieldtype": "Select",
+   "label": "Policy Status (N/R)",
+   "options": "New\nRenewal"
+  },
+  {
+   "fieldname": "internal_business_section",
+   "fieldtype": "Section Break",
+   "label": "Internal Business Information"
+  },
+  {
+   "description": "Primary payment mode",
+   "fieldname": "payment_mode_1",
+   "fieldtype": "Data",
+   "label": "Payment Mode 1",
+   "length": 100
+  },
+  {
+   "description": "Relationship Manager/CSC/Reference - Auto-populated with current user, can be changed manually",
+   "fieldname": "rm_csc_ref",
+   "fieldtype": "Link",
+   "label": "RM/CSC/REF",
+   "options": "Insurance Employee"
+  },
+  {
+   "description": "Brokerage rate",
+   "fieldname": "brok_rate",
+   "fieldtype": "Float",
+   "label": "Brok Rate",
+   "precision": "2"
+  },
+  {
+   "description": "Third party rate",
+   "fieldname": "tp_rate",
+   "fieldtype": "Float",
+   "label": "TP Rate",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_internal_business",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Reward basis",
+   "fieldname": "reward_on",
+   "fieldtype": "Data",
+   "label": "Reward On",
+   "length": 100
+  },
+  {
+   "description": "Reward rate percentage",
+   "fieldname": "reward_rate",
+   "fieldtype": "Float",
+   "label": "Reward Rate",
+   "precision": "2"
+  },
+  {
+   "description": "Third party reward amount",
+   "fieldname": "tp_reward",
+   "fieldtype": "Float",
+   "label": "TP Reward",
+   "precision": "2"
+  },
+  {
+   "description": "Campaign type",
+   "fieldname": "campaign_name",
+   "fieldtype": "Select",
+   "label": "Campaign Name",
+   "options": "Portability\nNon Portability"
+  },
+  {
+   "default": "NA",
+   "description": "Policy processing status",
+   "fieldname": "policy_status_na",
+   "fieldtype": "Data",
+   "label": "Policy Status",
+   "length": 50,
+   "read_only": 1
+  },
+  {
+   "default": "Pending",
+   "description": "Mandate status",
+   "fieldname": "mandate",
+   "fieldtype": "Select",
+   "label": "Mandate",
+   "options": "Received\nPending"
   }
  ],
  "grid_page_length": 50,

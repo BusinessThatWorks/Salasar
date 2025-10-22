@@ -9,6 +9,10 @@ from policy_reader.policy_reader.services.policy_creation_service import PolicyC
 
 
 class MotorPolicy(Document):
+	def before_save(self):
+		"""Auto-populate RM/CSC/REF with current user's Insurance Employee"""
+		self._populate_rm_csc_ref()
+
 	def validate(self):
 		"""Basic validation for SAIBA ERP compliance"""
 		self.validate_policy_dates()
@@ -28,6 +32,34 @@ class MotorPolicy(Document):
 		# Removed mandatory validation to allow document creation without all fields
 		# Fields can be populated later through AI extraction or manual entry
 		pass
+
+	def _populate_rm_csc_ref(self):
+		"""Auto-set RM/CSC/REF to current user's Insurance Employee if not already set"""
+		try:
+			# Only auto-populate if empty (allows manual override)
+			if not self.rm_csc_ref:
+				current_user = frappe.session.user
+
+				# Skip for system users
+				if current_user in ["Guest", "Administrator"]:
+					return
+
+				# Get Insurance Employee record for current user
+				employee = frappe.db.get_value(
+					"Insurance Employee",
+					{"user": current_user},
+					"name"
+				)
+
+				if employee:
+					self.rm_csc_ref = employee
+					frappe.logger().info(f"Auto-populated rm_csc_ref with Insurance Employee: {employee}")
+				else:
+					frappe.logger().info(f"No Insurance Employee record found for user {current_user}")
+
+		except Exception as e:
+			frappe.logger().error(f"Error auto-populating rm_csc_ref: {str(e)}")
+			# Don't throw - this is a non-critical operation
 	
 	@frappe.whitelist()
 	def populate_fields_from_policy_document(self, policy_document_name):
