@@ -1,7 +1,7 @@
 {
  "app": "policy_reader",
  "charts": [],
- "content": "[{\"id\":\"1ZEEQwhWPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\",\"col\":12}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cQ6ICE_CWt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Upload New Policy\",\"col\":3}},{\"id\":\"Y1MqgcRIcc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":3}},{\"id\":\"oxGC3YT1-D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":3}},{\"id\":\"NCEAYm7KCU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":3}},{\"id\":\"JVu8-FJZCu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Recent Activity</b></span>\",\"col\":12}},{\"id\":\"RecentDocs1\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Recent Policy Documents\",\"col\":12}}]",
+ "content": "[{\"id\":\"1ZEEQwhWPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Documents</b></span>\",\"col\":12}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cQ6ICE_CWt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":3}},{\"id\":\"Y1MqgcRIcc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":3}},{\"id\":\"oxGC3YT1-D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":3}},{\"id\":\"NCEAYm7KCU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance App Settings\",\"col\":3}},{\"id\":\"JVu8-FJZCu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}}]",
  "creation": "2025-09-08 23:35:48.632301",
  "custom_blocks": [],
  "docstatus": 0,
@@ -38,6 +38,16 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insurance Companies",
+   "link_count": 0,
+   "link_to": "Insurance Company",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -47,74 +57,37 @@
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insurance Company Branches",
+   "link_count": 0,
+   "link_to": "Insurance Branch Code",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Insurance Employees",
+   "link_count": 0,
+   "link_to": "Insurance Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2025-09-10 17:18:54.445728",
+ "modified": "2025-10-23 16:42:18.263241",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Insurance",
- "number_cards": [
-  {
-   "aggregate_function_based_on": "",
-   "color": "Blue",
-   "filters_json": "[]",
-   "function": "Count",
-   "hide": 0,
-   "label": "Total Policies",
-   "report_name": "",
-   "stats_time_interval": "Daily",
-   "type": "DocType",
-   "document_type": "Policy Document"
-  },
-  {
-   "aggregate_function_based_on": "",
-   "color": "Green", 
-   "filters_json": "[{\"fieldname\":\"status\",\"operator\":\"=\",\"value\":\"Active\"}]",
-   "function": "Count",
-   "hide": 0,
-   "label": "Active Policies",
-   "report_name": "",
-   "stats_time_interval": "Daily",
-   "type": "DocType",
-   "document_type": "Policy Document"
-  },
-  {
-   "aggregate_function_based_on": "",
-   "color": "Orange",
-   "filters_json": "[{\"fieldname\":\"expiry_date\",\"operator\":\"between\",\"value\":[\"Today\",\"Next 30 Days\"]}]",
-   "function": "Count", 
-   "hide": 0,
-   "label": "Expiring Soon",
-   "report_name": "",
-   "stats_time_interval": "Daily",
-   "type": "DocType",
-   "document_type": "Policy Document"
-  },
-  {
-   "aggregate_function_based_on": "",
-   "color": "Purple",
-   "filters_json": "[{\"fieldname\":\"creation\",\"operator\":\">\",\"value\":\"Last 30 Days\"}]", 
-   "function": "Count",
-   "hide": 0,
-   "label": "Documents Uploaded",
-   "report_name": "",
-   "stats_time_interval": "Daily",
-   "type": "DocType",
-   "document_type": "Policy Document"
-  }
- ],
+ "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
- "quick_lists": [
-  {
-   "document_type": "Policy Document",
-   "filters": "[]",
-   "label": "Recent Policy Documents",
-   "limit": 10,
-   "query": "SELECT name, policy_number, policy_type, status, creation FROM `tabPolicy Document` ORDER BY creation DESC LIMIT 10"
-  }
- ],
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [
   {
@@ -129,14 +102,6 @@
  ],
  "sequence_id": 1.0,
  "shortcuts": [
-  {
-   "color": "Blue",
-   "doc_view": "New",
-   "label": "Upload New Policy",
-   "link_to": "Policy Document",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
   {
    "color": "Grey",
    "doc_view": "List",
@@ -166,6 +131,24 @@
    "doc_view": "List",
    "label": "Insurance App Settings",
    "link_to": "Policy Reader Settings",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Insurance Co Branches",
+   "link_to": "Insurance Branch Code",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Insurance Companies",
+   "link_to": "Insurance Company",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "label": "Insurance Employees",
+   "link_to": "Insurance Employee",
    "type": "DocType"
   }
  ],

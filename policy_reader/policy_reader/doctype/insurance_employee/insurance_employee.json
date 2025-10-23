@@ -51,7 +51,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Branch",
-   "options": "Insurance Branch Code",
+   "options": "Broker Branch",
    "reqd": 1
   },
   {
@@ -65,13 +65,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-07 17:29:51.176480",
+ "modified": "2025-10-23 16:54:11.347052",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Insurance Employee",
  "naming_rule": "Expression",
- "show_title_field_in_link": 1,
- "title_field": "employee_name",
  "owner": "Administrator",
  "permissions": [
   {
@@ -88,7 +86,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "employee_name"
 }

@@ -1,29 +1,71 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format: INSX_CUST-{YYYY}-{MM}-{####}",
+ "autoname": "field:customer_code",
  "creation": "2025-10-07 16:26:06.290561",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "title"
+  "customer_information_section",
+  "customer_name",
+  "customer_code",
+  "column_break_customer",
+  "customer_group",
+  "customer_group_name"
  ],
  "fields": [
   {
-   "fieldname": "title",
-   "fieldtype": "Select",
-   "label": "Title",
-   "options": "Dr.\nM/s\nMr.\nMrs.\nMs."
+   "fieldname": "customer_information_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "length": 200,
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Code",
+   "length": 50,
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer Group",
+   "options": "Insurance Customer Group"
+  },
+  {
+   "fetch_from": "customer_group.customer_group_name",
+   "fieldname": "customer_group_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Group Name",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-07 16:30:37.954465",
+ "modified": "2025-10-23 23:32:08.461265",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Insurance Customer",
- "naming_rule": "Expression",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -40,7 +82,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "customer_name,customer_code",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "customer_name"
 }

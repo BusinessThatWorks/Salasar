@@ -62,7 +62,10 @@ class PolicyCreationService:
             # Set document link
             policy_record.policy_document = policy_doc.name
             policy_record.policy_file = policy_doc.policy_file
-            
+
+            # Populate customer data from Policy Document if available
+            self._populate_customer_fields(policy_record, policy_doc)
+
             # Dynamic field mapping
             field_mapping_service = FieldMappingService()
             mapping_results = field_mapping_service.map_fields_dynamically(
@@ -148,6 +151,25 @@ class PolicyCreationService:
         except Exception as e:
             frappe.logger().error(f"Error populating processor fields: {str(e)}")
             frappe.log_error(f"Failed to populate processor fields: {str(e)}", "Processor Field Population")
+            # Don't throw - this is a non-critical operation
+
+    def _populate_customer_fields(self, policy_record, policy_doc):
+        """Populate customer information from Policy Document to policy record"""
+        try:
+            if not policy_doc.customer_code:
+                frappe.logger().info("No customer selected in Policy Document, skipping customer field population")
+                return
+
+            # Set the customer code link field - Frappe will auto-fetch related fields
+            policy_record.customer_code = policy_doc.customer_code
+            frappe.logger().info(f"Auto-populated customer_code link: {policy_doc.customer_code}")
+            frappe.logger().info(f"Customer name: {policy_doc.customer_name}")
+            frappe.logger().info(f"Customer group: {policy_doc.customer_group_name}")
+            frappe.logger().info(f"Successfully set customer link field for {policy_record.doctype}")
+
+        except Exception as e:
+            frappe.logger().error(f"Error populating customer fields: {str(e)}")
+            frappe.log_error(f"Failed to populate customer fields: {str(e)}", "Customer Field Population")
             # Don't throw - this is a non-critical operation
 
 

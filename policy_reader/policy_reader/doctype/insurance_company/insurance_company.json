@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-10-23 15:50:41.506832",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company_information_section",
+  "insurer_name",
+  "ins_short_name",
+  "column_break_company",
+  "status",
+  "tax_information_section",
+  "pan_no",
+  "tan_no",
+  "gstin",
+  "column_break_tax",
+  "ro_zone",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "company_information_section",
+   "fieldtype": "Section Break",
+   "label": "Company Information"
+  },
+  {
+   "fieldname": "insurer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Insurer Name",
+   "length": 200,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Short name for insurance company",
+   "fieldname": "ins_short_name",
+   "fieldtype": "Data",
+   "label": "Insurer Short Name",
+   "length": 50
+  },
+  {
+   "fieldname": "column_break_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Active\nDeactivate"
+  },
+  {
+   "fieldname": "tax_information_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Information"
+  },
+  {
+   "description": "Permanent Account Number",
+   "fieldname": "pan_no",
+   "fieldtype": "Data",
+   "label": "PAN No",
+   "length": 20
+  },
+  {
+   "description": "Tax Deduction Account Number",
+   "fieldname": "tan_no",
+   "fieldtype": "Data",
+   "label": "TAN No",
+   "length": 20
+  },
+  {
+   "description": "Goods and Services Tax Identification Number",
+   "fieldname": "gstin",
+   "fieldtype": "Data",
+   "label": "GSTIN",
+   "length": 20
+  },
+  {
+   "fieldname": "column_break_tax",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Regional Office Zone",
+   "fieldname": "ro_zone",
+   "fieldtype": "Data",
+   "label": "RO Zone",
+   "length": 100
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Long Text",
+   "label": "Remarks"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-23 15:50:41.506832",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "Insurance Company",
+ "naming_rule": "By fieldname",
+ "autoname": "field:insurer_name",
+ "owner": "Administrator",
+ "search_fields": "ins_short_name,status",
+ "show_title_field_in_link": 1,
+ "title_field": "insurer_name",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

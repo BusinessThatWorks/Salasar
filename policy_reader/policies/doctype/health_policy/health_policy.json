@@ -32,6 +32,7 @@
   "customer_info_section",
   "customer_code",
   "policy_biz_type",
+  "insurance_company_branch",
   "insurer_name",
   "insurer_city",
   "insurer_branch",
@@ -79,7 +80,20 @@
   "column_break_internal_business",
   "reward_on",
   "reward_rate",
-  "tp_reward"
+  "tp_reward",
+  "documents_tab",
+  "documents_section",
+  "final_quote_renewal_notice",
+  "quote_comparison",
+  "mandate_doc",
+  "kyc_doc",
+  "proposal_form",
+  "column_break_documents",
+  "portability_form",
+  "policy_copy_doc",
+  "rc_copy",
+  "passport_copy",
+  "payment_details_doc"
  ],
  "fields": [
   {
@@ -241,6 +255,14 @@
    "length": 100
   },
   {
+   "description": "Select Insurance Company Branch to auto-fill branch details",
+   "fieldname": "insurance_company_branch",
+   "fieldtype": "Link",
+   "label": "Insurance Company Branch",
+   "options": "Insurance Company Branch"
+  },
+  {
+   "fetch_from": "insurance_company_branch.insurance_company",
    "description": "SAIBA(Insurer Name)",
    "fieldname": "insurer_name",
    "fieldtype": "Data",
@@ -248,6 +270,7 @@
    "length": 150
   },
   {
+   "fetch_from": "insurance_company_branch.city",
    "description": "SAIBA(Insurer City)",
    "fieldname": "insurer_city",
    "fieldtype": "Data",
@@ -255,6 +278,7 @@
    "length": 100
   },
   {
+   "fetch_from": "insurance_company_branch.branch_name",
    "description": "SAIBA(Insurer Branch)",
    "fieldname": "insurer_branch",
    "fieldtype": "Data",
@@ -266,10 +290,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "insurance_company_branch.branch_auto_code",
    "description": "SAIBA(Insurer Branch Code)",
    "fieldname": "insurer_branch_code",
    "fieldtype": "Data",
-   "label": "Insurer Branch Code"
+   "label": "Insurer Branch Code",
+   "length": 50
   },
   {
    "fieldname": "pos_policy",
@@ -538,6 +564,80 @@
    "fieldtype": "Float",
    "label": "TP Reward",
    "precision": "2"
+  },
+  {
+   "fieldname": "documents_tab",
+   "fieldtype": "Tab Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Document Uploads"
+  },
+  {
+   "description": "Upload final quote or renewal notice document",
+   "fieldname": "final_quote_renewal_notice",
+   "fieldtype": "Attach",
+   "label": "Final Quote/Renewal Notice"
+  },
+  {
+   "description": "Upload quote comparison document",
+   "fieldname": "quote_comparison",
+   "fieldtype": "Attach",
+   "label": "Quote Comparison"
+  },
+  {
+   "description": "Upload mandate document if required (optional)",
+   "fieldname": "mandate_doc",
+   "fieldtype": "Attach",
+   "label": "Mandate (if required)"
+  },
+  {
+   "description": "Upload KYC document",
+   "fieldname": "kyc_doc",
+   "fieldtype": "Attach",
+   "label": "KYC"
+  },
+  {
+   "description": "Upload proposal form for health policy",
+   "fieldname": "proposal_form",
+   "fieldtype": "Attach",
+   "label": "Proposal Form (for health)"
+  },
+  {
+   "fieldname": "column_break_documents",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Upload portability form for health policy",
+   "fieldname": "portability_form",
+   "fieldtype": "Attach",
+   "label": "Portability Form (for health)"
+  },
+  {
+   "description": "Upload policy copy document",
+   "fieldname": "policy_copy_doc",
+   "fieldtype": "Attach",
+   "label": "Policy Copy"
+  },
+  {
+   "description": "Upload RC (Registration Certificate) copy",
+   "fieldname": "rc_copy",
+   "fieldtype": "Attach",
+   "label": "RC Copy"
+  },
+  {
+   "description": "Upload passport copy for travel policy (optional)",
+   "fieldname": "passport_copy",
+   "fieldtype": "Attach",
+   "label": "Passport Copy (for travel policy)"
+  },
+  {
+   "description": "Upload payment details - Cheque/NEFT/Online Payment (optional)",
+   "fieldname": "payment_details_doc",
+   "fieldtype": "Attach",
+   "label": "Payment Details (Cheque/NEFT/Online Payment)"
   }
  ],
  "index_web_pages_for_search": 1,

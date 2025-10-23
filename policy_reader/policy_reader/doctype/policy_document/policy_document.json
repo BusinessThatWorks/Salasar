@@ -16,6 +16,11 @@
   "processing_method",
   "processing_time",
   "tokens_used",
+  "customer_info_section",
+  "customer_code",
+  "column_break_customer",
+  "customer_name",
+  "customer_group_name",
   "policy_links_section",
   "motor_policy",
   "health_policy",
@@ -99,6 +104,35 @@
    "fieldname": "tokens_used",
    "fieldtype": "Int",
    "label": "Tokens Used",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "fieldname": "customer_code",
+   "fieldtype": "Link",
+   "label": "Customer Code",
+   "options": "Insurance Customer"
+  },
+  {
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer_code.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_code.customer_group_name",
+   "fieldname": "customer_group_name",
+   "fieldtype": "Data",
+   "label": "Customer Group",
    "read_only": 1
   },
   {

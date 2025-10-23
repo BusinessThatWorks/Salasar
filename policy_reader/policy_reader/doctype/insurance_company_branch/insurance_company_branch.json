@@ -1,0 +1,180 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format: INSCBR-{YYYY}-{MM}-{####}",
+ "creation": "2025-10-23 16:56:42.959896",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company_information_section",
+  "insurance_company",
+  "branch_auto_code",
+  "broker_code",
+  "branch_office_code",
+  "column_break_company",
+  "status",
+  "user_id",
+  "branch_details_section",
+  "branch_name",
+  "address",
+  "city",
+  "state",
+  "column_break_location",
+  "pin",
+  "mobile",
+  "email",
+  "ro_zone",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "company_information_section",
+   "fieldtype": "Section Break",
+   "label": "Company Information"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Insurance Company",
+   "options": "Insurance Company",
+   "reqd": 1
+  },
+  {
+   "description": "Unique branch auto code from insurance company system",
+   "fieldname": "branch_auto_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Branch Auto Code",
+   "length": 50,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Broker code for this branch",
+   "fieldname": "broker_code",
+   "fieldtype": "Data",
+   "label": "Broker Code",
+   "length": 50
+  },
+  {
+   "description": "Branch or Office Code",
+   "fieldname": "branch_office_code",
+   "fieldtype": "Data",
+   "label": "Branch/Office Code",
+   "length": 50
+  },
+  {
+   "fieldname": "column_break_company",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Active\nDeactivate"
+  },
+  {
+   "description": "User ID for this branch",
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User ID",
+   "length": 100
+  },
+  {
+   "fieldname": "branch_details_section",
+   "fieldtype": "Section Break",
+   "label": "Branch Location Details"
+  },
+  {
+   "fieldname": "branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name",
+   "length": 200
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Long Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "length": 100
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State",
+   "length": 100
+  },
+  {
+   "fieldname": "column_break_location",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pin",
+   "fieldtype": "Data",
+   "label": "PIN Code",
+   "length": 10
+  },
+  {
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "label": "Mobile",
+   "length": 15
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "length": 150
+  },
+  {
+   "description": "Regional Office Zone",
+   "fieldname": "ro_zone",
+   "fieldtype": "Data",
+   "label": "RO Zone",
+   "length": 100
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Long Text",
+   "label": "Remarks"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-10-23 22:44:21.922909",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "Insurance Company Branch",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "search_fields": "branch_auto_code,insurance_company,branch_name,city,state,status",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "branch_name"
+}

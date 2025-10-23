@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format: INSX-CSTGRP-{YYYY}-{MM}-{####}",
+ "autoname": "field:customer_group_name",
  "creation": "2025-10-07 18:09:33.639772",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -14,7 +14,9 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Customer Group Name",
-   "reqd": 1
+   "length": 200,
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
@@ -24,7 +26,7 @@
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Insurance Customer Group",
- "naming_rule": "Expression",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -41,7 +43,9 @@
   }
  ],
  "row_format": "Dynamic",
+ "search_fields": "customer_group_name",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "customer_group_name"
 }
