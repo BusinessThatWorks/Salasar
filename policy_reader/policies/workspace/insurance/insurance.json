@@ -1,7 +1,7 @@
 {
  "app": "policy_reader",
  "charts": [],
- "content": "[{\"id\":\"1ZEEQwhWPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Documents</b></span>\",\"col\":12}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cQ6ICE_CWt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":3}},{\"id\":\"Y1MqgcRIcc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":3}},{\"id\":\"oxGC3YT1-D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":3}},{\"id\":\"NCEAYm7KCU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance App Settings\",\"col\":3}},{\"id\":\"JVu8-FJZCu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}}]",
+ "content": "[{\"id\":\"1ZEEQwhWPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Documents</b></span>\",\"col\":12}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cQ6ICE_CWt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":3}},{\"id\":\"Y1MqgcRIcc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":3}},{\"id\":\"oxGC3YT1-D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":3}},{\"id\":\"5FkVNlYlYX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Companies\",\"col\":3}},{\"id\":\"NCEAYm7KCU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance App Settings\",\"col\":3}},{\"id\":\"C4ICCjVqTA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Company Branch\",\"col\":3}},{\"id\":\"VaRRlmEzBO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Customer\",\"col\":3}},{\"id\":\"J9Mks_ilsm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Customer Group\",\"col\":3}}]",
  "creation": "2025-09-08 23:35:48.632301",
  "custom_blocks": [],
  "docstatus": 0,
@@ -63,7 +63,7 @@
    "is_query_report": 0,
    "label": "Insurance Company Branches",
    "link_count": 0,
-   "link_to": "Insurance Branch Code",
+   "link_to": "Broker Branch",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -79,7 +79,7 @@
    "type": "Link"
   }
  ],
- "modified": "2025-10-23 16:42:18.263241",
+ "modified": "2025-10-24 11:04:51.628060",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Insurance",
@@ -113,8 +113,24 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Insurance Companies",
+   "link_to": "Insurance Company",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Health Policies",
    "link_to": "Health Policy",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Insurance Company Branch",
+   "link_to": "Insurance Company Branch",
    "stats_filter": "[]",
    "type": "DocType"
   },
@@ -129,26 +145,24 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Insurance Customer",
+   "link_to": "Insurance Customer",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Insurance App Settings",
    "link_to": "Policy Reader Settings",
    "type": "DocType"
   },
   {
+   "color": "Grey",
    "doc_view": "List",
-   "label": "Insurance Co Branches",
-   "link_to": "Insurance Branch Code",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "List",
-   "label": "Insurance Companies",
-   "link_to": "Insurance Company",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "List",
-   "label": "Insurance Employees",
-   "link_to": "Insurance Employee",
+   "label": "Insurance Customer Group",
+   "link_to": "Insurance Customer Group",
+   "stats_filter": "[]",
    "type": "DocType"
   }
  ],
