@@ -6,6 +6,8 @@ import json
 from frappe.model.document import Document
 from frappe.utils import getdate, cstr
 from policy_reader.policy_reader.services.policy_creation_service import PolicyCreationService
+from policy_reader.policy_reader.services.common_service import CommonService
+from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
 
 
 class HealthPolicy(Document):
@@ -108,7 +110,7 @@ class HealthPolicy(Document):
 				frappe.logger().warning(f"Could not refresh health policy field mappings: {str(e)}")
 
 			# Get field mapping for Health policy type
-			field_mapping = policy_service.get_field_mapping_for_policy_type("Health")
+			field_mapping = CommonService.get_field_mapping_for_policy_type("Health")
 
 			if not field_mapping:
 				return {
@@ -119,8 +121,9 @@ class HealthPolicy(Document):
 			# STEP 2: Define protected fields that should not be overwritten by AI extraction
 			protected_fields = policy_service._get_protected_fields()
 
-			# STEP 3: Map fields using existing service method with field protection
-			mapping_results = policy_service.map_fields_dynamically(
+			# STEP 3: Map fields using FieldMappingService with field protection
+			field_mapping_service = FieldMappingService()
+			mapping_results = field_mapping_service.map_fields_dynamically(
 				parsed_data, field_mapping, self, "Health", protected_fields
 			)
 
