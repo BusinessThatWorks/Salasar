@@ -11,36 +11,54 @@ class FieldMappingService:
     def __init__(self):
         self._last_used_prompt = None
     
-    def map_fields_dynamically(self, parsed_data, field_mapping, policy_record, policy_type):
+    def map_fields_dynamically(self, parsed_data, field_mapping, policy_record, policy_type, protected_fields=None):
         """
         Dynamically map fields using the field mapping from Policy Reader Settings
+
+        Args:
+            parsed_data: Extracted field data from AI
+            field_mapping: Field mapping from Policy Reader Settings
+            policy_record: Policy record to populate
+            policy_type: Type of policy (Motor/Health)
+            protected_fields: List of fields that should not be overwritten if already set
         """
         mapped_count = 0
         unmapped_fields = []
         suggestions = {}
-        
+        protected_count = 0
+
         frappe.logger().info(f"=== FIELD MAPPING DEBUG ===")
         frappe.logger().info(f"Parsed data keys: {list(parsed_data.keys())}")
         frappe.logger().info(f"Field mapping keys: {list(field_mapping.keys())}")
         frappe.logger().info(f"Policy record doctype: {policy_record.doctype}")
-        
+        if protected_fields:
+            frappe.logger().info(f"Protected fields: {protected_fields}")
+
         # Build normalized mapping for robust matching
         normalized_mapping = self._build_normalized_mapping(field_mapping)
-        
+
         # First pass: direct and normalized-key matching over parsed_data keys
         for raw_key, raw_value in parsed_data.items():
             if raw_value is None or str(raw_value).strip() == "":
                 continue
-            
+
             # Try direct match
             policy_field_name = normalized_mapping.get(raw_key)
-            
+
             # Try normalized key match
             if not policy_field_name:
                 nk = self._normalize_key(raw_key)
                 policy_field_name = normalized_mapping.get(nk)
-            
+
             if policy_field_name:
+                # Skip if this field is protected and already has a value
+                if protected_fields and policy_field_name in protected_fields:
+                    current_value = getattr(policy_record, policy_field_name, None)
+                    if current_value:
+                        protected_count += 1
+                        frappe.logger().info(f"⊘ Skipping {policy_field_name} - already set from Policy Document (value: {current_value})")
+                        continue
+
                 try:
                     converted_value = self._convert_field_value(policy_field_name, raw_value, policy_record.doctype)
                     if converted_value is not None:
@@ -64,13 +82,15 @@ class FieldMappingService:
         frappe.logger().info(f"=== FIELD MAPPING SUMMARY ===")
         frappe.logger().info(f"Total fields processed: {len(parsed_data)}")
         frappe.logger().info(f"Successfully mapped: {mapped_count}")
+        frappe.logger().info(f"Protected fields skipped: {protected_count}")
         frappe.logger().info(f"Unmapped fields: {len(unmapped_fields)}")
         frappe.logger().info(f"Unmapped: {unmapped_fields}")
-        
+
         return {
             "mapped_count": mapped_count,
             "unmapped_fields": unmapped_fields,
-            "suggestions": suggestions
+            "suggestions": suggestions,
+            "protected_count": protected_count
         }
     
     def _build_normalized_mapping(self, field_mapping):

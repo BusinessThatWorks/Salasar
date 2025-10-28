@@ -428,10 +428,12 @@ frappe.ui.form.on("Policy Document", {
 						console.log("Employee Code:", emp.employee_code);
 						console.log("Employee Type:", emp.employee_type);
 						console.log("Employee Full Name:", emp.employee_name);
+						console.log("Branch Name:", emp.branch_name);
 
 						frm.set_value("processor_employee_name", emp.employee_name);
 						frm.set_value("processor_employee_code", emp.employee_code);
 						frm.set_value("processor_employee_type", emp.employee_type);
+						frm.set_value("processor_branch_name", emp.branch_name);
 
 						console.log("Successfully populated processor fields");
 					} else {

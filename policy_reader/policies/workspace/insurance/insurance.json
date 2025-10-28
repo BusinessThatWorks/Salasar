@@ -1,14 +1,14 @@
 {
  "app": "policy_reader",
  "charts": [],
- "content": "[{\"id\":\"1ZEEQwhWPN\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Documents</b></span>\",\"col\":12}},{\"id\":\"d_KVM1gsf9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"cQ6ICE_CWt\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":3}},{\"id\":\"Y1MqgcRIcc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":3}},{\"id\":\"oxGC3YT1-D\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":3}},{\"id\":\"5FkVNlYlYX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Companies\",\"col\":3}},{\"id\":\"NCEAYm7KCU\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance App Settings\",\"col\":3}},{\"id\":\"C4ICCjVqTA\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Company Branch\",\"col\":3}},{\"id\":\"VaRRlmEzBO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Customer\",\"col\":3}},{\"id\":\"J9Mks_ilsm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Customer Group\",\"col\":3}}]",
+ "content": "[{\"id\":\"operations_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Operations</b></span>\",\"col\":12}},{\"id\":\"operations_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"policy_docs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Policy Documents\",\"col\":4}},{\"id\":\"motor_policies\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Motor Policies\",\"col\":4}},{\"id\":\"health_policies\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Health Policies\",\"col\":4}},{\"id\":\"customer_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Customer Management</b></span>\",\"col\":12}},{\"id\":\"customer_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"insurance_customer\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Customer\",\"col\":6}},{\"id\":\"customer_group\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Customer Group\",\"col\":6}},{\"id\":\"master_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Master Data</b></span>\",\"col\":12}},{\"id\":\"master_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"insurance_companies\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Companies\",\"col\":6}},{\"id\":\"company_branch\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance Company Branch\",\"col\":6}},{\"id\":\"settings_header\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Settings</b></span>\",\"col\":12}},{\"id\":\"settings_spacer\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"app_settings\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Insurance App Settings\",\"col\":12}}]",
  "creation": "2025-09-08 23:35:48.632301",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "home",
+ "icon": "folder-open",
  "idx": 0,
  "indicator_color": "green",
  "is_hidden": 0,
@@ -103,10 +103,42 @@
  "sequence_id": 1.0,
  "shortcuts": [
   {
-   "color": "Grey",
+   "color": "Blue",
    "doc_view": "List",
    "label": "Policy Documents",
    "link_to": "Policy Document",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Motor Policies",
+   "link_to": "Motor Policy",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Health Policies",
+   "link_to": "Health Policy",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Insurance Customer",
+   "link_to": "Insurance Customer",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Insurance Customer Group",
+   "link_to": "Insurance Customer Group",
    "stats_filter": "[]",
    "type": "DocType"
   },
@@ -121,48 +153,16 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Health Policies",
-   "link_to": "Health Policy",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
    "label": "Insurance Company Branch",
    "link_to": "Insurance Company Branch",
    "stats_filter": "[]",
    "type": "DocType"
   },
   {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Motor Policies",
-   "link_to": "Motor Policy",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Insurance Customer",
-   "link_to": "Insurance Customer",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
+   "color": "Red",
    "doc_view": "List",
    "label": "Insurance App Settings",
    "link_to": "Policy Reader Settings",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Insurance Customer Group",
-   "link_to": "Insurance Customer Group",
-   "stats_filter": "[]",
    "type": "DocType"
   }
  ],

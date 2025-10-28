@@ -19,6 +19,7 @@
   "policy_expiry_date",
   "receive_date",
   "policy_receive_format",
+  "portability",
   "policy_dates_section",
   "plan_name",
   "is_renewable",
@@ -28,26 +29,31 @@
   "insured1gender",
   "insured1dob",
   "insured1relation",
+  "additional_insured_persons",
   "business_information_tab",
-  "customer_info_section",
-  "customer_code",
-  "policy_biz_type",
-  "insurance_company_branch",
-  "insurer_name",
-  "insurer_city",
-  "insurer_branch",
-  "column_break_business",
-  "insurer_branch_code",
-  "pos_policy",
-  "department",
-  "coverage_type",
-  "policy_vertical",
   "business_information_section",
   "old_control_number",
   "bus_book_date",
   "policy_enquiry_remarks",
   "column_break_business_info",
   "pos_misp_ref",
+  "customer_insurer_info_tab",
+  "insurer_info_section",
+  "insurance_company_branch",
+  "insurer_name",
+  "insurer_city",
+  "insurer_branch",
+  "column_break_insurer",
+  "insurer_branch_code",
+  "pos_policy",
+  "department",
+  "coverage_type",
+  "policy_vertical",
+  "customer_info_section",
+  "customer_code",
+  "customer_name",
+  "customer_group",
+  "policy_biz_type",
   "financial_details_tab",
   "financial_details_section",
   "sum_insured",
@@ -74,7 +80,6 @@
   "processor_branch_name",
   "internal_business_section",
   "csc_pe_code_ops",
-  "rm_ce1_code",
   "brok_rate",
   "tp_rate",
   "column_break_internal_business",
@@ -131,9 +136,9 @@
   {
    "description": "SAIBA(Policy Type)",
    "fieldname": "policy_type",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Policy Type",
-   "length": 75
+   "options": "CANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
   },
   {
    "description": "SAIBA(Insured/Proposer Name)",
@@ -179,6 +184,12 @@
    "fieldtype": "Select",
    "label": "Policy Receive Format",
    "options": "Recd. In Hard Copy\nRecd. In Soft Copy"
+  },
+  {
+   "fieldname": "portability",
+   "fieldtype": "Select",
+   "label": "Portability",
+   "options": "Yes\nNo"
   },
   {
    "fieldname": "policy_dates_section",
@@ -231,99 +242,15 @@
    "length": 50
   },
   {
+   "description": "Add details of additional insured persons (e.g., Insured 2 - Name, Gender, DOB, Relation)",
+   "fieldname": "additional_insured_persons",
+   "fieldtype": "Text",
+   "label": "Additional Insured Persons"
+  },
+  {
    "fieldname": "business_information_tab",
    "fieldtype": "Tab Break",
    "label": "Business Information"
-  },
-  {
-   "fieldname": "customer_info_section",
-   "fieldtype": "Section Break",
-   "label": "Customer Information"
-  },
-  {
-   "description": "SAIBA(Customer Code)",
-   "fieldname": "customer_code",
-   "fieldtype": "Data",
-   "label": "Customer Code",
-   "length": 50
-  },
-  {
-   "description": "SAIBA(PolicyBiz Type)",
-   "fieldname": "policy_biz_type",
-   "fieldtype": "Data",
-   "label": "PolicyBiz Type",
-   "length": 100
-  },
-  {
-   "description": "Select Insurance Company Branch to auto-fill branch details",
-   "fieldname": "insurance_company_branch",
-   "fieldtype": "Link",
-   "label": "Insurance Company Branch",
-   "options": "Insurance Company Branch"
-  },
-  {
-   "fetch_from": "insurance_company_branch.insurance_company",
-   "description": "SAIBA(Insurer Name)",
-   "fieldname": "insurer_name",
-   "fieldtype": "Data",
-   "label": "Insurer Name",
-   "length": 150
-  },
-  {
-   "fetch_from": "insurance_company_branch.city",
-   "description": "SAIBA(Insurer City)",
-   "fieldname": "insurer_city",
-   "fieldtype": "Data",
-   "label": "Insurer City",
-   "length": 100
-  },
-  {
-   "fetch_from": "insurance_company_branch.branch_name",
-   "description": "SAIBA(Insurer Branch)",
-   "fieldname": "insurer_branch",
-   "fieldtype": "Data",
-   "label": "Insurer Branch",
-   "length": 100
-  },
-  {
-   "fieldname": "column_break_business",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "insurance_company_branch.branch_auto_code",
-   "description": "SAIBA(Insurer Branch Code)",
-   "fieldname": "insurer_branch_code",
-   "fieldtype": "Data",
-   "label": "Insurer Branch Code",
-   "length": 50
-  },
-  {
-   "fieldname": "pos_policy",
-   "fieldtype": "Data",
-   "label": "Pos Policy",
-   "length": 20
-  },
-  {
-   "default": "Health",
-   "description": "Department handling this policy",
-   "fieldname": "department",
-   "fieldtype": "Select",
-   "label": "Department",
-   "options": "Health\nMotor"
-  },
-  {
-   "description": "Coverage type for health policy",
-   "fieldname": "coverage_type",
-   "fieldtype": "Data",
-   "label": "Coverage Type",
-   "length": 100
-  },
-  {
-   "description": "SAIBA(Policy Vertical)",
-   "fieldname": "policy_vertical",
-   "fieldtype": "Select",
-   "label": "Policy Vertical",
-   "options": "Accident & Health\nCorporate Fleet\nCorporate Individual\nIndividual"
   },
   {
    "fieldname": "business_information_section",
@@ -357,6 +284,120 @@
    "fieldname": "pos_misp_ref",
    "fieldtype": "Data",
    "label": "POS/MISP/Ref",
+   "length": 100
+  },
+  {
+   "fieldname": "customer_insurer_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Customer & Insurer Information"
+  },
+  {
+   "fieldname": "insurer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Insurer Information"
+  },
+  {
+   "description": "Select Insurance Company Branch to auto-fill branch details",
+   "fieldname": "insurance_company_branch",
+   "fieldtype": "Link",
+   "label": "Insurance Company Branch",
+   "options": "Insurance Company Branch"
+  },
+  {
+   "fetch_from": "insurance_company_branch.insurance_company",
+   "description": "SAIBA(Insurer Name)",
+   "fieldname": "insurer_name",
+   "fieldtype": "Data",
+   "label": "Insurer Name",
+   "length": 150
+  },
+  {
+   "fetch_from": "insurance_company_branch.city",
+   "description": "SAIBA(Insurer City)",
+   "fieldname": "insurer_city",
+   "fieldtype": "Data",
+   "label": "Insurer City",
+   "length": 100
+  },
+  {
+   "fetch_from": "insurance_company_branch.branch_name",
+   "description": "SAIBA(Insurer Branch)",
+   "fieldname": "insurer_branch",
+   "fieldtype": "Data",
+   "label": "Insurer Branch",
+   "length": 100
+  },
+  {
+   "fieldname": "column_break_insurer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_company_branch.branch_auto_code",
+   "description": "SAIBA(Insurer Branch Code)",
+   "fieldname": "insurer_branch_code",
+   "fieldtype": "Data",
+   "label": "Insurer Branch Code",
+   "length": 50
+  },
+  {
+   "fieldname": "pos_policy",
+   "fieldtype": "Data",
+   "label": "Pos Policy",
+   "length": 20
+  },
+  {
+   "default": "Health",
+   "description": "Department handling this policy",
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "label": "Department",
+   "options": "Health\nMotor"
+  },
+  {
+   "description": "Coverage type for health policy",
+   "fieldname": "coverage_type",
+   "fieldtype": "Select",
+   "label": "Coverage Type",
+   "options": "1 YEAR\n2 YEAR\n3 YEAR\n4 YEAR\n5 YEAR"
+  },
+  {
+   "description": "SAIBA(Policy Vertical)",
+   "fieldname": "policy_vertical",
+   "fieldtype": "Select",
+   "label": "Policy Vertical",
+   "options": "Accident & Health\nCorporate Fleet\nCorporate Individual\nIndividual"
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "description": "SAIBA(Customer Code)",
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Customer Code",
+   "length": 50
+  },
+  {
+   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "length": 200
+  },
+  {
+   "default": "NO GROUP",
+   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
+   "fieldname": "customer_group",
+   "fieldtype": "Data",
+   "label": "Customer Group"
+  },
+  {
+   "description": "SAIBA(PolicyBiz Type)",
+   "fieldname": "policy_biz_type",
+   "fieldtype": "Data",
+   "label": "PolicyBiz Type",
    "length": 100
   },
   {
@@ -513,13 +554,6 @@
    "fieldtype": "Data",
    "label": "CSC/PE Code(OPS)",
    "length": 100
-  },
-  {
-   "description": "RM/CE1 Code - Auto-populated with current user, can be changed manually",
-   "fieldname": "rm_ce1_code",
-   "fieldtype": "Link",
-   "label": "RM/CE1 Code",
-   "options": "Insurance Employee"
   },
   {
    "default": "15",

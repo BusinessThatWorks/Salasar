@@ -72,25 +72,33 @@ class MotorPolicy(Document):
 		"""
 		Populate Motor Policy fields from the linked Policy Document's extracted fields
 		Uses the existing PolicyCreationService to avoid code duplication
+
+		IMPORTANT: Customer and Insurer information from Policy Document takes precedence
+		over AI-extracted values and will not be overwritten.
 		"""
 		try:
 			# Get the Policy Document
 			policy_doc = frappe.get_doc("Policy Document", policy_document_name)
-			
+
 			# Check if extracted fields exist
 			if not policy_doc.extracted_fields:
 				return {
 					"success": False,
 					"error": "No extracted fields found in Policy Document. Please process the document first."
 				}
-			
+
 			# Use the existing PolicyCreationService
 			policy_service = PolicyCreationService()
-			
+
+			# STEP 1: Copy customer and insurer information from Policy Document FIRST
+			# These should match the Policy Document's manually selected values
+			self._copy_customer_info_from_policy_doc(policy_doc)
+			self._copy_insurer_info_from_policy_doc(policy_doc)
+
 			# Use extracted data directly (already parsed by Claude Vision Service)
 			extracted_data = frappe.parse_json(policy_doc.extracted_fields)
 			parsed_data = extracted_data if isinstance(extracted_data, dict) else {}
-			
+
 			# Refresh field mappings to include latest aliases (including ChasisNo)
 			try:
 				settings = frappe.get_single("Policy Reader Settings")
@@ -99,16 +107,16 @@ class MotorPolicy(Document):
 				frappe.logger().info("Field mappings refreshed successfully - ChasisNo mapping updated")
 			except Exception as e:
 				frappe.logger().warning(f"Could not refresh field mappings: {str(e)}")
-			
+
 			# Get field mapping for Motor policy type
 			field_mapping = policy_service.get_field_mapping_for_policy_type("Motor")
-			
+
 			if not field_mapping:
 				return {
 					"success": False,
 					"error": "No field mapping found for Motor policy. Please check Policy Reader Settings."
 				}
-			
+
 			# Debug: Log the specific fields we're trying to map
 			chasis_related = [k for k in parsed_data.keys() if 'chasis' in k.lower() or 'chassis' in k.lower()]
 			if chasis_related:
@@ -118,25 +126,73 @@ class MotorPolicy(Document):
 						frappe.logger().info(f"✓ Field '{field}' maps to: {field_mapping[field]}")
 					else:
 						frappe.logger().warning(f"✗ Field '{field}' NOT found in mapping")
-			
-			# Map fields using existing service method
+
+			# STEP 2: Define protected fields that should not be overwritten by AI extraction
+			protected_fields = policy_service._get_protected_fields()
+
+			# STEP 3: Map fields using existing service method with field protection
 			mapping_results = policy_service.map_fields_dynamically(
-				parsed_data, field_mapping, self, "Motor"
+				parsed_data, field_mapping, self, "Motor", protected_fields
 			)
-			
+
 			# Save the Motor Policy with populated fields
 			self.save()
-			
+
 			return {
 				"success": True,
 				"populated_fields": mapping_results["mapped_count"],
+				"protected_fields": mapping_results.get("protected_count", 0),
 				"unmapped_fields": mapping_results["unmapped_fields"],
-				"message": f"Successfully populated {mapping_results['mapped_count']} fields from Policy Document."
+				"message": f"Successfully populated {mapping_results['mapped_count']} fields from Policy Document. {mapping_results.get('protected_count', 0)} fields protected from overwriting."
 			}
-			
+
 		except Exception as e:
 			frappe.log_error(f"Error populating Motor Policy fields: {str(e)}", "Motor Policy Population Error")
 			return {
 				"success": False,
 				"error": str(e)
 			}
+
+	def _copy_customer_info_from_policy_doc(self, policy_doc):
+		"""Copy customer information from Policy Document to Motor Policy"""
+		try:
+			if policy_doc.customer_code:
+				self.customer_code = policy_doc.customer_code
+				frappe.logger().info(f"Copied customer_code from Policy Document: {policy_doc.customer_code}")
+
+			if policy_doc.customer_name:
+				self.customer_name = policy_doc.customer_name
+				frappe.logger().info(f"Copied customer_name from Policy Document: {policy_doc.customer_name}")
+
+			if policy_doc.customer_group_name:
+				self.customer_group = policy_doc.customer_group_name
+				frappe.logger().info(f"Copied customer_group from Policy Document: {policy_doc.customer_group_name}")
+
+		except Exception as e:
+			frappe.logger().error(f"Error copying customer info from Policy Document: {str(e)}")
+
+	def _copy_insurer_info_from_policy_doc(self, policy_doc):
+		"""Copy insurer information from Policy Document to Motor Policy"""
+		try:
+			if policy_doc.insurance_company_branch:
+				self.insurance_company_branch = policy_doc.insurance_company_branch
+				frappe.logger().info(f"Copied insurance_company_branch from Policy Document: {policy_doc.insurance_company_branch}")
+
+			if policy_doc.insurer_name:
+				self.insurer_name = policy_doc.insurer_name
+				frappe.logger().info(f"Copied insurer_name from Policy Document: {policy_doc.insurer_name}")
+
+			if policy_doc.insurer_city:
+				self.insurer_city = policy_doc.insurer_city
+				frappe.logger().info(f"Copied insurer_city from Policy Document: {policy_doc.insurer_city}")
+
+			if policy_doc.insurer_branch:
+				self.insurer_branch = policy_doc.insurer_branch
+				frappe.logger().info(f"Copied insurer_branch from Policy Document: {policy_doc.insurer_branch}")
+
+			if policy_doc.insurer_branch_code:
+				self.insurer_branch_code = policy_doc.insurer_branch_code
+				frappe.logger().info(f"Copied insurer_branch_code from Policy Document: {policy_doc.insurer_branch_code}")
+
+		except Exception as e:
+			frappe.logger().error(f"Error copying insurer info from Policy Document: {str(e)}")

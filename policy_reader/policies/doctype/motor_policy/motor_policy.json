@@ -22,19 +22,6 @@
   "receive_date",
   "policy_receive_format",
   "business_information_tab",
-  "customer_info_section",
-  "customer_code",
-  "policy_biz_type",
-  "insurance_company_branch",
-  "insurer_name",
-  "insurer_city",
-  "insurer_branch",
-  "column_break_customer",
-  "insurer_branch_code",
-  "new_renewal",
-  "department",
-  "coverage_type",
-  "policy_vertical",
   "payment_section",
   "payment_mode",
   "bank_name",
@@ -50,6 +37,32 @@
   "dated",
   "cvr_note_rcv_date",
   "policy_status_nr",
+  "customer_insurer_info_tab",
+  "insurer_info_section",
+  "insurance_company_branch",
+  "insurer_name",
+  "insurer_city",
+  "insurer_branch",
+  "column_break_insurer",
+  "insurer_branch_code",
+  "new_renewal",
+  "department",
+  "coverage_type",
+  "policy_vertical",
+  "customer_info_section",
+  "customer_code",
+  "branch_code",
+  "customer_group",
+  "customer_title",
+  "customer_name",
+  "column_break_customer",
+  "gender",
+  "dob_doi",
+  "customer_id",
+  "mobile_number",
+  "column_break_customer_2",
+  "email_id",
+  "policy_biz_type",
   "vehicle_information_tab",
   "basic_vehicle_section",
   "vehicle_no",
@@ -89,19 +102,6 @@
   "column_break_tax",
   "ncb",
   "internal_information_tab",
-  "customer_information_section",
-  "branch_code",
-  "customer_group",
-  "customer_title",
-  "customer_name",
-  "column_break_customer_info",
-  "gender",
-  "dob_doi",
-  "customer_id",
-  "mobile_number",
-  "column_break_customer_info_2",
-  "email_id",
-  "insurer_branch_code_internal",
   "processor_info_section",
   "insurance_employee",
   "processor_employee_name",
@@ -110,7 +110,6 @@
   "processor_branch_name",
   "internal_business_section",
   "payment_mode_1",
-  "rm_csc_ref",
   "brok_rate",
   "tp_rate",
   "column_break_internal_business",
@@ -170,9 +169,9 @@
   {
    "description": "SAIBA(Policy Type)",
    "fieldname": "policy_type",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Policy Type",
-   "length": 75
+   "options": "MOTOR COMMERCIAL VEHICLE\nMOTOR PRIVATE CAR\nMOTOR TWO WHEELER\nMotor Vechile Liability\nPassenger Carring Vehicle\nTRADE PLATE [MOTOR]"
   },
   {
    "description": "SAIBA(Insured/Proposer Name)",
@@ -233,23 +232,43 @@
    "label": "Business Information"
   },
   {
-   "fieldname": "customer_info_section",
+   "fieldname": "payment_section",
    "fieldtype": "Section Break",
-   "label": "Customer Information"
+   "label": "Payment Information"
   },
   {
-   "description": "SAIBA(Customer Code)",
-   "fieldname": "customer_code",
+   "description": "SAIBA(Payment Mode)",
+   "fieldname": "payment_mode",
    "fieldtype": "Data",
-   "label": "Customer Code",
-   "length": 50
+   "label": "Payment Mode"
   },
   {
-   "description": "SAIBA(PolicyBiz Type)",
-   "fieldname": "policy_biz_type",
+   "description": "SAIBA(Bank Name)",
+   "fieldname": "bank_name",
    "fieldtype": "Data",
-   "label": "PolicyBiz Type",
+   "label": "Bank Name",
+   "length": 150
+  },
+  {
+   "fieldname": "column_break_payment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(Payment TransactionNo)",
+   "fieldname": "payment_transaction_no",
+   "fieldtype": "Data",
+   "label": "Payment Transaction No",
    "length": 100
+  },
+  {
+   "fieldname": "customer_insurer_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Customer & Insurer Information"
+  },
+  {
+   "fieldname": "insurer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Insurer Information"
   },
   {
    "description": "Select Insurance Company Branch to auto-fill branch details",
@@ -283,7 +302,7 @@
    "length": 100
   },
   {
-   "fieldname": "column_break_customer",
+   "fieldname": "column_break_insurer",
    "fieldtype": "Column Break"
   },
   {
@@ -312,9 +331,9 @@
   {
    "description": "SAIBA(Coverage Type)",
    "fieldname": "coverage_type",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Coverage Type",
-   "length": 100
+   "options": "NA\n(1+1) Years\n(1+3) Years\n(1+5) Years\nSTANDALONE TP 1Yr Policy (0+1) Year\nSTANDALONE OD 1Yr Policy (1+0) Year\n(3+3) Years\n(5+5) Years"
   },
   {
    "description": "SAIBA(Policy Vertical)",
@@ -324,71 +343,89 @@
    "options": "Accident & Health\nCorporate Fleet\nCorporate Individual\nIndividual"
   },
   {
-   "fieldname": "processor_info_section",
+   "fieldname": "customer_info_section",
    "fieldtype": "Section Break",
-   "label": "Processor Information"
+   "label": "Customer Information"
   },
   {
-   "fieldname": "insurance_employee",
-   "fieldtype": "Link",
-   "label": "Insurance Employee",
-   "options": "Insurance Employee"
-  },
-  {
-   "fetch_from": "insurance_employee.employee_name",
-   "fieldname": "processor_employee_name",
+   "description": "SAIBA(Customer Code)",
+   "fieldname": "customer_code",
    "fieldtype": "Data",
-   "label": "Employee Name",
-   "read_only": 1
+   "label": "Customer Code",
+   "length": 50
   },
   {
-   "fetch_from": "insurance_employee.employee_code",
-   "fieldname": "processor_employee_code",
+   "description": "Branch code for Subhangee Clapgrow",
+   "fieldname": "branch_code",
    "fieldtype": "Data",
-   "label": "Employee Code",
-   "read_only": 1
+   "label": "Branch Code"
   },
   {
-   "fetch_from": "insurance_employee.employee_type",
-   "fieldname": "processor_employee_type",
+   "default": "NO GROUP",
+   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
+   "fieldname": "customer_group",
    "fieldtype": "Data",
-   "label": "Employee Type",
-   "read_only": 1
+   "label": "Customer Group"
   },
   {
-   "fetch_from": "insurance_employee.branch_name",
-   "fieldname": "processor_branch_name",
+   "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
+   "fieldname": "customer_title",
+   "fieldtype": "Select",
+   "label": "Customer Title",
+   "options": "Dr.\nM/S\nMr.\nMrs.\nMs."
+  },
+  {
+   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
+   "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Branch Name",
-   "read_only": 1
+   "label": "Customer Name",
+   "length": 200
   },
   {
-   "fieldname": "payment_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Information"
-  },
-  {
-   "description": "SAIBA(Payment Mode)",
-   "fieldname": "payment_mode",
-   "fieldtype": "Data",
-   "label": "Payment Mode"
-  },
-  {
-   "description": "SAIBA(Bank Name)",
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "length": 150
-  },
-  {
-   "fieldname": "column_break_payment",
+   "fieldname": "column_break_customer",
    "fieldtype": "Column Break"
   },
   {
-   "description": "SAIBA(Payment TransactionNo)",
-   "fieldname": "payment_transaction_no",
+   "description": "Male / Female / Other",
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "description": "Date of Birth/Date of Incorporation (DD-MM-YYYY format)",
+   "fieldname": "dob_doi",
+   "fieldtype": "Date",
+   "label": "DOB/DOI"
+  },
+  {
+   "description": "Enter the ID, Not the name",
+   "fieldname": "customer_id",
    "fieldtype": "Data",
-   "label": "Payment Transaction No",
+   "label": "Customer ID"
+  },
+  {
+   "description": "Enter mobile number (up to 15 characters for international formats)",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "length": 15
+  },
+  {
+   "fieldname": "column_break_customer_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Valid customer email address (e.g. insurance@custome.com)",
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email ID"
+  },
+  {
+   "description": "SAIBA(PolicyBiz Type)",
+   "fieldname": "policy_biz_type",
+   "fieldtype": "Data",
+   "label": "PolicyBiz Type",
    "length": 100
   },
   {
@@ -631,82 +668,43 @@
    "label": "Internal Information"
   },
   {
-   "fieldname": "customer_information_section",
+   "fieldname": "processor_info_section",
    "fieldtype": "Section Break",
-   "label": "Customer Information"
+   "label": "Processor Information"
   },
   {
-   "description": "Branch code for Subhangee Clapgrow",
-   "fieldname": "branch_code",
+   "fieldname": "insurance_employee",
+   "fieldtype": "Link",
+   "label": "Insurance Employee",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "insurance_employee.employee_name",
+   "fieldname": "processor_employee_name",
    "fieldtype": "Data",
-   "label": "Branch Code"
+   "label": "Employee Name",
+   "read_only": 1
   },
   {
-   "default": "NO GROUP",
-   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
-   "fieldname": "customer_group",
+   "fetch_from": "insurance_employee.employee_code",
+   "fieldname": "processor_employee_code",
    "fieldtype": "Data",
-   "label": "Customer Group"
+   "label": "Employee Code",
+   "read_only": 1
   },
   {
-   "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
-   "fieldname": "customer_title",
-   "fieldtype": "Select",
-   "label": "Customer Title",
-   "options": "Dr.\nM/S\nMr.\nMrs.\nMs."
-  },
-  {
-   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
-   "fieldname": "customer_name",
+   "fetch_from": "insurance_employee.employee_type",
+   "fieldname": "processor_employee_type",
    "fieldtype": "Data",
-   "label": "Customer Name",
-   "length": 200
+   "label": "Employee Type",
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_customer_info",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Male / Female / Other",
-   "fieldname": "gender",
-   "fieldtype": "Select",
-   "label": "Gender",
-   "options": "Male\nFemale\nOther"
-  },
-  {
-   "description": "Date of Birth/Date of Incorporation (DD-MM-YYYY format)",
-   "fieldname": "dob_doi",
-   "fieldtype": "Date",
-   "label": "DOB/DOI"
-  },
-  {
-   "description": "Enter the ID, Not the name",
-   "fieldname": "customer_id",
+   "fetch_from": "insurance_employee.branch_name",
+   "fieldname": "processor_branch_name",
    "fieldtype": "Data",
-   "label": "Customer ID"
-  },
-  {
-   "description": "Enter mobile number (up to 15 characters for international formats)",
-   "fieldname": "mobile_number",
-   "fieldtype": "Data",
-   "label": "Mobile Number",
-   "length": 15
-  },
-  {
-   "fieldname": "column_break_customer_info_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Valid customer email address (e.g. insurance@custome.com)",
-   "fieldname": "email_id",
-   "fieldtype": "Data",
-   "label": "Email ID"
-  },
-  {
-   "description": "Enter the ID, Not the name",
-   "fieldname": "insurer_branch_code_internal",
-   "fieldtype": "Data",
-   "label": "Insurer Branch Code"
+   "label": "Branch Name",
+   "read_only": 1
   },
   {
    "fieldname": "business_information_section",
@@ -778,13 +776,6 @@
    "fieldtype": "Data",
    "label": "Payment Mode 1",
    "length": 100
-  },
-  {
-   "description": "Relationship Manager/CSC/Reference - Auto-populated with current user, can be changed manually",
-   "fieldname": "rm_csc_ref",
-   "fieldtype": "Link",
-   "label": "RM/CSC/REF",
-   "options": "Insurance Employee"
   },
   {
    "default": "15",

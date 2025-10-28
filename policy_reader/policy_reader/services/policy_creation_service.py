@@ -66,10 +66,19 @@ class PolicyCreationService:
             # Populate customer data from Policy Document if available
             self._populate_customer_fields(policy_record, policy_doc)
 
+            # Copy documents from Policy Document
+            self._copy_document_fields(policy_record, policy_doc)
+
+            # Copy business information from Policy Document
+            self._copy_business_info_fields(policy_record, policy_doc)
+
+            # Define fields that should not be overwritten by AI extraction
+            protected_fields = self._get_protected_fields()
+
             # Dynamic field mapping
             field_mapping_service = FieldMappingService()
             mapping_results = field_mapping_service.map_fields_dynamically(
-                parsed_data, field_mapping, policy_record, policy_type
+                parsed_data, field_mapping, policy_record, policy_type, protected_fields
             )
 
             # Auto-populate processor information based on logged-in user
@@ -100,6 +109,27 @@ class PolicyCreationService:
         except Exception as e:
             frappe.db.rollback()
             CommonService.handle_processing_exception("creating policy record", e)
+
+    def _get_protected_fields(self):
+        """
+        Get list of fields that should not be overwritten by AI extraction
+
+        These are fields that were manually selected in Policy Document and should
+        always take precedence over AI-extracted values
+        """
+        return [
+            # Customer fields from Policy Document
+            'customer_code',
+            'customer_name',
+            'customer_group',
+
+            # Insurer fields from Policy Document
+            'insurance_company_branch',
+            'insurer_name',
+            'insurer_city',
+            'insurer_branch',
+            'insurer_branch_code',
+        ]
 
     def _get_current_user_employee_info(self):
         """Get Insurance Employee record for the logged-in user"""
@@ -160,18 +190,92 @@ class PolicyCreationService:
                 frappe.logger().info("No customer selected in Policy Document, skipping customer field population")
                 return
 
-            # Set the customer code link field - Frappe will auto-fetch related fields
+            # Copy customer code (just the text value in Motor/Health Policy)
             policy_record.customer_code = policy_doc.customer_code
-            frappe.logger().info(f"Auto-populated customer_code link: {policy_doc.customer_code}")
-            frappe.logger().info(f"Customer name: {policy_doc.customer_name}")
-            frappe.logger().info(f"Customer group: {policy_doc.customer_group_name}")
-            frappe.logger().info(f"Successfully set customer link field for {policy_record.doctype}")
+            frappe.logger().info(f"Copied customer_code: {policy_doc.customer_code}")
+
+            # Copy customer name from Policy Document's auto-fetched field
+            if policy_doc.customer_name:
+                policy_record.customer_name = policy_doc.customer_name
+                frappe.logger().info(f"Copied customer_name: {policy_doc.customer_name}")
+
+            # Copy customer group from Policy Document's auto-fetched field
+            # Note: Policy Document uses 'customer_group_name', Motor/Health Policy uses 'customer_group'
+            if policy_doc.customer_group_name:
+                policy_record.customer_group = policy_doc.customer_group_name
+                frappe.logger().info(f"Copied customer_group: {policy_doc.customer_group_name}")
+
+            frappe.logger().info(f"Successfully copied customer fields from Policy Document for {policy_record.doctype}")
 
         except Exception as e:
             frappe.logger().error(f"Error populating customer fields: {str(e)}")
             frappe.log_error(f"Failed to populate customer fields: {str(e)}", "Customer Field Population")
             # Don't throw - this is a non-critical operation
 
+    def _copy_document_fields(self, policy_record, policy_doc):
+        """Copy document attachment fields from Policy Document to policy record"""
+        try:
+            document_fields = [
+                'final_quote_renewal_notice',
+                'quote_comparison',
+                'mandate_doc',
+                'kyc_doc',
+                'proposal_form',
+                'portability_form',
+                'policy_copy_doc',
+                'rc_copy',
+                'passport_copy',
+                'payment_details_doc'
+            ]
+
+            copied_count = 0
+            for field in document_fields:
+                if hasattr(policy_doc, field) and getattr(policy_doc, field):
+                    setattr(policy_record, field, getattr(policy_doc, field))
+                    copied_count += 1
+                    frappe.logger().info(f"Copied document field: {field}")
+
+            frappe.logger().info(f"Successfully copied {copied_count} document fields from Policy Document")
+
+        except Exception as e:
+            frappe.logger().error(f"Error copying document fields: {str(e)}")
+            frappe.log_error(f"Failed to copy document fields: {str(e)}", "Document Field Copy")
+            # Don't throw - this is a non-critical operation
+
+    def _copy_business_info_fields(self, policy_record, policy_doc):
+        """Copy business information fields from Policy Document to policy record"""
+        try:
+            if not policy_doc.insurance_company_branch:
+                frappe.logger().info("No insurance company branch selected in Policy Document, skipping business info population")
+                return
+
+            # Copy the insurance company branch link field
+            policy_record.insurance_company_branch = policy_doc.insurance_company_branch
+            frappe.logger().info(f"Copied insurance_company_branch: {policy_doc.insurance_company_branch}")
+
+            # Copy auto-fetched insurer fields from Policy Document
+            if policy_doc.insurer_name:
+                policy_record.insurer_name = policy_doc.insurer_name
+                frappe.logger().info(f"Copied insurer_name: {policy_doc.insurer_name}")
+
+            if policy_doc.insurer_city:
+                policy_record.insurer_city = policy_doc.insurer_city
+                frappe.logger().info(f"Copied insurer_city: {policy_doc.insurer_city}")
+
+            if policy_doc.insurer_branch:
+                policy_record.insurer_branch = policy_doc.insurer_branch
+                frappe.logger().info(f"Copied insurer_branch: {policy_doc.insurer_branch}")
+
+            if policy_doc.insurer_branch_code:
+                policy_record.insurer_branch_code = policy_doc.insurer_branch_code
+                frappe.logger().info(f"Copied insurer_branch_code: {policy_doc.insurer_branch_code}")
+
+            frappe.logger().info(f"Successfully copied business info fields from Policy Document for {policy_record.doctype}")
+
+        except Exception as e:
+            frappe.logger().error(f"Error copying business info fields: {str(e)}")
+            frappe.log_error(f"Failed to copy business info fields: {str(e)}", "Business Info Copy")
+            # Don't throw - this is a non-critical operation
 
     def _normalize_key(self, text):
         """Normalize keys for robust alias matching (lowercase, alnum+space)"""

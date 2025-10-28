@@ -65,7 +65,7 @@ class PolicyDocument(Document):
             employee = frappe.db.get_value(
                 "Insurance Employee",
                 {"user": current_user},
-                ["employee_code", "employee_type", "employee_name"],
+                ["employee_code", "employee_type", "employee_name", "branch_name"],
                 as_dict=True
             )
 
@@ -73,6 +73,7 @@ class PolicyDocument(Document):
                 self.processor_employee_code = employee.get("employee_code")
                 self.processor_employee_type = employee.get("employee_type")
                 self.processor_employee_name = employee.get("employee_name")
+                self.processor_branch_name = employee.get("branch_name")
                 frappe.logger().info(f"Auto-populated processor info for Policy Document: {employee}")
             else:
                 frappe.logger().info(f"No Insurance Employee record found for user {current_user}")
@@ -385,7 +386,7 @@ def get_current_user_employee_info():
         employee = frappe.db.get_value(
             "Insurance Employee",
             {"user": current_user},
-            ["employee_code", "employee_type", "employee_name"],
+            ["employee_code", "employee_type", "employee_name", "branch_name"],
             as_dict=True
         )
 

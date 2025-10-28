@@ -16,11 +16,6 @@
   "processing_method",
   "processing_time",
   "tokens_used",
-  "customer_info_section",
-  "customer_code",
-  "column_break_customer",
-  "customer_name",
-  "customer_group_name",
   "policy_links_section",
   "motor_policy",
   "health_policy",
@@ -28,11 +23,38 @@
   "raw_ocr_text",
   "used_prompt",
   "error_message",
+  "customer_insurer_info_tab",
+  "customer_info_section",
+  "customer_code",
+  "column_break_customer",
+  "customer_name",
+  "customer_group_name",
+  "business_info_section",
+  "insurance_company_branch",
+  "column_break_business",
+  "insurer_name",
+  "insurer_city",
+  "insurer_branch",
+  "insurer_branch_code",
+  "documents_tab",
+  "documents_section",
+  "final_quote_renewal_notice",
+  "quote_comparison",
+  "mandate_doc",
+  "kyc_doc",
+  "proposal_form",
+  "column_break_documents",
+  "portability_form",
+  "policy_copy_doc",
+  "rc_copy",
+  "passport_copy",
+  "payment_details_doc",
   "processor_info_tab",
   "processor_info_section",
   "processor_employee_name",
   "processor_employee_code",
-  "processor_employee_type"
+  "processor_employee_type",
+  "processor_branch_name"
  ],
  "fields": [
   {
@@ -107,35 +129,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "customer_info_section",
-   "fieldtype": "Section Break",
-   "label": "Customer Information"
-  },
-  {
-   "fieldname": "customer_code",
-   "fieldtype": "Link",
-   "label": "Customer Code",
-   "options": "Insurance Customer"
-  },
-  {
-   "fieldname": "column_break_customer",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "customer_code.customer_name",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "customer_code.customer_group_name",
-   "fieldname": "customer_group_name",
-   "fieldtype": "Data",
-   "label": "Customer Group",
-   "read_only": 1
-  },
-  {
    "fieldname": "policy_links_section",
    "fieldtype": "Section Break",
    "label": "Created Policy Records"
@@ -179,6 +172,158 @@
    "read_only": 1
   },
   {
+   "fieldname": "customer_insurer_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Customer & Insurer Information"
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "fieldname": "customer_code",
+   "fieldtype": "Link",
+   "label": "Customer Code",
+   "options": "Insurance Customer"
+  },
+  {
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer_code.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_code.customer_group_name",
+   "fieldname": "customer_group_name",
+   "fieldtype": "Data",
+   "label": "Customer Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "business_info_section",
+   "fieldtype": "Section Break",
+   "label": "Business Information"
+  },
+  {
+   "description": "Select Insurance Company Branch to auto-fill branch details",
+   "fieldname": "insurance_company_branch",
+   "fieldtype": "Link",
+   "label": "Insurance Company Branch",
+   "options": "Insurance Company Branch"
+  },
+  {
+   "fieldname": "column_break_business",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_company_branch.insurance_company",
+   "fieldname": "insurer_name",
+   "fieldtype": "Data",
+   "label": "Insurer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_company_branch.city",
+   "fieldname": "insurer_city",
+   "fieldtype": "Data",
+   "label": "Insurer City",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_company_branch.branch_name",
+   "fieldname": "insurer_branch",
+   "fieldtype": "Data",
+   "label": "Insurer Branch",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_company_branch.branch_auto_code",
+   "fieldname": "insurer_branch_code",
+   "fieldtype": "Data",
+   "label": "Insurer Branch Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "documents_tab",
+   "fieldtype": "Tab Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Document Uploads"
+  },
+  {
+   "description": "Upload final quote or renewal notice document",
+   "fieldname": "final_quote_renewal_notice",
+   "fieldtype": "Attach",
+   "label": "Final Quote/Renewal Notice"
+  },
+  {
+   "description": "Upload quote comparison document",
+   "fieldname": "quote_comparison",
+   "fieldtype": "Attach",
+   "label": "Quote Comparison"
+  },
+  {
+   "description": "Upload mandate document if required (optional)",
+   "fieldname": "mandate_doc",
+   "fieldtype": "Attach",
+   "label": "Mandate (if required)"
+  },
+  {
+   "description": "Upload KYC document",
+   "fieldname": "kyc_doc",
+   "fieldtype": "Attach",
+   "label": "KYC"
+  },
+  {
+   "description": "Upload proposal form for health policy",
+   "fieldname": "proposal_form",
+   "fieldtype": "Attach",
+   "label": "Proposal Form (for health)"
+  },
+  {
+   "fieldname": "column_break_documents",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Upload portability form for health policy",
+   "fieldname": "portability_form",
+   "fieldtype": "Attach",
+   "label": "Portability Form (for health)"
+  },
+  {
+   "description": "Upload policy copy document",
+   "fieldname": "policy_copy_doc",
+   "fieldtype": "Attach",
+   "label": "Policy Copy"
+  },
+  {
+   "description": "Upload RC (Registration Certificate) copy",
+   "fieldname": "rc_copy",
+   "fieldtype": "Attach",
+   "label": "RC Copy"
+  },
+  {
+   "description": "Upload passport copy for travel policy (optional)",
+   "fieldname": "passport_copy",
+   "fieldtype": "Attach",
+   "label": "Passport Copy (for travel policy)"
+  },
+  {
+   "description": "Upload payment details - Cheque/NEFT/Online Payment (optional)",
+   "fieldname": "payment_details_doc",
+   "fieldtype": "Attach",
+   "label": "Payment Details (Cheque/NEFT/Online Payment)"
+  },
+  {
    "fieldname": "processor_info_tab",
    "fieldtype": "Tab Break",
    "label": "Processor Information"
@@ -207,6 +352,13 @@
    "fieldname": "processor_employee_type",
    "fieldtype": "Data",
    "label": "Employee Type",
+   "read_only": 1
+  },
+  {
+   "description": "Auto-populated branch name from logged-in user",
+   "fieldname": "processor_branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name",
    "read_only": 1
   }
  ],
