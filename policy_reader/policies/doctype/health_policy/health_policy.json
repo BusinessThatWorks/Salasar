@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format: HLTPLCY-{YYYY}-{MM}-{####}",
  "creation": "2025-08-05 21:47:56.065076",

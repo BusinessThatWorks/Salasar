@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format: INSCBR-{YYYY}-{MM}-{####}",
  "creation": "2025-10-23 16:56:42.959896",

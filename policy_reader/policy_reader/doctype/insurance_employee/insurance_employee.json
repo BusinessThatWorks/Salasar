@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format: INSX-EMP-{YYYY}-{MM}-{####}",
  "creation": "2025-10-07 17:25:17.465132",

@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_events_in_timeline": 1,
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "format:MTRPLCY-{YYYY}-{MM}-{####}",
  "creation": "2025-08-05 21:46:40.705492",
