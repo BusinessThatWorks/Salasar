@@ -43,14 +43,13 @@
    "reqd": 1
   },
   {
-   "description": "Unique branch auto code from insurance company system",
+   "description": "Branch auto code from insurance company system",
    "fieldname": "branch_auto_code",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Branch Auto Code",
    "length": 50,
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "description": "Broker code for this branch",
