@@ -13,32 +13,45 @@
   "policy_file",
   "policy_section",
   "policy_no",
+  "department",
   "policy_type",
+  "coverage_type",
   "insured_proposer_name",
-  "is_renewable",
   "column_break_policy_basic",
   "policy_issuance_date",
   "policy_start_date",
   "policy_expiry_date",
   "receive_date",
-  "policy_receive_format",
+  "is_renewable",
   "business_information_tab",
-  "payment_section",
-  "payment_mode",
-  "bank_name",
-  "column_break_payment",
-  "payment_transaction_no",
   "business_information_section",
   "old_control_number",
-  "bus_book_date",
-  "policy_enquiry_remarks",
+  "branch_code",
+  "biz_type",
+  "customer_code",
+  "customer_vertical",
+  "customer_pan",
+  "customer_gst",
   "column_break_business_info",
-  "payment_mode_internal",
-  "bank_name_internal",
-  "dated",
-  "cvr_note_rcv_date",
-  "policy_status_nr",
+  "policy_type_biz",
+  "rm_code",
+  "csc_code",
+  "tc_code",
+  "ref_code",
+  "portability",
+  "pos_misp_ref",
+  "policy_enquiry_remarks",
   "customer_insurer_info_tab",
+  "customer_info_section",
+  "customer_group",
+  "customer_title",
+  "customer_name",
+  "customer_address",
+  "column_break_customer",
+  "gender",
+  "dob_doi",
+  "mobile_number",
+  "email_id",
   "insurer_info_section",
   "insurance_company_branch",
   "insurer_name",
@@ -46,31 +59,12 @@
   "insurer_branch",
   "column_break_insurer",
   "insurer_branch_code",
-  "new_renewal",
-  "department",
-  "coverage_type",
-  "policy_vertical",
-  "customer_info_section",
-  "customer_code",
-  "branch_code",
-  "customer_group",
-  "customer_title",
-  "customer_name",
-  "column_break_customer",
-  "gender",
-  "dob_doi",
-  "customer_id",
-  "mobile_number",
-  "column_break_customer_2",
-  "email_id",
-  "policy_biz_type",
   "vehicle_information_tab",
   "basic_vehicle_section",
   "vehicle_no",
   "make",
   "model",
   "type_of_vehicle",
-  "vehicle_class",
   "column_break_vehicle_basic",
   "variant",
   "year_of_man",
@@ -83,7 +77,6 @@
   "seats",
   "vehicle_registration_section",
   "rto_code",
-  "vehicle_category",
   "category",
   "column_break_registration",
   "passenger_gvw",
@@ -220,51 +213,75 @@
    "label": "Receive Date"
   },
   {
-   "default": "Recd. In Soft Copy",
-   "description": "Format in which policy was received",
-   "fieldname": "policy_receive_format",
-   "fieldtype": "Select",
-   "label": "Policy Receive Format",
-   "options": "Recd. In Hard Copy\nRecd. In Soft Copy"
-  },
-  {
    "fieldname": "business_information_tab",
    "fieldtype": "Tab Break",
    "label": "Business Information"
   },
   {
-   "fieldname": "payment_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Information"
-  },
-  {
-   "description": "SAIBA(Payment Mode)",
-   "fieldname": "payment_mode",
-   "fieldtype": "Data",
-   "label": "Payment Mode"
-  },
-  {
-   "description": "SAIBA(Bank Name)",
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "length": 150
-  },
-  {
-   "fieldname": "column_break_payment",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "SAIBA(Payment TransactionNo)",
-   "fieldname": "payment_transaction_no",
-   "fieldtype": "Data",
-   "label": "Payment Transaction No",
-   "length": 100
-  },
-  {
    "fieldname": "customer_insurer_info_tab",
    "fieldtype": "Tab Break",
    "label": "Customer & Insurer Information"
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "default": "NO GROUP",
+   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
+   "fieldname": "customer_group",
+   "fieldtype": "Data",
+   "label": "Customer Group"
+  },
+  {
+   "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
+   "fieldname": "customer_title",
+   "fieldtype": "Select",
+   "label": "Customer Title",
+   "options": "Dr.\nM/S\nMr.\nMrs.\nMs."
+  },
+  {
+   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "length": 200
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Small Text",
+   "label": "Customer Address"
+  },
+  {
+   "fieldname": "column_break_customer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Male / Female / Other",
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "description": "Date of Birth/Date of Incorporation (DD-MM-YYYY format)",
+   "fieldname": "dob_doi",
+   "fieldtype": "Date",
+   "label": "DOB/DOI"
+  },
+  {
+   "description": "Enter mobile number (up to 15 characters for international formats)",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "length": 15
+  },
+  {
+   "description": "Valid customer email address (e.g. insurance@custome.com)",
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email ID"
   },
   {
    "fieldname": "insurer_info_section",
@@ -315,121 +332,6 @@
    "length": 50
   },
   {
-   "description": "SAIBA(NewRenewal)",
-   "fieldname": "new_renewal",
-   "fieldtype": "Select",
-   "label": "New/Renewal",
-   "options": "New\nRenewal"
-  },
-  {
-   "default": "Motor",
-   "description": "Department handling this policy",
-   "fieldname": "department",
-   "fieldtype": "Select",
-   "label": "Department",
-   "options": "Health\nMotor"
-  },
-  {
-   "description": "SAIBA(Coverage Type)",
-   "fieldname": "coverage_type",
-   "fieldtype": "Select",
-   "label": "Coverage Type",
-   "options": "NA\n(1+1) Years\n(1+3) Years\n(1+5) Years\nSTANDALONE TP 1Yr Policy (0+1) Year\nSTANDALONE OD 1Yr Policy (1+0) Year\n(3+3) Years\n(5+5) Years"
-  },
-  {
-   "description": "SAIBA(Policy Vertical)",
-   "fieldname": "policy_vertical",
-   "fieldtype": "Select",
-   "label": "Policy Vertical",
-   "options": "Accident & Health\nCorporate Fleet\nCorporate Individual\nIndividual"
-  },
-  {
-   "fieldname": "customer_info_section",
-   "fieldtype": "Section Break",
-   "label": "Customer Information"
-  },
-  {
-   "description": "SAIBA(Customer Code)",
-   "fieldname": "customer_code",
-   "fieldtype": "Data",
-   "label": "Customer Code",
-   "length": 50
-  },
-  {
-   "description": "Branch code for Subhangee Clapgrow",
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "label": "Branch Code"
-  },
-  {
-   "default": "NO GROUP",
-   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
-   "fieldname": "customer_group",
-   "fieldtype": "Data",
-   "label": "Customer Group"
-  },
-  {
-   "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
-   "fieldname": "customer_title",
-   "fieldtype": "Select",
-   "label": "Customer Title",
-   "options": "Dr.\nM/S\nMr.\nMrs.\nMs."
-  },
-  {
-   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "length": 200
-  },
-  {
-   "fieldname": "column_break_customer",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Male / Female / Other",
-   "fieldname": "gender",
-   "fieldtype": "Select",
-   "label": "Gender",
-   "options": "Male\nFemale\nOther"
-  },
-  {
-   "description": "Date of Birth/Date of Incorporation (DD-MM-YYYY format)",
-   "fieldname": "dob_doi",
-   "fieldtype": "Date",
-   "label": "DOB/DOI"
-  },
-  {
-   "description": "Enter the ID, Not the name",
-   "fieldname": "customer_id",
-   "fieldtype": "Data",
-   "label": "Customer ID"
-  },
-  {
-   "description": "Enter mobile number (up to 15 characters for international formats)",
-   "fieldname": "mobile_number",
-   "fieldtype": "Data",
-   "label": "Mobile Number",
-   "length": 15
-  },
-  {
-   "fieldname": "column_break_customer_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Valid customer email address (e.g. insurance@custome.com)",
-   "fieldname": "email_id",
-   "fieldtype": "Data",
-   "label": "Email ID"
-  },
-  {
-   "description": "SAIBA(PolicyBiz Type)",
-   "fieldname": "policy_biz_type",
-   "fieldtype": "Data",
-   "label": "PolicyBiz Type",
-   "length": 100
-  },
-  {
    "fieldname": "vehicle_information_tab",
    "fieldtype": "Tab Break",
    "label": "Vehicle Information"
@@ -466,13 +368,6 @@
    "fieldtype": "Select",
    "label": "Type of Vehicle",
    "options": "PRIVATE\nCOMMERCIAL"
-  },
-  {
-   "description": "SAIBA(Vehicle Class)",
-   "fieldname": "vehicle_class",
-   "fieldtype": "Data",
-   "label": "Vehicle Class",
-   "length": 100
   },
   {
    "fieldname": "column_break_vehicle_basic",
@@ -544,13 +439,6 @@
    "fieldname": "rto_code",
    "fieldtype": "Data",
    "label": "RTO Code",
-   "length": 100
-  },
-  {
-   "description": "SAIBA(VehicleCategory)",
-   "fieldname": "vehicle_category",
-   "fieldtype": "Data",
-   "label": "Vehicle Category",
    "length": 100
   },
   {
@@ -713,58 +601,76 @@
    "label": "Business Information"
   },
   {
-   "description": "Enter the ID, Not the name",
+   "description": "Old control number/ID",
    "fieldname": "old_control_number",
    "fieldtype": "Data",
    "label": "Old Control Number"
   },
   {
-   "description": "Business booking date",
-   "fieldname": "bus_book_date",
-   "fieldtype": "Date",
-   "label": "Bus. Book Date"
+   "fieldname": "biz_type",
+   "fieldtype": "Data",
+   "label": "Biz Type"
   },
   {
-   "description": "Additional remarks or notes about the policy",
-   "fieldname": "policy_enquiry_remarks",
-   "fieldtype": "Long Text",
-   "label": "Policy/Enquiry Remarks"
+   "fieldname": "customer_vertical",
+   "fieldtype": "Data",
+   "label": "Customer Vertical"
+  },
+  {
+   "fieldname": "customer_pan",
+   "fieldtype": "Data",
+   "label": "Customer PAN"
+  },
+  {
+   "fieldname": "customer_gst",
+   "fieldtype": "Data",
+   "label": "Customer GST"
   },
   {
    "fieldname": "column_break_business_info",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Payment mode (e.g., Bank Transfer)",
-   "fieldname": "payment_mode_internal",
+   "fieldname": "policy_type_biz",
    "fieldtype": "Data",
-   "label": "Payment Mode"
+   "label": "Policy Type"
   },
   {
-   "default": "NONE",
-   "description": "Bank name (can be NONE)",
-   "fieldname": "bank_name_internal",
+   "fieldname": "rm_code",
    "fieldtype": "Data",
-   "label": "Bank Name"
+   "label": "RM Code"
   },
   {
-   "description": "Date in DD-MM-YYYY format",
-   "fieldname": "dated",
-   "fieldtype": "Date",
-   "label": "Dated"
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code"
   },
   {
-   "description": "Cover note received date",
-   "fieldname": "cvr_note_rcv_date",
-   "fieldtype": "Date",
-   "label": "Cvr Note Rcv. Date"
+   "fieldname": "tc_code",
+   "fieldtype": "Data",
+   "label": "TC Code"
   },
   {
-   "description": "Policy status - New or Renewal",
-   "fieldname": "policy_status_nr",
+   "fieldname": "ref_code",
+   "fieldtype": "Data",
+   "label": "Ref Code"
+  },
+  {
+   "fieldname": "portability",
    "fieldtype": "Select",
-   "label": "Policy Status (N/R)",
-   "options": "New\nRenewal"
+   "label": "Portability",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "pos_misp_ref",
+   "fieldtype": "Data",
+   "label": "POS/MISP/Ref"
+  },
+  {
+   "description": "Additional remarks or notes about the policy",
+   "fieldname": "policy_enquiry_remarks",
+   "fieldtype": "Long Text",
+   "label": "Policy/Enquiry Remarks"
   },
   {
    "fieldname": "internal_business_section",

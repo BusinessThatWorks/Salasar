@@ -3,6 +3,16 @@
 
 frappe.ui.form.on("Motor Policy", {
 	refresh(frm) {
+		// Set type_of_vehicle based on policy_type on load
+		set_type_of_vehicle(frm);
+	},
+
+	policy_type(frm) {
+		// Auto-set type_of_vehicle when policy_type changes
+		set_type_of_vehicle(frm);
+	},
+
+	onload(frm) {
 		// Add "View Policy Document" button if policy_document is linked
 		if (frm.doc.policy_document) {
 			frm.add_custom_button(__('View Policy Document'), function() {
@@ -20,6 +30,20 @@ frappe.ui.form.on("Motor Policy", {
 		}
 	}
 });
+
+function set_type_of_vehicle(frm) {
+	// Auto-set type_of_vehicle based on policy_type
+	// If "Motor Commercial Car" is selected → "COMMERCIAL"
+	// Otherwise (Motor Private Car, Two Wheeler, etc.) → "PRIVATE"
+	let policy_type = frm.doc.policy_type || '';
+
+	if (policy_type.toLowerCase().includes('commercial')) {
+		frm.set_value('type_of_vehicle', 'COMMERCIAL');
+	} else if (policy_type) {
+		// Only set to Private if a policy_type is actually selected
+		frm.set_value('type_of_vehicle', 'PRIVATE');
+	}
+}
 
 function populate_motor_policy_fields(frm) {
 	// Show loading indicator
