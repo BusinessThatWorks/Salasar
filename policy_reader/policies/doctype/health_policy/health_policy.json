@@ -12,15 +12,14 @@
   "policy_file",
   "policy_information_section",
   "policy_no",
-  "policy_type",
+  "department",
+  "coverage_type",
   "insured_proposer_name",
   "column_break_1",
   "policy_issuance_date",
   "policy_start_date",
   "policy_expiry_date",
   "receive_date",
-  "policy_receive_format",
-  "portability",
   "policy_dates_section",
   "plan_name",
   "is_renewable",
@@ -34,9 +33,20 @@
   "business_information_tab",
   "business_information_section",
   "old_control_number",
-  "bus_book_date",
   "policy_enquiry_remarks",
+  "policy_type",
+  "portability",
+  "customer_code",
   "column_break_business_info",
+  "branch_code",
+  "biz_type",
+  "customer_vertical",
+  "customer_pan",
+  "customer_gst",
+  "rm_code",
+  "csc_code",
+  "tc_code",
+  "ref_code",
   "pos_misp_ref",
   "customer_insurer_info_tab",
   "insurer_info_section",
@@ -47,11 +57,8 @@
   "column_break_insurer",
   "insurer_branch_code",
   "pos_policy",
-  "department",
-  "coverage_type",
   "policy_vertical",
   "customer_info_section",
-  "customer_code",
   "customer_name",
   "customer_group",
   "policy_biz_type",
@@ -66,12 +73,7 @@
   "stamp_duty",
   "prem_rate",
   "column_break_3",
-  "payment_mode",
-  "bank_name",
-  "payment_transaction_no",
-  "dated",
   "remarks",
-  "policy_status",
   "internal_information_tab",
   "processor_information_section",
   "insurance_employee",
@@ -135,11 +137,19 @@
    "length": 100
   },
   {
-   "description": "SAIBA(Policy Type)",
-   "fieldname": "policy_type",
+   "default": "Health",
+   "description": "Department handling this policy",
+   "fieldname": "department",
    "fieldtype": "Select",
-   "label": "Policy Type",
-   "options": "CANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
+   "label": "Department",
+   "options": "Health\nMotor"
+  },
+  {
+   "description": "Coverage type for health policy",
+   "fieldname": "coverage_type",
+   "fieldtype": "Select",
+   "label": "Coverage Type",
+   "options": "1 YEAR\n2 YEAR\n3 YEAR\n4 YEAR\n5 YEAR"
   },
   {
    "description": "SAIBA(Insured/Proposer Name)",
@@ -179,20 +189,6 @@
    "label": "Receive Date"
   },
   {
-   "default": "Recd. In Soft Copy",
-   "description": "Format in which policy was received",
-   "fieldname": "policy_receive_format",
-   "fieldtype": "Select",
-   "label": "Policy Receive Format",
-   "options": "Recd. In Hard Copy\nRecd. In Soft Copy"
-  },
-  {
-   "fieldname": "portability",
-   "fieldtype": "Select",
-   "label": "Portability",
-   "options": "Yes\nNo"
-  },
-  {
    "fieldname": "policy_dates_section",
    "fieldtype": "Section Break",
    "label": "Policy Details"
@@ -204,10 +200,11 @@
    "length": 150
   },
   {
+   "default": "Yes",
    "fieldname": "is_renewable",
-   "fieldtype": "Data",
-   "label": "IsRenewable",
-   "length": 20
+   "fieldtype": "Select",
+   "label": "Is Renewable",
+   "options": "Yes\nNo"
   },
   {
    "fieldname": "prev_policy",
@@ -265,20 +262,79 @@
    "label": "Old Control Number"
   },
   {
-   "description": "Business booking date",
-   "fieldname": "bus_book_date",
-   "fieldtype": "Date",
-   "label": "Bus. Book Date"
-  },
-  {
    "description": "Additional remarks or notes about the policy",
    "fieldname": "policy_enquiry_remarks",
    "fieldtype": "Long Text",
    "label": "Policy/Enquiry Remarks"
   },
   {
+   "description": "SAIBA(Policy Type)",
+   "fieldname": "policy_type",
+   "fieldtype": "Select",
+   "label": "Policy Type",
+   "options": "CANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
+  },
+  {
+   "fieldname": "portability",
+   "fieldtype": "Select",
+   "label": "Portability",
+   "options": "Yes\nNo"
+  },
+  {
+   "description": "SAIBA(Customer Code)",
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Customer Code",
+   "length": 50
+  },
+  {
    "fieldname": "column_break_business_info",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code"
+  },
+  {
+   "fieldname": "biz_type",
+   "fieldtype": "Data",
+   "label": "Biz Type"
+  },
+  {
+   "fieldname": "customer_vertical",
+   "fieldtype": "Data",
+   "label": "Customer Vertical"
+  },
+  {
+   "fieldname": "customer_pan",
+   "fieldtype": "Data",
+   "label": "Customer PAN"
+  },
+  {
+   "fieldname": "customer_gst",
+   "fieldtype": "Data",
+   "label": "Customer GST"
+  },
+  {
+   "fieldname": "rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code"
+  },
+  {
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code"
+  },
+  {
+   "fieldname": "tc_code",
+   "fieldtype": "Data",
+   "label": "TC Code"
+  },
+  {
+   "fieldname": "ref_code",
+   "fieldtype": "Data",
+   "label": "Ref Code"
   },
   {
    "description": "POS/MISP/Reference code",
@@ -347,21 +403,6 @@
    "length": 20
   },
   {
-   "default": "Health",
-   "description": "Department handling this policy",
-   "fieldname": "department",
-   "fieldtype": "Select",
-   "label": "Department",
-   "options": "Health\nMotor"
-  },
-  {
-   "description": "Coverage type for health policy",
-   "fieldname": "coverage_type",
-   "fieldtype": "Select",
-   "label": "Coverage Type",
-   "options": "1 YEAR\n2 YEAR\n3 YEAR\n4 YEAR\n5 YEAR"
-  },
-  {
    "description": "SAIBA(Policy Vertical)",
    "fieldname": "policy_vertical",
    "fieldtype": "Select",
@@ -372,13 +413,6 @@
    "fieldname": "customer_info_section",
    "fieldtype": "Section Break",
    "label": "Customer Information"
-  },
-  {
-   "description": "SAIBA(Customer Code)",
-   "fieldname": "customer_code",
-   "fieldtype": "Data",
-   "label": "Customer Code",
-   "length": 50
   },
   {
    "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
@@ -467,38 +501,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "payment_mode",
-   "fieldtype": "Data",
-   "label": "Payment Mode"
-  },
-  {
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "length": 75
-  },
-  {
-   "fieldname": "payment_transaction_no",
-   "fieldtype": "Data",
-   "label": "Payment TransactionNo",
-   "length": 50
-  },
-  {
-   "description": "Date in DD-MM-YYYY format",
-   "fieldname": "dated",
-   "fieldtype": "Date",
-   "label": "Dated"
-  },
-  {
    "fieldname": "remarks",
    "fieldtype": "Long Text",
    "label": "Remarks"
-  },
-  {
-   "fieldname": "policy_status",
-   "fieldtype": "Data",
-   "label": "Policy Status",
-   "length": 50
   },
   {
    "fieldname": "internal_information_tab",
