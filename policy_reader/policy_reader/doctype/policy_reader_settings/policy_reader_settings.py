@@ -482,11 +482,28 @@ DO NOT group fields by categories. DO NOT create nested structures.
 REQUIRED FORMAT:
 {{
   "policy_no": "value",
-  "insured_name": "value", 
+  "insured_name": "value",
   "premium": "value",
   "sum_insured": "value",
   ...all fields in one flat structure
 }}
+
+INSURED PERSONS TABLE EXTRACTION:
+This policy may contain a table listing multiple insured members/dependents.
+Look for tables with headers like: Name, Relation, DOB, Gender, Sum Insured, Employee Code, Member Code, etc.
+
+For each row in the insured persons table:
+- Row 1 (usually Self/Proposer) maps to: insured_1_name, insured_1_relation, insured_1_dob, insured_1_gender, insured_1_sum_insured, insured_1_emp_code
+- Row 2 (usually Spouse) maps to: insured_2_name, insured_2_relation, insured_2_dob, insured_2_gender, insured_2_sum_insured, insured_2_emp_code
+- Row 3 maps to insured_3_*, Row 4 to insured_4_*, and so on up to Row 8 (insured_8_*)
+
+IMPORTANT FOR INSURED PERSONS:
+- Extract each insured person's data into the numbered fields based on their row position
+- The "Self" or "Proposer" is typically insured_1_*
+- Relations like "Spouse", "Son", "Daughter", "Father", "Mother" indicate family members
+- Dates of Birth should be in DD/MM/YYYY format
+- Gender: Use "Male", "Female", or "Other"
+- Relation: Use "Self", "Spouse", "Wife", "Husband", "Son", "Daughter", "Father", "Mother", or "Other"
 
 Document: {extracted_text[:truncation_limit]}
 

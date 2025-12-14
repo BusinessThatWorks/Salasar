@@ -291,7 +291,7 @@
    "fieldname": "insured_1_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_1_emp_code",
@@ -332,7 +332,7 @@
    "fieldname": "insured_2_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_2_emp_code",
@@ -373,7 +373,7 @@
    "fieldname": "insured_3_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_3_emp_code",
@@ -414,7 +414,7 @@
    "fieldname": "insured_4_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_4_emp_code",
@@ -455,7 +455,7 @@
    "fieldname": "insured_5_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_5_emp_code",
@@ -496,7 +496,7 @@
    "fieldname": "insured_6_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_6_emp_code",
@@ -537,7 +537,7 @@
    "fieldname": "insured_7_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_7_emp_code",
@@ -578,7 +578,7 @@
    "fieldname": "insured_8_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_8_emp_code",
@@ -639,7 +639,7 @@
    "options": "Yes\nNo"
   },
   {
-   "default": "Yes",
+   "default": "No",
    "fieldname": "is_renewable",
    "fieldtype": "Select",
    "label": "Is Renewable",

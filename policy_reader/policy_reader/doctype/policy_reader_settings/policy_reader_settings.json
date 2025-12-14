@@ -23,7 +23,10 @@
   "refresh_extraction_prompts",
   "background_job_settings_section",
   "timeout",
-  "queue_type"
+  "queue_type",
+  "renewable_validation_section",
+  "renewable_ocn_handling",
+  "default_old_control_number"
  ],
  "fields": [
   {
@@ -134,6 +137,27 @@
    "fieldtype": "Select",
    "label": "Queue Type",
    "options": "short\ndefault\nlong"
+  },
+  {
+   "fieldname": "renewable_validation_section",
+   "fieldtype": "Section Break",
+   "label": "Renewable Policy Validation"
+  },
+  {
+   "default": "Block Creation",
+   "description": "How to handle renewable policies without an Old Control Number",
+   "fieldname": "renewable_ocn_handling",
+   "fieldtype": "Select",
+   "label": "Missing Old Control Number Handling",
+   "options": "Block Creation\nUse Default Value"
+  },
+  {
+   "default": "DEF_CN_1",
+   "depends_on": "eval:doc.renewable_ocn_handling=='Use Default Value'",
+   "description": "Default value to use when Old Control Number is missing for renewable policies",
+   "fieldname": "default_old_control_number",
+   "fieldtype": "Data",
+   "label": "Default Old Control Number"
   }
  ],
  "grid_page_length": 50,

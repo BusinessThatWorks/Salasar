@@ -39,7 +39,29 @@ EXTRACTION RULES:
 - Return ONLY valid JSON, no explanations or markdown
 
 RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
-                
+
+                # Add health-specific insured persons extraction instructions
+                if policy_type.lower() == "health":
+                    prompt += """
+
+INSURED PERSONS TABLE EXTRACTION:
+This policy may contain a table listing multiple insured members/dependents.
+Look for tables with headers like: Name, Relation, DOB, Gender, Sum Insured, Employee Code, Member Code, etc.
+
+For each row in the insured persons table:
+- Row 1 (usually Self/Proposer) maps to: insured_1_name, insured_1_relation, insured_1_dob, insured_1_gender, insured_1_sum_insured, insured_1_emp_code
+- Row 2 (usually Spouse) maps to: insured_2_name, insured_2_relation, insured_2_dob, insured_2_gender, insured_2_sum_insured, insured_2_emp_code
+- Row 3 maps to insured_3_*, Row 4 to insured_4_*, and so on up to Row 8 (insured_8_*)
+
+IMPORTANT:
+- Extract each insured person's data into the numbered fields based on their row position
+- The "Self" or "Proposer" is typically insured_1_*
+- Relations like "Spouse", "Son", "Daughter", "Father", "Mother" indicate family members
+- Dates of Birth should be in DD/MM/YYYY format
+- Gender: Use "Male", "Female", or "Other"
+- Relation: Use "Self", "Spouse", "Wife", "Husband", "Son", "Daughter", "Father", "Mother", or "Other"
+"""
+
                 return prompt
             else:
                 # Fallback prompt if no mapping available
@@ -117,9 +139,31 @@ POLICY TEXT:
 {text_to_use}
 
 RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
-            
+
+            # Add health-specific insured persons extraction instructions
+            if ptype == "health":
+                prompt += """
+
+INSURED PERSONS TABLE EXTRACTION:
+This policy may contain a table listing multiple insured members/dependents.
+Look for tables with headers like: Name, Relation, DOB, Gender, Sum Insured, Employee Code, Member Code, etc.
+
+For each row in the insured persons table:
+- Row 1 (usually Self/Proposer) maps to: insured_1_name, insured_1_relation, insured_1_dob, insured_1_gender, insured_1_sum_insured, insured_1_emp_code
+- Row 2 (usually Spouse) maps to: insured_2_name, insured_2_relation, insured_2_dob, insured_2_gender, insured_2_sum_insured, insured_2_emp_code
+- Row 3 maps to insured_3_*, Row 4 to insured_4_*, and so on up to Row 8 (insured_8_*)
+
+IMPORTANT:
+- Extract each insured person's data into the numbered fields based on their row position
+- The "Self" or "Proposer" is typically insured_1_*
+- Relations like "Spouse", "Son", "Daughter", "Father", "Mother" indicate family members
+- Dates of Birth should be in DD/MM/YYYY format
+- Gender: Use "Male", "Female", or "Other"
+- Relation: Use "Self", "Spouse", "Wife", "Husband", "Son", "Daughter", "Father", "Mother", or "Other"
+"""
+
             return prompt
-            
+
         except Exception as e:
             frappe.log_error(f"Error building prompt from mapping: {str(e)}", frappe.get_traceback())
             return PromptService._build_fallback_prompt(ptype, extracted_text)
@@ -153,6 +197,11 @@ RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS
             return f"""Extract health insurance policy information as FLAT JSON:
 PolicyNumber, InsuredName, PolicyStartDate, PolicyExpiryDate, SumInsured, Premium, GST, NCB
 
+Also extract insured persons from tables (up to 8 members):
+insured_1_name, insured_1_relation, insured_1_dob, insured_1_gender, insured_1_sum_insured, insured_1_emp_code
+insured_2_name, insured_2_relation, insured_2_dob, insured_2_gender, insured_2_sum_insured, insured_2_emp_code
+(continue for insured_3 through insured_8)
+
 EXTRACTION RULES:
 - Dates: DD/MM/YYYY format only
 - Currency/Amounts: Extract exact numeric value including decimals, remove currency symbols and commas only
@@ -160,6 +209,14 @@ EXTRACTION RULES:
 - Numbers: Extract as strings unless specified otherwise
 - If a field is not found, use null
 - Return ONLY valid JSON, no explanations or markdown
+
+INSURED PERSONS TABLE EXTRACTION:
+Look for tables with member/dependent details. Map each row by position:
+- Row 1 (Self/Proposer) -> insured_1_*
+- Row 2 (Spouse) -> insured_2_*
+- Row 3+ -> insured_3_* through insured_8_*
+- Gender: Use "Male", "Female", or "Other"
+- Relation: Use "Self", "Spouse", "Wife", "Husband", "Son", "Daughter", "Father", "Mother", or "Other"
 
 POLICY TEXT:
 {extracted_text[:truncation_limit]}

@@ -39,7 +39,14 @@ class MotorPolicy(Document):
 	def validate_renewable_policy(self):
 		"""Validate that renewable policies have Old Control Number"""
 		if self.is_renewable == "Yes" and not self.old_control_number:
-			frappe.throw("Old Control Number is required when policy is marked as Renewable")
+			settings = frappe.get_single("Policy Reader Settings")
+			handling = getattr(settings, 'renewable_ocn_handling', 'Block Creation')
+
+			if handling == "Use Default Value":
+				default_ocn = getattr(settings, 'default_old_control_number', 'DEF_CN_1') or 'DEF_CN_1'
+				self.old_control_number = default_ocn
+			else:
+				frappe.throw("Old Control Number is required when policy is marked as Renewable")
 
 	def _populate_rm_csc_ref(self):
 		"""Auto-set RM/CSC/REF to current user's Insurance Employee if not already set"""
