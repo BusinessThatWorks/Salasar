@@ -13,6 +13,7 @@
   "policy_information_section",
   "policy_no",
   "department",
+  "policy_type",
   "coverage_type",
   "insured_proposer_name",
   "column_break_1",
@@ -34,7 +35,6 @@
   "business_information_section",
   "old_control_number",
   "policy_enquiry_remarks",
-  "policy_type",
   "portability",
   "customer_code",
   "column_break_business_info",
@@ -143,6 +143,13 @@
    "fieldtype": "Select",
    "label": "Department",
    "options": "Health\nMotor"
+  },
+  {
+   "description": "SAIBA(Policy Type)",
+   "fieldname": "policy_type",
+   "fieldtype": "Select",
+   "label": "Policy Type",
+   "options": "CANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
   },
   {
    "description": "Coverage type for health policy",
@@ -266,13 +273,6 @@
    "fieldname": "policy_enquiry_remarks",
    "fieldtype": "Long Text",
    "label": "Policy/Enquiry Remarks"
-  },
-  {
-   "description": "SAIBA(Policy Type)",
-   "fieldname": "policy_type",
-   "fieldtype": "Select",
-   "label": "Policy Type",
-   "options": "CANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
   },
   {
    "fieldname": "portability",
