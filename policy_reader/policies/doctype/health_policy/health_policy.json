@@ -25,11 +25,6 @@
   "plan_name",
   "prev_policy",
   "column_break_2",
-  "insured1name",
-  "insured1gender",
-  "insured1dob",
-  "insured1relation",
-  "additional_insured_persons",
   "business_information_tab",
   "business_information_section",
   "policy_enquiry_remarks",
@@ -63,6 +58,71 @@
   "customer_name",
   "customer_group",
   "policy_biz_type",
+  "insured_persons_tab",
+  "insured_1_section",
+  "insured_1_relation",
+  "insured_1_emp_code",
+  "insured_1_name",
+  "column_break_insured_1",
+  "insured_1_gender",
+  "insured_1_dob",
+  "insured_1_sum_insured",
+  "insured_2_section",
+  "insured_2_relation",
+  "insured_2_emp_code",
+  "insured_2_name",
+  "column_break_insured_2",
+  "insured_2_gender",
+  "insured_2_dob",
+  "insured_2_sum_insured",
+  "insured_3_section",
+  "insured_3_relation",
+  "insured_3_emp_code",
+  "insured_3_name",
+  "column_break_insured_3",
+  "insured_3_gender",
+  "insured_3_dob",
+  "insured_3_sum_insured",
+  "insured_4_section",
+  "insured_4_relation",
+  "insured_4_emp_code",
+  "insured_4_name",
+  "column_break_insured_4",
+  "insured_4_gender",
+  "insured_4_dob",
+  "insured_4_sum_insured",
+  "insured_5_section",
+  "insured_5_relation",
+  "insured_5_emp_code",
+  "insured_5_name",
+  "column_break_insured_5",
+  "insured_5_gender",
+  "insured_5_dob",
+  "insured_5_sum_insured",
+  "insured_6_section",
+  "insured_6_relation",
+  "insured_6_emp_code",
+  "insured_6_name",
+  "column_break_insured_6",
+  "insured_6_gender",
+  "insured_6_dob",
+  "insured_6_sum_insured",
+  "insured_7_section",
+  "insured_7_relation",
+  "insured_7_emp_code",
+  "insured_7_name",
+  "column_break_insured_7",
+  "insured_7_gender",
+  "insured_7_dob",
+  "insured_7_sum_insured",
+  "insured_8_section",
+  "insured_8_relation",
+  "insured_8_emp_code",
+  "insured_8_name",
+  "column_break_insured_8",
+  "insured_8_gender",
+  "insured_8_dob",
+  "insured_8_sum_insured",
   "financial_details_tab",
   "financial_details_section",
   "sum_insured",
@@ -218,33 +278,337 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "insured1name",
+   "fieldname": "insured_persons_tab",
+   "fieldtype": "Tab Break",
+   "label": "Insured Persons"
+  },
+  {
+   "fieldname": "insured_1_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 1"
+  },
+  {
+   "fieldname": "insured_1_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_1_emp_code",
    "fieldtype": "Data",
-   "label": "INSURED1NAME",
-   "length": 200
+   "label": "Emp Code/Family Code"
   },
   {
-   "fieldname": "insured1gender",
+   "fieldname": "insured_1_name",
    "fieldtype": "Data",
-   "label": "INSURED1GENDER",
-   "length": 20
+   "label": "Name"
   },
   {
-   "fieldname": "insured1dob",
-   "fieldtype": "Datetime",
-   "label": "INSURED1DOB"
+   "fieldname": "column_break_insured_1",
+   "fieldtype": "Column Break"
   },
   {
-   "fieldname": "insured1relation",
+   "fieldname": "insured_1_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_1_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_1_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_2_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 2"
+  },
+  {
+   "fieldname": "insured_2_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_2_emp_code",
    "fieldtype": "Data",
-   "label": "INSURED1RELATION",
-   "length": 50
+   "label": "Emp Code/Family Code"
   },
   {
-   "description": "Add details of additional insured persons (e.g., Insured 2 - Name, Gender, DOB, Relation)",
-   "fieldname": "additional_insured_persons",
-   "fieldtype": "Text",
-   "label": "Additional Insured Persons"
+   "fieldname": "insured_2_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_2_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_2_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_2_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_3_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 3"
+  },
+  {
+   "fieldname": "insured_3_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_3_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_3_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_3_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_3_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_3_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_4_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 4"
+  },
+  {
+   "fieldname": "insured_4_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_4_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_4_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_4_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_4_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_4_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_5_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 5"
+  },
+  {
+   "fieldname": "insured_5_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_5_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_5_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_5_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_5_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_5_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_6_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 6"
+  },
+  {
+   "fieldname": "insured_6_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_6_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_6_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_6_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_6_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_6_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_7_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 7"
+  },
+  {
+   "fieldname": "insured_7_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_7_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_7_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_7_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_7_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_7_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_8_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 8"
+  },
+  {
+   "fieldname": "insured_8_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_8_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_8_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_8_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_8_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_8_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
   },
   {
    "fieldname": "business_information_tab",

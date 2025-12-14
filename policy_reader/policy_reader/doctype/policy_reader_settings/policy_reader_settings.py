@@ -159,11 +159,69 @@ class PolicyReaderSettings(Document):
 				"is_renewable": ["IsRenewable", "Is Renewable", "Renewable", "is_renewable"],
 				"prev_policy": ["PrevPolicy", "Previous Policy", "Prev Policy", "prev_policy"],
 				
-				# Insured Person Details
-				"insured1name": ["INSURED1NAME", "Insured Name", "Insured 1 Name", "Insured1Name", "insured1name"],
-				"insured1gender": ["INSURED1GENDER", "Insured Gender", "Insured 1 Gender", "Gender", "insured1gender"],
-				"insured1dob": ["INSURED1DOB", "Insured DOB", "Insured 1 DOB", "Date of Birth", "DOB", "insured1dob"],
-				"insured1relation": ["INSURED1RELATION", "Insured Relation", "Insured 1 Relation", "Relationship", "Relation", "insured1relation"],
+				# Insured Person 1
+				"insured_1_relation": ["INSURED1RELATION", "Insured1Relation", "Insured 1 Relation", "insured_1_relation", "insured1relation"],
+				"insured_1_emp_code": ["INSURED1EMPCODE", "Insured1EmpCode", "INSURED1FAMILYCODE", "Insured1FamilyCode", "insured_1_emp_code", "insured1empcode"],
+				"insured_1_name": ["INSURED1NAME", "Insured1Name", "Insured 1 Name", "insured_1_name", "insured1name"],
+				"insured_1_gender": ["INSURED1GENDER", "Insured1Gender", "Insured 1 Gender", "insured_1_gender", "insured1gender"],
+				"insured_1_dob": ["INSURED1DOB", "Insured1DOB", "Insured 1 DOB", "insured_1_dob", "insured1dob"],
+				"insured_1_sum_insured": ["INSURED1SUMINSURED", "Insured1SumInsured", "Insured 1 Sum Insured", "insured_1_sum_insured", "insured1suminsured"],
+
+				# Insured Person 2
+				"insured_2_relation": ["INSURED2RELATION", "Insured2Relation", "Insured 2 Relation", "insured_2_relation", "insured2relation"],
+				"insured_2_emp_code": ["INSURED2EMPCODE", "Insured2EmpCode", "INSURED2FAMILYCODE", "Insured2FamilyCode", "insured_2_emp_code", "insured2empcode"],
+				"insured_2_name": ["INSURED2NAME", "Insured2Name", "Insured 2 Name", "insured_2_name", "insured2name"],
+				"insured_2_gender": ["INSURED2GENDER", "Insured2Gender", "Insured 2 Gender", "insured_2_gender", "insured2gender"],
+				"insured_2_dob": ["INSURED2DOB", "Insured2DOB", "Insured 2 DOB", "insured_2_dob", "insured2dob"],
+				"insured_2_sum_insured": ["INSURED2SUMINSURED", "Insured2SumInsured", "Insured 2 Sum Insured", "insured_2_sum_insured", "insured2suminsured"],
+
+				# Insured Person 3
+				"insured_3_relation": ["INSURED3RELATION", "Insured3Relation", "Insured 3 Relation", "insured_3_relation", "insured3relation"],
+				"insured_3_emp_code": ["INSURED3EMPCODE", "Insured3EmpCode", "INSURED3FAMILYCODE", "Insured3FamilyCode", "insured_3_emp_code", "insured3empcode"],
+				"insured_3_name": ["INSURED3NAME", "Insured3Name", "Insured 3 Name", "insured_3_name", "insured3name"],
+				"insured_3_gender": ["INSURED3GENDER", "Insured3Gender", "Insured 3 Gender", "insured_3_gender", "insured3gender"],
+				"insured_3_dob": ["INSURED3DOB", "Insured3DOB", "Insured 3 DOB", "insured_3_dob", "insured3dob"],
+				"insured_3_sum_insured": ["INSURED3SUMINSURED", "Insured3SumInsured", "Insured 3 Sum Insured", "insured_3_sum_insured", "insured3suminsured"],
+
+				# Insured Person 4
+				"insured_4_relation": ["INSURED4RELATION", "Insured4Relation", "Insured 4 Relation", "insured_4_relation", "insured4relation"],
+				"insured_4_emp_code": ["INSURED4EMPCODE", "Insured4EmpCode", "INSURED4FAMILYCODE", "Insured4FamilyCode", "insured_4_emp_code", "insured4empcode"],
+				"insured_4_name": ["INSURED4NAME", "Insured4Name", "Insured 4 Name", "insured_4_name", "insured4name"],
+				"insured_4_gender": ["INSURED4GENDER", "Insured4Gender", "Insured 4 Gender", "insured_4_gender", "insured4gender"],
+				"insured_4_dob": ["INSURED4DOB", "Insured4DOB", "Insured 4 DOB", "insured_4_dob", "insured4dob"],
+				"insured_4_sum_insured": ["INSURED4SUMINSURED", "Insured4SumInsured", "Insured 4 Sum Insured", "insured_4_sum_insured", "insured4suminsured"],
+
+				# Insured Person 5
+				"insured_5_relation": ["INSURED5RELATION", "Insured5Relation", "Insured 5 Relation", "insured_5_relation", "insured5relation"],
+				"insured_5_emp_code": ["INSURED5EMPCODE", "Insured5EmpCode", "INSURED5FAMILYCODE", "Insured5FamilyCode", "insured_5_emp_code", "insured5empcode"],
+				"insured_5_name": ["INSURED5NAME", "Insured5Name", "Insured 5 Name", "insured_5_name", "insured5name"],
+				"insured_5_gender": ["INSURED5GENDER", "Insured5Gender", "Insured 5 Gender", "insured_5_gender", "insured5gender"],
+				"insured_5_dob": ["INSURED5DOB", "Insured5DOB", "Insured 5 DOB", "insured_5_dob", "insured5dob"],
+				"insured_5_sum_insured": ["INSURED5SUMINSURED", "Insured5SumInsured", "Insured 5 Sum Insured", "insured_5_sum_insured", "insured5suminsured"],
+
+				# Insured Person 6
+				"insured_6_relation": ["INSURED6RELATION", "Insured6Relation", "Insured 6 Relation", "insured_6_relation", "insured6relation"],
+				"insured_6_emp_code": ["INSURED6EMPCODE", "Insured6EmpCode", "INSURED6FAMILYCODE", "Insured6FamilyCode", "insured_6_emp_code", "insured6empcode"],
+				"insured_6_name": ["INSURED6NAME", "Insured6Name", "Insured 6 Name", "insured_6_name", "insured6name"],
+				"insured_6_gender": ["INSURED6GENDER", "Insured6Gender", "Insured 6 Gender", "insured_6_gender", "insured6gender"],
+				"insured_6_dob": ["INSURED6DOB", "Insured6DOB", "Insured 6 DOB", "insured_6_dob", "insured6dob"],
+				"insured_6_sum_insured": ["INSURED6SUMINSURED", "Insured6SumInsured", "Insured 6 Sum Insured", "insured_6_sum_insured", "insured6suminsured"],
+
+				# Insured Person 7
+				"insured_7_relation": ["INSURED7RELATION", "Insured7Relation", "Insured 7 Relation", "insured_7_relation", "insured7relation"],
+				"insured_7_emp_code": ["INSURED7EMPCODE", "Insured7EmpCode", "INSURED7FAMILYCODE", "Insured7FamilyCode", "insured_7_emp_code", "insured7empcode"],
+				"insured_7_name": ["INSURED7NAME", "Insured7Name", "Insured 7 Name", "insured_7_name", "insured7name"],
+				"insured_7_gender": ["INSURED7GENDER", "Insured7Gender", "Insured 7 Gender", "insured_7_gender", "insured7gender"],
+				"insured_7_dob": ["INSURED7DOB", "Insured7DOB", "Insured 7 DOB", "insured_7_dob", "insured7dob"],
+				"insured_7_sum_insured": ["INSURED7SUMINSURED", "Insured7SumInsured", "Insured 7 Sum Insured", "insured_7_sum_insured", "insured7suminsured"],
+
+				# Insured Person 8
+				"insured_8_relation": ["INSURED8RELATION", "Insured8Relation", "Insured 8 Relation", "insured_8_relation", "insured8relation"],
+				"insured_8_emp_code": ["INSURED8EMPCODE", "Insured8EmpCode", "INSURED8FAMILYCODE", "Insured8FamilyCode", "insured_8_emp_code", "insured8empcode"],
+				"insured_8_name": ["INSURED8NAME", "Insured8Name", "Insured 8 Name", "insured_8_name", "insured8name"],
+				"insured_8_gender": ["INSURED8GENDER", "Insured8Gender", "Insured 8 Gender", "insured_8_gender", "insured8gender"],
+				"insured_8_dob": ["INSURED8DOB", "Insured8DOB", "Insured 8 DOB", "insured_8_dob", "insured8dob"],
+				"insured_8_sum_insured": ["INSURED8SUMINSURED", "Insured8SumInsured", "Insured 8 Sum Insured", "insured_8_sum_insured", "insured8suminsured"],
 				
 				# Financial Details
 				"sum_insured": ["Sum Insured", "SumInsured", "Insured Amount", "Coverage Amount", "sum_insured"],
