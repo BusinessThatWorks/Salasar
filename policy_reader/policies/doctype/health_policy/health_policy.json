@@ -23,7 +23,6 @@
   "receive_date",
   "policy_dates_section",
   "plan_name",
-  "is_renewable",
   "prev_policy",
   "column_break_2",
   "insured1name",
@@ -33,20 +32,22 @@
   "additional_insured_persons",
   "business_information_tab",
   "business_information_section",
-  "old_control_number",
   "policy_enquiry_remarks",
-  "portability",
-  "customer_code",
-  "column_break_business_info",
   "branch_code",
   "biz_type",
+  "old_control_number",
+  "customer_code",
   "customer_vertical",
   "customer_pan",
   "customer_gst",
+  "column_break_business_info",
+  "policy_type_biz",
   "rm_code",
   "csc_code",
   "tc_code",
   "ref_code",
+  "portability",
+  "is_renewable",
   "pos_misp_ref",
   "customer_insurer_info_tab",
   "insurer_info_section",
@@ -207,13 +208,6 @@
    "length": 150
   },
   {
-   "default": "Yes",
-   "fieldname": "is_renewable",
-   "fieldtype": "Select",
-   "label": "Is Renewable",
-   "options": "Yes\nNo"
-  },
-  {
    "fieldname": "prev_policy",
    "fieldtype": "Data",
    "label": "PrevPolicy",
@@ -281,6 +275,13 @@
    "options": "Yes\nNo"
   },
   {
+   "default": "Yes",
+   "fieldname": "is_renewable",
+   "fieldtype": "Select",
+   "label": "Is Renewable",
+   "options": "Yes\nNo"
+  },
+  {
    "description": "SAIBA(Customer Code)",
    "fieldname": "customer_code",
    "fieldtype": "Data",
@@ -290,6 +291,11 @@
   {
    "fieldname": "column_break_business_info",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "policy_type_biz",
+   "fieldtype": "Data",
+   "label": "Policy Type"
   },
   {
    "fieldname": "branch_code",
