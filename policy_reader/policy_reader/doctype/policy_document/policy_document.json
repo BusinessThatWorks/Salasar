@@ -82,7 +82,7 @@
   {
    "fieldname": "document_info",
    "fieldtype": "Tab Break",
-   "label": "Document Information",
+   "label": "Policy Information",
    "options": "fa fa-file-text-o"
   },
   {
@@ -512,7 +512,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-24 11:26:18.910243",
+ "modified": "2025-12-16 16:20:26.174969",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",
