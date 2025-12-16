@@ -327,7 +327,8 @@
    "fieldname": "checklist_department",
    "fieldtype": "Select",
    "label": "Department",
-   "options": "Motor\nHealth"
+   "options": "Motor\nHealth",
+   "read_only": 1
   },
   {
    "description": "Options change based on Department selection",
@@ -512,7 +513,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-16 16:20:26.174969",
+ "modified": "2025-12-16 16:24:27.905696",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

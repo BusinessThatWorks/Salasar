@@ -1,11 +1,19 @@
-# Byte-compiled / optimized / DLL files
+##################################
+# Python bytecode / temp files
+##################################
 __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
 *.py~
+*.log
+*.pid
+*.retry
+*.bak
 
+##################################
 # Distribution / packaging
+##################################
 .Python
 develop-eggs/
 dist/
@@ -23,8 +31,11 @@ wheels/
 tags
 MANIFEST
 
+##################################
 # Environments
+##################################
 .env
+.env.*
 .venv
 env/
 venv/
@@ -32,24 +43,96 @@ ENV/
 env.bak/
 venv.bak/
 
+##################################
 # Dependency directories
+##################################
 node_modules/
 jspm_packages/
+.yarn/
+.pnpm-store/
 
-# IDEs and editors
+##################################
+# IDEs / editors / OS
+##################################
 .vscode/
 .vs/
 .idea/
 .kdev4/
 *.kdev4
-*.DS_Store
+.DS_Store
 *.swp
+*.swo
 *.comp.js
 .wnf-lang-status
 *debug.log
 
+##################################
 # Helix Editor
+##################################
 .helix/
 
+##################################
 # Aider AI Chat
+##################################
 .aider*
+
+##################################
+# Bench / Frappe runtime
+##################################
+logs/
+config/
+redis.conf
+nginx.conf
+supervisor.conf
+Procfile
+
+##################################
+# 🚫 SITES — NEVER COMMIT SITE DATA
+##################################
+sites/*/
+
+# Explicit allowlist
+!sites/apps.txt
+!sites/common_site_config.json
+!sites/assets/
+!sites/assets/**
+
+##################################
+# Site internals (belt + suspenders)
+##################################
+sites/**/private/
+sites/**/private/backups/
+sites/**/private/files/
+sites/**/public/files/
+sites/**/backups/
+
+##################################
+# Sensitive site state & config
+##################################
+sites/**/site_config.json
+sites/**/touched_tables.json
+sites/**/locks/
+sites/**/scheduler.log
+
+##################################
+# Database dumps / backups
+##################################
+*.sql
+*.sql.gz
+*.dump
+*.backup
+*.json.bak
+
+##################################
+# Uploaded documents & media
+##################################
+*.pdf
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.doc
+*.docx
+*.xls
+*.xlsx
