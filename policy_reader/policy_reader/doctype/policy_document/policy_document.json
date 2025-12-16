@@ -37,6 +37,27 @@
   "insurer_city",
   "insurer_branch",
   "insurer_branch_code",
+  "checklist_section",
+  "checklist_branch_code",
+  "checklist_biz_type",
+  "checklist_old_control_number",
+  "column_break_checklist_1",
+  "checklist_customer_vertical",
+  "checklist_customer_pan",
+  "checklist_customer_gst",
+  "checklist_section_2",
+  "checklist_department",
+  "checklist_policy_type",
+  "checklist_category",
+  "column_break_checklist_2",
+  "checklist_coverage_type",
+  "checklist_rm_code",
+  "checklist_csc_code",
+  "checklist_section_3",
+  "checklist_tc_code",
+  "checklist_ref_code",
+  "column_break_checklist_3",
+  "checklist_portability",
   "documents_tab",
   "documents_section",
   "final_quote_renewal_notice",
@@ -175,7 +196,7 @@
   {
    "fieldname": "customer_insurer_info_tab",
    "fieldtype": "Tab Break",
-   "label": "Customer & Insurer Information"
+   "label": "Checklist"
   },
   {
    "fieldname": "customer_info_section",
@@ -249,6 +270,131 @@
    "fieldtype": "Data",
    "label": "Insurer Branch Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "checklist_section",
+   "fieldtype": "Section Break",
+   "label": "Checklist Fields"
+  },
+  {
+   "description": "Auto-populated from logged-in user's Insurance Employee record",
+   "fieldname": "checklist_branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checklist_biz_type",
+   "fieldtype": "Select",
+   "label": "Biz Type",
+   "options": "NEW\nRENEWAL"
+  },
+  {
+   "fieldname": "checklist_old_control_number",
+   "fieldtype": "Data",
+   "label": "Old Control Number"
+  },
+  {
+   "fieldname": "column_break_checklist_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "checklist_customer_vertical",
+   "fieldtype": "Select",
+   "label": "Customer Vertical",
+   "options": "Individual\nCorporate Individual\nCorporate Fleet\nAccident & Health"
+  },
+  {
+   "fetch_from": "customer_code.customer_pan",
+   "fieldname": "checklist_customer_pan",
+   "fieldtype": "Data",
+   "label": "Customer PAN",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_code.customer_gst",
+   "fieldname": "checklist_customer_gst",
+   "fieldtype": "Data",
+   "label": "Customer GST",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checklist_section_2",
+   "fieldtype": "Section Break",
+   "label": "Policy Classification"
+  },
+  {
+   "fieldname": "checklist_department",
+   "fieldtype": "Select",
+   "label": "Department",
+   "options": "Motor\nHealth"
+  },
+  {
+   "description": "Options change based on Department selection",
+   "fieldname": "checklist_policy_type",
+   "fieldtype": "Select",
+   "label": "Policy Type",
+   "options": "MOTOR COMMERCIAL VEHICLE\nMOTOR PRIVATE CAR\nMOTOR TWO WHEELER\nMotor Vehicle Liability\nCANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
+  },
+  {
+   "depends_on": "eval:doc.checklist_policy_type=='MOTOR COMMERCIAL VEHICLE'",
+   "description": "Only applicable for Motor Commercial Vehicle",
+   "fieldname": "checklist_category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "\nGCV\nPCV\nMISC"
+  },
+  {
+   "fieldname": "column_break_checklist_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Options change based on Department selection",
+   "fieldname": "checklist_coverage_type",
+   "fieldtype": "Select",
+   "label": "Coverage Type",
+   "options": "NA (1+1) Years\n(1+3) Years\n(1+5) Years\nSTANDALONE TP 1Yr Policy (0+1) Year\nSTANDALONE OD 1Yr Policy (1+0) Year\n(3+3) Years\n(5+5) Years\n1 YEAR\n2 YEAR\n3 YEAR\n4 YEAR\n5 YEAR"
+  },
+  {
+   "description": "Auto-populated from logged-in user's Insurance Employee record",
+   "fieldname": "checklist_rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code",
+   "read_only": 1
+  },
+  {
+   "description": "Auto-populated from logged-in user's Insurance Employee record",
+   "fieldname": "checklist_csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checklist_section_3",
+   "fieldtype": "Section Break",
+   "label": "Additional Codes"
+  },
+  {
+   "default": "0",
+   "fieldname": "checklist_tc_code",
+   "fieldtype": "Data",
+   "label": "TC Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "checklist_ref_code",
+   "fieldtype": "Data",
+   "label": "Ref Code"
+  },
+  {
+   "fieldname": "column_break_checklist_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "checklist_portability",
+   "fieldtype": "Select",
+   "label": "Portability",
+   "options": "Yes\nNo"
   },
   {
    "fieldname": "documents_tab",

@@ -5,9 +5,15 @@ frappe.ui.form.on("Policy Document", {
 	onload: function (frm) {
 		// Populate processor info on form load
 		frm.trigger("populate_processor_info");
+		// Sync checklist_department with policy_type if set
+		frm.trigger("sync_department_with_policy_type");
+		// Set up checklist dropdown options based on current department
+		frm.trigger("setup_checklist_dropdowns");
 	},
 
 	refresh: function (frm) {
+		// Set up checklist dropdown options on refresh
+		frm.trigger("setup_checklist_dropdowns");
 		// Cleanup and setup
 		$(".processing-indicator").remove();
 		frm.trigger("setup_realtime_listener");
@@ -63,7 +69,16 @@ frappe.ui.form.on("Policy Document", {
 	},
 
 	policy_type: function (frm) {
+		// Sync checklist_department with policy_type
+		frm.trigger("sync_department_with_policy_type");
 		frm.refresh();
+	},
+
+	sync_department_with_policy_type: function (frm) {
+		// Auto-set checklist_department to match policy_type
+		if (frm.doc.policy_type) {
+			frm.set_value("checklist_department", frm.doc.policy_type);
+		}
 	},
 
 	setup_realtime_listener: function (frm) {
@@ -409,6 +424,83 @@ frappe.ui.form.on("Policy Document", {
 		window.open(`/app/policy-file-view?policy_document=${frm.doc.name}`, "_blank");
 	},
 
+	// Checklist dropdown handlers
+	checklist_department: function (frm) {
+		// Update Policy Type and Coverage Type options based on Department selection
+		frm.trigger("setup_checklist_dropdowns");
+		// Clear current selections when department changes
+		frm.set_value("checklist_policy_type", "");
+		frm.set_value("checklist_coverage_type", "");
+		frm.set_value("checklist_category", "");
+	},
+
+	checklist_policy_type: function (frm) {
+		// Category field visibility is handled by depends_on in DocType JSON
+		// Clear category if policy type is not Motor Commercial Vehicle
+		if (frm.doc.checklist_policy_type !== "MOTOR COMMERCIAL VEHICLE") {
+			frm.set_value("checklist_category", "");
+		}
+	},
+
+	setup_checklist_dropdowns: function (frm) {
+		// Define options for Motor department
+		const motor_policy_types = [
+			"MOTOR COMMERCIAL VEHICLE",
+			"MOTOR PRIVATE CAR",
+			"MOTOR TWO WHEELER",
+			"Motor Vehicle Liability"
+		];
+
+		const motor_coverage_types = [
+			"NA (1+1) Years",
+			"(1+3) Years",
+			"(1+5) Years",
+			"STANDALONE TP 1Yr Policy (0+1) Year",
+			"STANDALONE OD 1Yr Policy (1+0) Year",
+			"(3+3) Years",
+			"(5+5) Years"
+		];
+
+		// Define options for Health department
+		const health_policy_types = [
+			"CANCER INSURANCE",
+			"CRITICAL ILLNESS",
+			"FAMILY FLOATER MEDICLAIM",
+			"HOSPITAL CASH",
+			"INDIVIDUAL MEDICLAIM",
+			"PERSONAL ACCIDENT",
+			"SUPER TOP UP"
+		];
+
+		const health_coverage_types = [
+			"1 YEAR",
+			"2 YEAR",
+			"3 YEAR",
+			"4 YEAR",
+			"5 YEAR"
+		];
+
+		// Set options based on department selection
+		const department = frm.doc.checklist_department;
+
+		if (department === "Motor") {
+			frm.set_df_property("checklist_policy_type", "options", motor_policy_types.join("\n"));
+			frm.set_df_property("checklist_coverage_type", "options", motor_coverage_types.join("\n"));
+		} else if (department === "Health") {
+			frm.set_df_property("checklist_policy_type", "options", health_policy_types.join("\n"));
+			frm.set_df_property("checklist_coverage_type", "options", health_coverage_types.join("\n"));
+		} else {
+			// If no department selected, show all options
+			const all_policy_types = [...motor_policy_types, ...health_policy_types];
+			const all_coverage_types = [...motor_coverage_types, ...health_coverage_types];
+			frm.set_df_property("checklist_policy_type", "options", all_policy_types.join("\n"));
+			frm.set_df_property("checklist_coverage_type", "options", all_coverage_types.join("\n"));
+		}
+
+		frm.refresh_field("checklist_policy_type");
+		frm.refresh_field("checklist_coverage_type");
+	},
+
 	populate_processor_info: function (frm) {
 		console.log("=== POPULATE PROCESSOR INFO DEBUG ===");
 		console.log("Current logged-in user:", frappe.session.user);
@@ -430,12 +522,24 @@ frappe.ui.form.on("Policy Document", {
 						console.log("Employee Full Name:", emp.employee_name);
 						console.log("Branch Name:", emp.branch_name);
 
+						// Populate processor info fields
 						frm.set_value("processor_employee_name", emp.employee_name);
 						frm.set_value("processor_employee_code", emp.employee_code);
 						frm.set_value("processor_employee_type", emp.employee_type);
 						frm.set_value("processor_branch_name", emp.branch_name);
 
-						console.log("Successfully populated processor fields");
+						// Populate checklist fields from Insurance Employee
+						if (emp.branch_code) {
+							frm.set_value("checklist_branch_code", emp.branch_code);
+						}
+						if (emp.rm_code) {
+							frm.set_value("checklist_rm_code", emp.rm_code);
+						}
+						if (emp.csc_code) {
+							frm.set_value("checklist_csc_code", emp.csc_code);
+						}
+
+						console.log("Successfully populated processor and checklist fields");
 					} else {
 						console.warn("No Insurance Employee found for user:", frappe.session.user);
 						console.log("Full response:", r.message);

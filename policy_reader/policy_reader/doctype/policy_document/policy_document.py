@@ -50,7 +50,7 @@ class PolicyDocument(Document):
         return "New Policy Document"
 
     def _populate_processor_info(self):
-        """Auto-populate processor information from logged-in user's Insurance Employee record"""
+        """Auto-populate processor information and checklist fields from logged-in user's Insurance Employee record"""
         try:
             # Skip if already populated or for system users
             current_user = frappe.session.user
@@ -61,20 +61,27 @@ class PolicyDocument(Document):
             if self.processor_employee_code:
                 return
 
-            # Query Insurance Employee record for logged-in user
+            # Query Insurance Employee record for logged-in user (including checklist fields)
             employee = frappe.db.get_value(
                 "Insurance Employee",
                 {"user": current_user},
-                ["employee_code", "employee_type", "employee_name", "branch_name"],
+                ["employee_code", "employee_type", "employee_name", "branch_name", "branch_code", "rm_code", "csc_code"],
                 as_dict=True
             )
 
             if employee:
+                # Populate processor info fields
                 self.processor_employee_code = employee.get("employee_code")
                 self.processor_employee_type = employee.get("employee_type")
                 self.processor_employee_name = employee.get("employee_name")
                 self.processor_branch_name = employee.get("branch_name")
-                frappe.logger().info(f"Auto-populated processor info for Policy Document: {employee}")
+
+                # Populate checklist fields from Insurance Employee
+                self.checklist_branch_code = employee.get("branch_code")
+                self.checklist_rm_code = employee.get("rm_code")
+                self.checklist_csc_code = employee.get("csc_code")
+
+                frappe.logger().info(f"Auto-populated processor info and checklist fields for Policy Document: {employee}")
             else:
                 frappe.logger().info(f"No Insurance Employee record found for user {current_user}")
 
@@ -380,13 +387,13 @@ def get_current_user_employee_info():
             frappe.logger().info(f"Skipping for Guest user")
             return {"employee": None}
 
-        # Query Insurance Employee record
+        # Query Insurance Employee record (including checklist fields)
         frappe.logger().info(f"Querying Insurance Employee with user={current_user}")
 
         employee = frappe.db.get_value(
             "Insurance Employee",
             {"user": current_user},
-            ["employee_code", "employee_type", "employee_name", "branch_name"],
+            ["employee_code", "employee_type", "employee_name", "branch_name", "branch_code", "rm_code", "csc_code"],
             as_dict=True
         )
 

@@ -11,8 +11,11 @@
   "user",
   "branch",
   "branch_name",
+  "branch_code",
   "employee_type",
-  "employee_code"
+  "employee_code",
+  "rm_code",
+  "csc_code"
  ],
  "fields": [
   {
@@ -61,6 +64,25 @@
    "fieldtype": "Data",
    "label": "Branch Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "branch.branch_code",
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code",
+   "description": "Relationship Manager code (if employee type is RM)"
+  },
+  {
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code",
+   "description": "Customer Service Center code (if employee type is CSC)"
   }
  ],
  "grid_page_length": 50,
