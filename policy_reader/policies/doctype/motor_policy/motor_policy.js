@@ -5,6 +5,11 @@ frappe.ui.form.on("Motor Policy", {
 	refresh(frm) {
 		// Set type_of_vehicle based on policy_type on load
 		set_type_of_vehicle(frm);
+
+		// Add SAIBA sync button
+		if (!frm.doc.__islocal) {
+			add_saiba_sync_button(frm);
+		}
 	},
 
 	policy_type(frm) {
@@ -104,4 +109,90 @@ function populate_motor_policy_fields(frm) {
 			console.error('Error populating fields:', error);
 		}
 	});
+}
+
+function add_saiba_sync_button(frm) {
+	// Check if SAIBA sync is enabled in settings
+	frappe.db.get_single_value('Policy Reader Settings', 'saiba_enabled').then(enabled => {
+		if (!enabled) {
+			return;
+		}
+
+		// Add sync button
+		frm.add_custom_button(__('Sync to SAIBA'), function() {
+			sync_motor_policy_to_saiba(frm);
+		}, __('Actions'));
+
+		// Update button color based on sync status
+		update_saiba_button_indicator(frm);
+	});
+}
+
+function update_saiba_button_indicator(frm) {
+	// Add visual indicator based on sync status
+	const status = frm.doc.saiba_sync_status;
+	let indicator = '';
+
+	switch(status) {
+		case 'Synced':
+			indicator = 'green';
+			break;
+		case 'Failed':
+			indicator = 'red';
+			break;
+		case 'Pending':
+			indicator = 'orange';
+			break;
+		default:
+			indicator = 'gray';
+	}
+
+	// Update the page indicator
+	if (status && status !== 'Not Synced') {
+		frm.page.set_indicator(status, indicator);
+	}
+}
+
+function sync_motor_policy_to_saiba(frm) {
+	// Confirm before syncing
+	frappe.confirm(
+		__('Are you sure you want to sync this Motor Policy to SAIBA?'),
+		function() {
+			// Yes - proceed with sync
+			frappe.show_alert({
+				message: __('Syncing to SAIBA...'),
+				indicator: 'blue'
+			});
+
+			frappe.call({
+				method: 'policy_reader.policy_reader.services.saiba_sync_service.sync_motor_policy',
+				args: {
+					policy_name: frm.doc.name
+				},
+				callback: function(response) {
+					if (response.message && response.message.success) {
+						frappe.show_alert({
+							message: __('Successfully synced to SAIBA. Control Number: {0}', [response.message.control_number || 'N/A']),
+							indicator: 'green'
+						});
+						frm.reload_doc();
+					} else {
+						frappe.show_alert({
+							message: __('Sync failed: {0}', [response.message.error || 'Unknown error']),
+							indicator: 'red'
+						});
+						frm.reload_doc();
+					}
+				},
+				error: function(error) {
+					frappe.show_alert({
+						message: __('Error syncing to SAIBA. Please try again.'),
+						indicator: 'red'
+					});
+					console.error('SAIBA sync error:', error);
+					frm.reload_doc();
+				}
+			});
+		}
+	);
 }

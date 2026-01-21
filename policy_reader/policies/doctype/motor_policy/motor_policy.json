@@ -113,6 +113,14 @@
   "campaign_name",
   "policy_status_na",
   "mandate",
+  "saiba_sync_tab",
+  "saiba_sync_section",
+  "saiba_sync_status",
+  "saiba_sync_datetime",
+  "column_break_saiba_sync",
+  "saiba_control_number",
+  "saiba_sync_error",
+  "saiba_sync_response",
   "documents_tab",
   "documents_section",
   "final_quote_renewal_notice",
@@ -751,6 +759,61 @@
    "fieldtype": "Select",
    "label": "Mandate",
    "options": "Received\nPending"
+  },
+  {
+   "fieldname": "saiba_sync_tab",
+   "fieldtype": "Tab Break",
+   "label": "SAIBA Sync"
+  },
+  {
+   "fieldname": "saiba_sync_section",
+   "fieldtype": "Section Break",
+   "label": "Sync Status"
+  },
+  {
+   "default": "Not Synced",
+   "description": "Current sync status with SAIBA ERP",
+   "fieldname": "saiba_sync_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "SAIBA Sync Status",
+   "options": "Not Synced\nSynced\nFailed\nPending",
+   "read_only": 1
+  },
+  {
+   "description": "Last sync timestamp",
+   "fieldname": "saiba_sync_datetime",
+   "fieldtype": "Datetime",
+   "label": "Sync Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_saiba_sync",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Control number returned by SAIBA after successful sync",
+   "fieldname": "saiba_control_number",
+   "fieldtype": "Data",
+   "label": "SAIBA Control Number",
+   "length": 50,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.saiba_sync_status === 'Failed'",
+   "description": "Error message if sync failed",
+   "fieldname": "saiba_sync_error",
+   "fieldtype": "Long Text",
+   "label": "Sync Error",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.saiba_sync_status === 'Failed' || doc.saiba_sync_status === 'Synced'",
+   "description": "Full API request/response from SAIBA (for debugging)",
+   "fieldname": "saiba_sync_response",
+   "fieldtype": "JSON",
+   "label": "Sync Request/Response (Debug)",
+   "read_only": 1
   },
   {
    "fieldname": "documents_tab",

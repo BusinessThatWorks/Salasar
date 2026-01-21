@@ -159,7 +159,8 @@ scheduler_events = {
 # Data patches for migrations and updates
 
 patches = [
-	"policy_reader.patches.v1_0.migrate_motor_policy_schema"
+	"policy_reader.patches.v1_0.migrate_motor_policy_schema",
+	"policy_reader.patches.v1_0.add_saiba_sync_fields"
 ]
 
 # Overriding Methods
