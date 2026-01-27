@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-01-22 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "motor_section",
+  "motor_validation_rules",
+  "health_section",
+  "health_validation_rules"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "description": "Enable or disable the SAIBA validation feature",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable SAIBA Validation"
+  },
+  {
+   "fieldname": "motor_section",
+   "fieldtype": "Section Break",
+   "label": "Motor Policy Validation Rules"
+  },
+  {
+   "description": "Validation rules for Motor Policy before SAIBA sync",
+   "fieldname": "motor_validation_rules",
+   "fieldtype": "Table",
+   "label": "Motor Validation Rules",
+   "options": "SAIBA Validation Rule"
+  },
+  {
+   "fieldname": "health_section",
+   "fieldtype": "Section Break",
+   "label": "Health Policy Validation Rules"
+  },
+  {
+   "description": "Validation rules for Health Policy before SAIBA sync",
+   "fieldname": "health_validation_rules",
+   "fieldtype": "Table",
+   "label": "Health Validation Rules",
+   "options": "SAIBA Validation Rule"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-01-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "SAIBA Validation Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Policy Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -6,9 +6,13 @@ frappe.ui.form.on("Motor Policy", {
 		// Set type_of_vehicle based on policy_type on load
 		set_type_of_vehicle(frm);
 
-		// Add SAIBA sync button
+		// Add SAIBA buttons (sync + validation)
 		if (!frm.doc.__islocal) {
 			add_saiba_sync_button(frm);
+			// Add SAIBA validation button (uses shared function from saiba_validation.js)
+			if (typeof policy_reader !== 'undefined' && policy_reader.saiba) {
+				policy_reader.saiba.add_validate_button(frm, 'Motor');
+			}
 		}
 	},
 

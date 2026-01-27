@@ -19,9 +19,13 @@ frappe.ui.form.on("Health Policy", {
 			}, __('Actions'));
 		}
 
-		// Add SAIBA sync button
+		// Add SAIBA buttons (sync + validation)
 		if (!frm.doc.__islocal) {
 			add_saiba_sync_button_health(frm);
+			// Add SAIBA validation button (uses shared function from saiba_validation.js)
+			if (typeof policy_reader !== 'undefined' && policy_reader.saiba) {
+				policy_reader.saiba.add_validate_button(frm, 'Health');
+			}
 		}
 	}
 });
