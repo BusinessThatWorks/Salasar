@@ -308,11 +308,6 @@ class PolicyDocument(Document):
             return {}
     
     
-    
-    
-    
-    
-    
     @frappe.whitelist()
     def reset_processing_status(self):
         """Reset processing status for stuck documents using Frappe patterns"""

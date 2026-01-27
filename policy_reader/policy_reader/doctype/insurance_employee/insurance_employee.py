@@ -26,3 +26,4 @@ class InsuranceEmployee(Document):
 
 		if existing:
 			frappe.throw(f"User {self.user} is already linked to another Insurance Employee record: {existing}")
+
