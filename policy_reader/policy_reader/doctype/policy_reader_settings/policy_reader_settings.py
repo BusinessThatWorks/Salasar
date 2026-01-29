@@ -246,8 +246,9 @@ class PolicyReaderSettings(Document):
 			mapping[canonical_field] = canonical_field
 			for alias in aliases:
 				mapping[alias] = canonical_field
-		
+		print("mm",mapping)
 		return mapping
+	
 
 	def build_field_mapping_from_doctype(self, doctype_name):
 		"""Deprecated: Build field mapping from DocType definition.
