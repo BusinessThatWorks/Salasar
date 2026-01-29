@@ -35,16 +35,34 @@ class PolicyReaderSettings(Document):
 		"""Test API key connectivity (optional feature)"""
 		if not self.anthropic_api_key:
 			frappe.throw("Invalid input: please enter an API key to test")
-		
+
 		try:
 			# This is a basic test - in a real implementation you might want to make a test API call
-			frappe.msgprint("API key format appears valid. Test connection functionality can be implemented as needed.", 
+			frappe.msgprint("API key format appears valid. Test connection functionality can be implemented as needed.",
 							title="API Key Test", indicator="green")
 			return {"success": True, "message": "API key format valid"}
 		except Exception as e:
 			frappe.log_error(f"API connection test failed: {str(e)}", frappe.get_traceback())
 			frappe.throw("Unexpected error occurred while testing API connection. Please contact support.")
-	
+
+	@frappe.whitelist()
+	def test_saiba_connection(self):
+		"""Test SAIBA API connectivity"""
+		if not self.saiba_enabled:
+			return {"success": False, "error": "SAIBA integration is not enabled. Please enable it first."}
+
+		if not self.saiba_base_url or not self.saiba_username or not self.saiba_password:
+			return {"success": False, "error": "SAIBA credentials are not fully configured. Please fill in Base URL, Username, and Password."}
+
+		try:
+			# Import locally to avoid circular imports
+			from policy_reader.policy_reader.services.saiba_sync_service import test_saiba_connection as _test_saiba_connection
+			result = _test_saiba_connection()
+			return result
+		except Exception as e:
+			frappe.log_error(f"SAIBA connection test failed: {str(e)}", "SAIBA Connection Test Error")
+			return {"success": False, "error": str(e)}
+
 	@frappe.whitelist()
 	def refresh_field_mappings(self):
 		"""Refresh field mappings using default, DocType-independent generator"""

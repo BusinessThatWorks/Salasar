@@ -1,0 +1,20 @@
+  "errors": {
+   "BankName": [
+    "The BankName field is required."
+   ],
+   "Fuel": [
+    "Fuel is missing"
+   ],
+   "Model": [
+    "Model is missing"
+   ],
+   "PaymentMode": [
+    "The PaymentMode field is required."
+   ],
+   "PaymentTranNo": [
+    "The PaymentTranNo field is required."
+   ],
+   "Remarks": [
+    "The Remarks field is required."
+   ]
+  },

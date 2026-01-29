@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/policy_reader/css/policy_reader.css"
-# app_include_js = "/assets/policy_reader/js/policy_reader.js"
+app_include_js = "/assets/policy_reader/js/saiba_validation.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/policy_reader/css/policy_reader.css"
@@ -159,7 +159,10 @@ scheduler_events = {
 # Data patches for migrations and updates
 
 patches = [
-	"policy_reader.patches.v1_0.migrate_motor_policy_schema"
+	"policy_reader.patches.v1_0.migrate_motor_policy_schema",
+	"policy_reader.patches.v1_0.add_saiba_sync_fields",
+	"policy_reader.patches.v1_0.setup_saiba_validation_settings",
+	"policy_reader.patches.v1_0.update_motor_validation_rules"
 ]
 
 # Overriding Methods
