@@ -27,14 +27,17 @@
   "customer_insurer_info_tab",
   "customer_info_section",
   "customer_code",
+  "checklist_customer_vertical",
+  "checklist_customer_pan",
   "column_break_customer",
   "customer_name",
   "customer_group_name",
+  "checklist_customer_gst",
   "business_info_section",
   "insurance_company_branch",
-  "column_break_business",
-  "insurer_name",
   "insurer_city",
+  "insurer_name",
+  "column_break_business",
   "insurer_branch",
   "insurer_branch_code",
   "checklist_section",
@@ -42,9 +45,10 @@
   "checklist_biz_type",
   "checklist_old_control_number",
   "column_break_checklist_1",
-  "checklist_customer_vertical",
-  "checklist_customer_pan",
-  "checklist_customer_gst",
+  "rm",
+  "rm_code",
+  "csc",
+  "csc_code",
   "checklist_section_2",
   "checklist_department",
   "checklist_policy_type",
@@ -277,11 +281,9 @@
    "label": "Checklist Fields"
   },
   {
-   "description": "Auto-populated from logged-in user's Insurance Employee record",
    "fieldname": "checklist_branch_code",
    "fieldtype": "Data",
-   "label": "Branch Code",
-   "read_only": 1
+   "label": "Branch Code"
   },
   {
    "fieldname": "checklist_biz_type",
@@ -290,6 +292,7 @@
    "options": "NEW\nRENEWAL"
   },
   {
+   "depends_on": "eval: doc.checklist_biz_type == \"RENEWAL\"",
    "fieldname": "checklist_old_control_number",
    "fieldtype": "Data",
    "label": "Old Control Number"
@@ -308,15 +311,13 @@
    "fetch_from": "customer_code.customer_pan",
    "fieldname": "checklist_customer_pan",
    "fieldtype": "Data",
-   "label": "Customer PAN",
-   "read_only": 1
+   "label": "Customer PAN"
   },
   {
    "fetch_from": "customer_code.customer_gst",
    "fieldname": "checklist_customer_gst",
    "fieldtype": "Data",
-   "label": "Customer GST",
-   "read_only": 1
+   "label": "Customer GST"
   },
   {
    "fieldname": "checklist_section_2",
@@ -358,6 +359,7 @@
   },
   {
    "description": "Auto-populated from logged-in user's Insurance Employee record",
+   "fetch_from": "rm_code.rm_code",
    "fieldname": "checklist_rm_code",
    "fieldtype": "Data",
    "label": "RM Code",
@@ -508,12 +510,41 @@
    "fieldtype": "Data",
    "label": "Branch Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "rm.employee_code",
+   "fieldname": "rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "csc.employee_code",
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm",
+   "fieldtype": "Link",
+   "label": "RM",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"RM\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "rm_code.employee_code",
+   "fieldname": "csc",
+   "fieldtype": "Link",
+   "label": "CSC",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
+   "options": "Insurance Employee"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-16 16:24:27.905696",
+ "modified": "2026-01-30 17:33:11.553620",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

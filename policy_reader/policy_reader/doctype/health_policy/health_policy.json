@@ -1,0 +1,1169 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "format: HLTPLCY-{YYYY}-{MM}-{####}",
+ "creation": "2025-08-05 21:47:56.065076",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "policy_information_tab",
+  "policy_document",
+  "policy_file",
+  "policy_information_section",
+  "policy_no",
+  "department",
+  "policy_type",
+  "coverage_type",
+  "insured_proposer_name",
+  "column_break_1",
+  "policy_issuance_date",
+  "policy_start_date",
+  "policy_expiry_date",
+  "receive_date",
+  "policy_dates_section",
+  "plan_name",
+  "prev_policy",
+  "column_break_2",
+  "business_information_tab",
+  "business_information_section",
+  "policy_enquiry_remarks",
+  "branch_code",
+  "biz_type",
+  "old_control_number",
+  "customer_code",
+  "customer_vertical",
+  "customer_pan",
+  "customer_gst",
+  "column_break_business_info",
+  "policy_type_biz",
+  "rm_code",
+  "csc_code",
+  "tc_code",
+  "ref_code",
+  "portability",
+  "is_renewable",
+  "pos_misp_ref",
+  "customer_insurer_info_tab",
+  "insurer_info_section",
+  "insurance_company_branch",
+  "insurer_name",
+  "insurer_city",
+  "insurer_branch",
+  "column_break_insurer",
+  "insurer_branch_code",
+  "pos_policy",
+  "policy_vertical",
+  "customer_info_section",
+  "customer_name",
+  "customer_group",
+  "policy_biz_type",
+  "insured_persons_tab",
+  "insured_1_section",
+  "insured_1_relation",
+  "insured_1_emp_code",
+  "insured_1_name",
+  "column_break_insured_1",
+  "insured_1_gender",
+  "insured_1_dob",
+  "insured_1_sum_insured",
+  "insured_2_section",
+  "insured_2_relation",
+  "insured_2_emp_code",
+  "insured_2_name",
+  "column_break_insured_2",
+  "insured_2_gender",
+  "insured_2_dob",
+  "insured_2_sum_insured",
+  "insured_3_section",
+  "insured_3_relation",
+  "insured_3_emp_code",
+  "insured_3_name",
+  "column_break_insured_3",
+  "insured_3_gender",
+  "insured_3_dob",
+  "insured_3_sum_insured",
+  "insured_4_section",
+  "insured_4_relation",
+  "insured_4_emp_code",
+  "insured_4_name",
+  "column_break_insured_4",
+  "insured_4_gender",
+  "insured_4_dob",
+  "insured_4_sum_insured",
+  "insured_5_section",
+  "insured_5_relation",
+  "insured_5_emp_code",
+  "insured_5_name",
+  "column_break_insured_5",
+  "insured_5_gender",
+  "insured_5_dob",
+  "insured_5_sum_insured",
+  "insured_6_section",
+  "insured_6_relation",
+  "insured_6_emp_code",
+  "insured_6_name",
+  "column_break_insured_6",
+  "insured_6_gender",
+  "insured_6_dob",
+  "insured_6_sum_insured",
+  "insured_7_section",
+  "insured_7_relation",
+  "insured_7_emp_code",
+  "insured_7_name",
+  "column_break_insured_7",
+  "insured_7_gender",
+  "insured_7_dob",
+  "insured_7_sum_insured",
+  "insured_8_section",
+  "insured_8_relation",
+  "insured_8_emp_code",
+  "insured_8_name",
+  "column_break_insured_8",
+  "insured_8_gender",
+  "insured_8_dob",
+  "insured_8_sum_insured",
+  "financial_details_tab",
+  "financial_details_section",
+  "sum_insured",
+  "net_od_premium",
+  "coverage_tp",
+  "extensions",
+  "gst",
+  "gst_tax_percent",
+  "stamp_duty",
+  "prem_rate",
+  "column_break_3",
+  "remarks",
+  "internal_information_tab",
+  "processor_information_section",
+  "insurance_employee",
+  "processor_employee_name",
+  "processor_employee_code",
+  "processor_employee_type",
+  "processor_branch_name",
+  "internal_business_section",
+  "csc_pe_code_ops",
+  "brok_rate",
+  "tp_rate",
+  "column_break_internal_business",
+  "reward_on",
+  "reward_rate",
+  "tp_reward",
+  "saiba_sync_tab",
+  "saiba_sync_section",
+  "saiba_sync_status",
+  "saiba_sync_datetime",
+  "column_break_saiba_sync",
+  "saiba_control_number",
+  "saiba_sync_error",
+  "saiba_sync_response",
+  "documents_tab",
+  "documents_section",
+  "final_quote_renewal_notice",
+  "quote_comparison",
+  "mandate_doc",
+  "kyc_doc",
+  "proposal_form",
+  "column_break_documents",
+  "portability_form",
+  "policy_copy_doc",
+  "rc_copy",
+  "passport_copy",
+  "payment_details_doc"
+ ],
+ "fields": [
+  {
+   "fieldname": "policy_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Policy Information"
+  },
+  {
+   "fieldname": "policy_document",
+   "fieldtype": "Link",
+   "label": "Policy Document",
+   "options": "Policy Document",
+   "read_only": 1
+  },
+  {
+   "description": "Upload policy PDF document for processing",
+   "fieldname": "policy_file",
+   "fieldtype": "Attach",
+   "label": "Policy File",
+   "options": "file_types:pdf"
+  },
+  {
+   "fieldname": "policy_information_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Information"
+  },
+  {
+   "description": "SAIBA(PolicyNo)",
+   "fieldname": "policy_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Policy No",
+   "length": 100
+  },
+  {
+   "default": "Health",
+   "description": "Department handling this policy",
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "label": "Department",
+   "options": "Health\nMotor"
+  },
+  {
+   "description": "SAIBA(Policy Type)",
+   "fieldname": "policy_type",
+   "fieldtype": "Select",
+   "label": "Policy Type",
+   "options": "CANCER INSURANCE\nCRITICAL ILLNESS\nFAMILY FLOATER MEDICLAIM\nHOSPITAL CASH\nINDIVIDUAL MEDICLAIM\nPERSONAL ACCIDENT\nSUPER TOP UP"
+  },
+  {
+   "description": "Coverage type for health policy",
+   "fieldname": "coverage_type",
+   "fieldtype": "Select",
+   "label": "Coverage Type",
+   "options": "1 YEAR\n2 YEAR\n3 YEAR\n4 YEAR\n5 YEAR"
+  },
+  {
+   "description": "SAIBA(Insured/Proposer Name)",
+   "fieldname": "insured_proposer_name",
+   "fieldtype": "Data",
+   "label": "Insured/Proposer Name",
+   "length": 200
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(PolicyIssuanceDate)",
+   "fieldname": "policy_issuance_date",
+   "fieldtype": "Date",
+   "label": "Policy Issuance Date"
+  },
+  {
+   "description": "SAIBA(PolicyStartDate)",
+   "fieldname": "policy_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Policy Start Date"
+  },
+  {
+   "description": "SAIBA(PolicyExpiryDate)",
+   "fieldname": "policy_expiry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Policy Expiry Date"
+  },
+  {
+   "description": "Date when policy document was received",
+   "fieldname": "receive_date",
+   "fieldtype": "Date",
+   "label": "Receive Date"
+  },
+  {
+   "fieldname": "policy_dates_section",
+   "fieldtype": "Section Break",
+   "label": "Policy Details"
+  },
+  {
+   "fieldname": "plan_name",
+   "fieldtype": "Data",
+   "label": "Plan Name",
+   "length": 150
+  },
+  {
+   "fieldname": "prev_policy",
+   "fieldtype": "Data",
+   "label": "PrevPolicy",
+   "length": 100
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "business_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Business Information"
+  },
+  {
+   "fieldname": "business_information_section",
+   "fieldtype": "Section Break",
+   "label": "Business Information"
+  },
+  {
+   "description": "Additional remarks or notes about the policy",
+   "fieldname": "policy_enquiry_remarks",
+   "fieldtype": "Long Text",
+   "label": "Policy/Enquiry Remarks"
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code"
+  },
+  {
+   "fieldname": "biz_type",
+   "fieldtype": "Data",
+   "label": "Biz Type"
+  },
+  {
+   "description": "Enter the ID, Not the name",
+   "fieldname": "old_control_number",
+   "fieldtype": "Data",
+   "label": "Old Control Number"
+  },
+  {
+   "description": "SAIBA(Customer Code)",
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Customer Code",
+   "length": 50
+  },
+  {
+   "fieldname": "customer_vertical",
+   "fieldtype": "Data",
+   "label": "Customer Vertical"
+  },
+  {
+   "fieldname": "customer_pan",
+   "fieldtype": "Data",
+   "label": "Customer PAN"
+  },
+  {
+   "fieldname": "customer_gst",
+   "fieldtype": "Data",
+   "label": "Customer GST"
+  },
+  {
+   "fieldname": "column_break_business_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "policy_type_biz",
+   "fieldtype": "Data",
+   "label": "Policy Type"
+  },
+  {
+   "fieldname": "rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code"
+  },
+  {
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code"
+  },
+  {
+   "fieldname": "tc_code",
+   "fieldtype": "Data",
+   "label": "TC Code"
+  },
+  {
+   "fieldname": "ref_code",
+   "fieldtype": "Data",
+   "label": "Ref Code"
+  },
+  {
+   "fieldname": "portability",
+   "fieldtype": "Select",
+   "label": "Portability",
+   "options": "Yes\nNo"
+  },
+  {
+   "default": "No",
+   "fieldname": "is_renewable",
+   "fieldtype": "Select",
+   "label": "Is Renewable",
+   "options": "Yes\nNo"
+  },
+  {
+   "description": "POS/MISP/Reference code",
+   "fieldname": "pos_misp_ref",
+   "fieldtype": "Data",
+   "label": "POS/MISP/Ref",
+   "length": 100
+  },
+  {
+   "fieldname": "customer_insurer_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Customer & Insurer Information"
+  },
+  {
+   "fieldname": "insurer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Insurer Information"
+  },
+  {
+   "description": "Select Insurance Company Branch to auto-fill branch details",
+   "fieldname": "insurance_company_branch",
+   "fieldtype": "Link",
+   "label": "Insurance Company Branch",
+   "options": "Insurance Company Branch"
+  },
+  {
+   "description": "SAIBA(Insurer Name)",
+   "fetch_from": "insurance_company_branch.insurance_company",
+   "fieldname": "insurer_name",
+   "fieldtype": "Data",
+   "label": "Insurer Name",
+   "length": 150
+  },
+  {
+   "description": "SAIBA(Insurer City)",
+   "fetch_from": "insurance_company_branch.city",
+   "fieldname": "insurer_city",
+   "fieldtype": "Data",
+   "label": "Insurer City",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(Insurer Branch)",
+   "fetch_from": "insurance_company_branch.branch_name",
+   "fieldname": "insurer_branch",
+   "fieldtype": "Data",
+   "label": "Insurer Branch",
+   "length": 100
+  },
+  {
+   "fieldname": "column_break_insurer",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(Insurer Branch Code)",
+   "fetch_from": "insurance_company_branch.branch_auto_code",
+   "fieldname": "insurer_branch_code",
+   "fieldtype": "Data",
+   "label": "Insurer Branch Code",
+   "length": 50
+  },
+  {
+   "fieldname": "pos_policy",
+   "fieldtype": "Data",
+   "label": "Pos Policy",
+   "length": 20
+  },
+  {
+   "description": "SAIBA(Policy Vertical)",
+   "fieldname": "policy_vertical",
+   "fieldtype": "Select",
+   "label": "Policy Vertical",
+   "options": "Accident & Health\nCorporate Fleet\nCorporate Individual\nIndividual"
+  },
+  {
+   "fieldname": "customer_info_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Information"
+  },
+  {
+   "description": "Full Legal Name of the customer (e.g, Carbon Resources Pvt Ltd), same as policy name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "length": 200
+  },
+  {
+   "default": "NO GROUP",
+   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
+   "fieldname": "customer_group",
+   "fieldtype": "Data",
+   "label": "Customer Group"
+  },
+  {
+   "description": "SAIBA(PolicyBiz Type)",
+   "fieldname": "policy_biz_type",
+   "fieldtype": "Data",
+   "label": "PolicyBiz Type",
+   "length": 100
+  },
+  {
+   "fieldname": "insured_persons_tab",
+   "fieldtype": "Tab Break",
+   "label": "Insured Persons"
+  },
+  {
+   "fieldname": "insured_1_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 1"
+  },
+  {
+   "fieldname": "insured_1_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_1_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_1_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_1_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_1_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_1_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_2_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 2"
+  },
+  {
+   "fieldname": "insured_2_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_2_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_2_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_2_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_2_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_2_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_3_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 3"
+  },
+  {
+   "fieldname": "insured_3_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_3_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_3_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_3_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_3_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_3_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_4_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 4"
+  },
+  {
+   "fieldname": "insured_4_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_4_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_4_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_4_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_4_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_4_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_5_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 5"
+  },
+  {
+   "fieldname": "insured_5_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_5_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_5_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_5_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_5_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_5_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_6_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 6"
+  },
+  {
+   "fieldname": "insured_6_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_6_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_6_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_6_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_6_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_6_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_7_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 7"
+  },
+  {
+   "fieldname": "insured_7_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_7_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_7_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_7_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_7_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_7_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "insured_8_section",
+   "fieldtype": "Section Break",
+   "label": "Insured 8"
+  },
+  {
+   "fieldname": "insured_8_relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+  },
+  {
+   "fieldname": "insured_8_emp_code",
+   "fieldtype": "Data",
+   "label": "Emp Code/Family Code"
+  },
+  {
+   "fieldname": "insured_8_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "column_break_insured_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_8_gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther"
+  },
+  {
+   "fieldname": "insured_8_dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "insured_8_sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured"
+  },
+  {
+   "fieldname": "financial_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Financial Information"
+  },
+  {
+   "fieldname": "financial_details_section",
+   "fieldtype": "Section Break",
+   "label": "Financial Details"
+  },
+  {
+   "fieldname": "sum_insured",
+   "fieldtype": "Currency",
+   "label": "Sum Insured",
+   "precision": "2"
+  },
+  {
+   "fieldname": "net_od_premium",
+   "fieldtype": "Currency",
+   "label": "Net/OD Premium",
+   "precision": "2"
+  },
+  {
+   "description": "Coverage type - If OD premium extracted select 'Extension-Coverage', if TP extracted select 'ThirdParty(TP)'",
+   "fieldname": "coverage_tp",
+   "fieldtype": "Select",
+   "label": "Coverage/TP",
+   "options": "Extension-Coverage\nThirdParty(TP)\nOwnerDriver(LPD)\nRoadside Assistance"
+  },
+  {
+   "description": "SAIBA(Extensions) - Coverage extensions",
+   "fieldname": "extensions",
+   "fieldtype": "Long Text",
+   "label": "Extensions"
+  },
+  {
+   "fieldname": "gst",
+   "fieldtype": "Currency",
+   "label": "GST",
+   "precision": "2"
+  },
+  {
+   "description": "SAIBA(GST/Tax%) - GST or tax percentage",
+   "fieldname": "gst_tax_percent",
+   "fieldtype": "Float",
+   "label": "GST/Tax%",
+   "precision": "2"
+  },
+  {
+   "fieldname": "stamp_duty",
+   "fieldtype": "Currency",
+   "label": "StampDuty",
+   "precision": "2"
+  },
+  {
+   "description": "SAIBA(Prem. Rate) - Premium rate percentage",
+   "fieldname": "prem_rate",
+   "fieldtype": "Float",
+   "label": "Prem. Rate",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Long Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "internal_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Internal Information"
+  },
+  {
+   "fieldname": "processor_information_section",
+   "fieldtype": "Section Break",
+   "label": "Processor Information"
+  },
+  {
+   "fieldname": "insurance_employee",
+   "fieldtype": "Link",
+   "label": "Insurance Employee",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "insurance_employee.employee_name",
+   "fieldname": "processor_employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.employee_code",
+   "fieldname": "processor_employee_code",
+   "fieldtype": "Data",
+   "label": "Employee Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.employee_type",
+   "fieldname": "processor_employee_type",
+   "fieldtype": "Data",
+   "label": "Employee Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "insurance_employee.branch_name",
+   "fieldname": "processor_branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "internal_business_section",
+   "fieldtype": "Section Break",
+   "label": "Internal Business Information"
+  },
+  {
+   "description": "CSC/PE Code (Operations)",
+   "fieldname": "csc_pe_code_ops",
+   "fieldtype": "Data",
+   "label": "CSC/PE Code(OPS)",
+   "length": 100
+  },
+  {
+   "default": "15",
+   "description": "Brokerage rate (default 15%)",
+   "fieldname": "brok_rate",
+   "fieldtype": "Float",
+   "label": "Brok Rate",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "description": "Third party rate (default 0%)",
+   "fieldname": "tp_rate",
+   "fieldtype": "Float",
+   "label": "TP Rate",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_internal_business",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Premium",
+   "description": "Reward basis (default Premium)",
+   "fieldname": "reward_on",
+   "fieldtype": "Data",
+   "label": "Reward On",
+   "length": 100
+  },
+  {
+   "default": "0",
+   "description": "Reward rate percentage (default 0%)",
+   "fieldname": "reward_rate",
+   "fieldtype": "Float",
+   "label": "Reward Rate",
+   "precision": "2"
+  },
+  {
+   "default": "0",
+   "description": "Third party reward amount (default 0)",
+   "fieldname": "tp_reward",
+   "fieldtype": "Float",
+   "label": "TP Reward",
+   "precision": "2"
+  },
+  {
+   "fieldname": "saiba_sync_tab",
+   "fieldtype": "Tab Break",
+   "label": "SAIBA Sync"
+  },
+  {
+   "fieldname": "saiba_sync_section",
+   "fieldtype": "Section Break",
+   "label": "Sync Status"
+  },
+  {
+   "default": "Not Synced",
+   "description": "Current sync status with SAIBA ERP",
+   "fieldname": "saiba_sync_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "SAIBA Sync Status",
+   "options": "Not Synced\nSynced\nFailed\nPending",
+   "read_only": 1
+  },
+  {
+   "description": "Last sync timestamp",
+   "fieldname": "saiba_sync_datetime",
+   "fieldtype": "Datetime",
+   "label": "Sync Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_saiba_sync",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Control number returned by SAIBA after successful sync",
+   "fieldname": "saiba_control_number",
+   "fieldtype": "Data",
+   "label": "SAIBA Control Number",
+   "length": 50,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.saiba_sync_status === 'Failed'",
+   "description": "Error message if sync failed",
+   "fieldname": "saiba_sync_error",
+   "fieldtype": "Long Text",
+   "label": "Sync Error",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.saiba_sync_status === 'Failed' || doc.saiba_sync_status === 'Synced'",
+   "description": "Full API request/response from SAIBA (for debugging)",
+   "fieldname": "saiba_sync_response",
+   "fieldtype": "JSON",
+   "label": "Sync Request/Response (Debug)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "documents_tab",
+   "fieldtype": "Tab Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "documents_section",
+   "fieldtype": "Section Break",
+   "label": "Document Uploads"
+  },
+  {
+   "description": "Upload final quote or renewal notice document",
+   "fieldname": "final_quote_renewal_notice",
+   "fieldtype": "Attach",
+   "label": "Final Quote/Renewal Notice"
+  },
+  {
+   "description": "Upload quote comparison document",
+   "fieldname": "quote_comparison",
+   "fieldtype": "Attach",
+   "label": "Quote Comparison"
+  },
+  {
+   "description": "Upload mandate document if required (optional)",
+   "fieldname": "mandate_doc",
+   "fieldtype": "Attach",
+   "label": "Mandate (if required)"
+  },
+  {
+   "description": "Upload KYC document",
+   "fieldname": "kyc_doc",
+   "fieldtype": "Attach",
+   "label": "KYC"
+  },
+  {
+   "description": "Upload proposal form for health policy",
+   "fieldname": "proposal_form",
+   "fieldtype": "Attach",
+   "label": "Proposal Form (for health)"
+  },
+  {
+   "fieldname": "column_break_documents",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Upload portability form for health policy",
+   "fieldname": "portability_form",
+   "fieldtype": "Attach",
+   "label": "Portability Form (for health)"
+  },
+  {
+   "description": "Upload policy copy document",
+   "fieldname": "policy_copy_doc",
+   "fieldtype": "Attach",
+   "label": "Policy Copy"
+  },
+  {
+   "description": "Upload RC (Registration Certificate) copy",
+   "fieldname": "rc_copy",
+   "fieldtype": "Attach",
+   "label": "RC Copy"
+  },
+  {
+   "description": "Upload passport copy for travel policy (optional)",
+   "fieldname": "passport_copy",
+   "fieldtype": "Attach",
+   "label": "Passport Copy (for travel policy)"
+  },
+  {
+   "description": "Upload payment details - Cheque/NEFT/Online Payment (optional)",
+   "fieldname": "payment_details_doc",
+   "fieldtype": "Attach",
+   "label": "Payment Details (Cheque/NEFT/Online Payment)"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-30 07:22:57.793591",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "Health Policy",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Policy Manager",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Policy Data Entry",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "policy_no, customer_code",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
