@@ -2,7 +2,7 @@
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
 # On IntegrationTestCase, the doctype test records and all
@@ -13,7 +13,7 @@ IGNORE_TEST_RECORD_DEPENDENCIES = []  # eg. ["User"]
 
 
 
-class IntegrationTestInsuranceCustomer(IntegrationTestCase):
+class IntegrationTestInsuranceCustomer(FrappeTestCase):
 	"""
 	Integration tests for InsuranceCustomer.
 	Use this class for testing interactions between multiple components.
