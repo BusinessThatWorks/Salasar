@@ -31,7 +31,6 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 				"is_private": private,
 			}
 		).insert(ignore_permissions=True)
-
 		return test_file
 
 	def create_policy_document(self):
@@ -40,7 +39,6 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 			"doctype": "Policy Document",
 			"policy_file": test_file.file_url,
 		}).insert(ignore_permissions=True)
-
 		return doc
 
 	def setUp(self):
@@ -75,10 +73,9 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 			{"user": "test@example.com"},
 			"name"
 		)
-
 		if existing:
-			return frappe.get_doc("Insurance Employee", existing)
-
+			d =frappe.get_doc("Insurance Employee", existing)
+			return d 
 		branch = self.create_broker_branch()
 
 		return frappe.get_doc({
@@ -100,7 +97,6 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 
 		self.assertEqual(doc.title, "Motor Policies Car")
 
-
 	def test_before_save_populates_processor_info(self):
 		doc = self.create_policy_document()
 		doc.save()
@@ -110,10 +106,6 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 		self.assertEqual(doc.processor_employee_type, "CSC")
 		self.assertEqual(doc.processor_branch_name, "EXAMPLE")
 
-
-# validate 
-
-
 	def test_completed_status_without_extracted_fields_throws(self):
 		doc = frappe.get_doc({
 			"doctype": "Policy Document",
@@ -121,13 +113,10 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 			"status": "Completed",
 			"extracted_fields": None,
 		})
-
 		with self.assertRaises(frappe.ValidationError) as error:
-			doc.insert(ignore_permissions=True)
+			doc.save(ignore_permissions=True)
 
 		self.assertIn(f"Invalid input: extracted fields cannot be empty for completed documents", str(error.exception))
-
-
 
 	def test_cannot_change_policy_type_after_extraction(self):
 		doc = frappe.get_doc({
@@ -137,16 +126,14 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 			"policy_type": "Motor",
 			"extraction_policy_type": "Motor",
 			"extracted_fields": '{"Motor": "Policy"}', 
-		})
+		}).insert(ignore_permissions=True)
 		doc.policy_type="Health"
 
 		with self.assertRaises(frappe.ValidationError) as error:
-			doc.insert(ignore_permissions=True)
+			doc.save(ignore_permissions=True)
 
 		self.assertIn(f"Invalid input: Cannot change policy type after extraction. Extracted fields were generated for '{doc.extraction_policy_type}' policy type. Please reprocess the document if you need to change the policy type.", str(error.exception))
 
-
-    # background -> true
 	def test_process_policy_enqueues_background_job(self):
 		doc = self.create_policy_document()
 		doc.policy_type = "Motor"
@@ -162,7 +149,6 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 			self.assertTrue(result["success"])
 			self.assertEqual(result["status"], "Processing")
 
-	 # background -> false	-> success
 	def test_process_policy_sync_success(self):
 		doc = self.create_policy_document()
 		doc.policy_type = "Motor"
@@ -183,33 +169,6 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
 			self.assertTrue(result["success"])
 			self.assertEqual(result["extracted_fields"], {"policy_no": "EXAMPLE-123"})
 
-    # background -> false -> failure 
-	# def test_process_policy_sync_failure(self):
-	# 	doc = self.create_policy_document()
-	# 	doc.policy_type = "Motor"
-	# 	doc.save()
-
-	# 	fake_ai_result = {
-	# 		"success": False,
-	# 		"error": "Invalid PDF format"
-	# 	}
-
-	# 	with patch.object(doc, "_execute_ai_processing") as mock_exec, \
-	# 		patch("frappe.publish_realtime"):
-
-	# 		# Pretend AI failed
-	# 		mock_exec.return_value = (fake_ai_result, 0.8)
-
-	# 		result = doc.process_policy(background=False)
-	# 		doc.reload()
-
-	# 		# Document should now be Failed
-	# 		self.assertEqual(doc.status, "Failed")
-	# 		self.assertEqual(doc.error_message, "Invalid PDF format")
-
-	# 		# API response should reflect failure
-	# 		self.assertFalse(result["success"])
-	# 		self.assertIn("Invalid PDF format", result["message"])
 	def test_reset_processing_status_from_processing(self):
 		doc = self.create_policy_document()
 		doc.status = "Processing"
@@ -224,11 +183,16 @@ class IntegrationTestPolicyDocument(FrappeTestCase):
     
 	def test_reset_processing_status_invalid_state(self):
 		doc = self.create_policy_document()
-		# check for completed also later 
 		doc.status = "Failed"
 		doc.save()
 
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(frappe.ValidationError) as error:
 			doc.reset_processing_status()
+		
+		self.assertIn(
+        "Failed to reset status: Cannot reset status. Current status is 'Failed'",
+        str(error.exception),
+    )
+
   
 

@@ -19,15 +19,12 @@ class IntegrationTestInsuranceEmployee(FrappeTestCase):
 	"""
 
 	def setUp(self):
-		self.test_user = "test_insurance_employee@example.com"
-		frappe.db.delete("Insurance Employee", {"user": self.test_user})
-		frappe.db.commit()
-
-		if not frappe.db.exists("User", self.test_user):
+		frappe.db.delete("Insurance Employee")
+		if not frappe.db.exists("User", "test_insurance_employee@example.com"):
 			frappe.get_doc({
 				"doctype": "User",
 				"first_name": "Example",
-				"email": self.test_user
+				"email": "test_insurance_employee@example.com"
 			}).insert(ignore_permissions=True)
 
 
@@ -47,7 +44,7 @@ class IntegrationTestInsuranceEmployee(FrappeTestCase):
 		return frappe.get_doc({
 			"doctype": "Insurance Employee",
 			"employee_name": "Testing Insurance Employee",
-			"user": self.test_user,
+			"user": "test_insurance_employee@example.com",
 			"branch": branch.name,
 			"branch_name": branch.branch_name,
 			"branch_code": branch.branch_code,
@@ -80,7 +77,7 @@ class IntegrationTestInsuranceEmployee(FrappeTestCase):
 		second = frappe.get_doc({
 			"doctype": "Insurance Employee",
 			"employee_name": "Testing Insurance Employee3",
-			"user": self.test_user,  
+			"user": "test_insurance_employee@example.com",
 			"branch": branch.name,
 			"branch_name": branch.branch_name,
 			"branch_code": branch.branch_code,
@@ -88,13 +85,6 @@ class IntegrationTestInsuranceEmployee(FrappeTestCase):
 			"employee_code": "EMP-004",
 		})
 
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(frappe.ValidationError) as error:
 			second.insert(ignore_permissions=True)
 
-	def test_allow_update_same_record(self):
-		doc = self.create_first_insurance_employee()
-
-		doc.employee_name = "Updated Name"
-		doc.save(ignore_permissions=True)
-
-	

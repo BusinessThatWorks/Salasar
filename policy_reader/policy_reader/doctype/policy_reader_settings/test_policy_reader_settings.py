@@ -33,42 +33,46 @@ class IntegrationTestPolicyReaderSettings(FrappeTestCase):
 		self.doc.anthropic_api_key = "SK-ANT-123"
 		self.doc.timeout = 120
 
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(frappe.ValidationError) as exc:
 			self.doc.save()
+
+		self.assertIn("Invalid input: Anthropic API key format. Key should start with 'sk-ant-'",str(exc.exception))
+
 
 	def test_empty_anthropic_key(self):
 		"""Empty API key is allowed"""
 		self.doc.anthropic_api_key = None
 		self.doc.timeout = 120
-		self.doc.save()  # should not throw
+		self.doc.save()  
 
 	def test_timeout_too_small(self):
 		"""Timeout below 60 should fail"""
 		self.doc.anthropic_api_key = "sk-ant-valid"
 		self.doc.timeout = 30
 
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(frappe.ValidationError) as exc:
 			self.doc.save()
+
+		self.assertIn("Invalid input: timeout must be between 60 and 600 seconds",str(exc.exception))
+
 
 	def test_timeout_too_large(self):
 		"""Timeout above 600 should fail"""
 		self.doc.anthropic_api_key = "sk-ant-valid"
 		self.doc.timeout = 700
 
-		with self.assertRaises(frappe.ValidationError):
+		with self.assertRaises(frappe.ValidationError) as exc:
 			self.doc.save()
 
-	def test_timeout_boundary_values(self):
-		"""Timeout at boundary values should pass"""
+		self.assertIn("Invalid input: timeout must be between 60 and 600 seconds",str(exc.exception))
 
-		# Lower bound
+	def test_timeout_boundary_values(self):
 		self.doc.anthropic_api_key = "sk-ant-valid"
 		self.doc.timeout = 60
-		self.doc.save()  # should pass
+		self.doc.save()  
 
-		# Upper bound
 		self.doc.anthropic_api_key = "sk-ant-valid"
 		self.doc.timeout = 600
-		self.doc.save()  # should pass
+		self.doc.save()  
 
 
