@@ -13,9 +13,10 @@ frappe.ui.form.on("Motor Policy", {
 		// Add SAIBA buttons (sync + validation)
 		if (!frm.doc.__islocal) {
 			add_saiba_sync_button(frm);
-			// Add SAIBA validation button (uses shared function from saiba_validation.js)
+			// Add SAIBA validation button and field indicators (uses shared functions from saiba_validation.js)
 			if (typeof policy_reader !== "undefined" && policy_reader.saiba) {
 				policy_reader.saiba.add_validate_button(frm, "Motor");
+				policy_reader.saiba.mark_required_fields(frm, "Motor");
 			}
 		}
 	},

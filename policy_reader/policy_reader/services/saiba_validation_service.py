@@ -308,3 +308,11 @@ def is_validation_enabled():
     """Check if SAIBA validation feature is enabled"""
     service = SaibaValidationService()
     return {"enabled": service.is_enabled()}
+
+
+@frappe.whitelist()
+def get_required_fields(policy_type):
+    """Return list of required doctype_field names for a policy type"""
+    service = SaibaValidationService()
+    rules = service.get_validation_rules(policy_type)
+    return [r.doctype_field for r in rules if r.is_required]

@@ -72,6 +72,9 @@ class PolicyCreationService:
             # Copy business information from Policy Document
             self._copy_business_info_fields(policy_record, policy_doc)
 
+            # Copy checklist fields from Policy Document
+            self._copy_checklist_fields(policy_record, policy_doc)
+
             # Define fields that should not be overwritten by AI extraction
             protected_fields = self._get_protected_fields()
 
@@ -129,6 +132,22 @@ class PolicyCreationService:
             'insurer_city',
             'insurer_branch',
             'insurer_branch_code',
+
+            # Checklist fields from Policy Document
+            'department',
+            'policy_type',
+            'coverage_type',
+            'old_control_number',
+            'branch_code',
+            'biz_type',
+            'customer_vertical',
+            'rm_code',
+            'csc_code',
+            'tc_code',
+            'ref_code',
+            'customer_pan',
+            'customer_gst',
+            'category',
         ]
 
     def _get_current_user_employee_info(self):
@@ -240,6 +259,41 @@ class PolicyCreationService:
         except Exception as e:
             frappe.logger().error(f"Error copying document fields: {str(e)}")
             frappe.log_error(f"Failed to copy document fields: {str(e)}", "Document Field Copy")
+            # Don't throw - this is a non-critical operation
+
+    def _copy_checklist_fields(self, policy_record, policy_doc):
+        """Copy checklist fields from Policy Document to policy record"""
+        try:
+            checklist_mapping = {
+                "checklist_department": "department",
+                "checklist_policy_type": "policy_type",
+                "checklist_coverage_type": "coverage_type",
+                "checklist_old_control_number": "old_control_number",
+                "checklist_branch_code": "branch_code",
+                "checklist_biz_type": "biz_type",
+                "checklist_customer_vertical": "customer_vertical",
+                "checklist_rm_code": "rm_code",
+                "checklist_csc_code": "csc_code",
+                "checklist_tc_code": "tc_code",
+                "checklist_ref_code": "ref_code",
+                "checklist_customer_pan": "customer_pan",
+                "checklist_customer_gst": "customer_gst",
+                "checklist_category": "category",
+            }
+
+            copied_count = 0
+            for source_field, target_field in checklist_mapping.items():
+                value = getattr(policy_doc, source_field, None)
+                if value:
+                    setattr(policy_record, target_field, value)
+                    copied_count += 1
+                    frappe.logger().info(f"Copied checklist field: {source_field} -> {target_field} = {value}")
+
+            frappe.logger().info(f"Successfully copied {copied_count} checklist fields from Policy Document")
+
+        except Exception as e:
+            frappe.logger().error(f"Error copying checklist fields: {str(e)}")
+            frappe.log_error(f"Failed to copy checklist fields: {str(e)}", "Checklist Field Copy")
             # Don't throw - this is a non-critical operation
 
     def _copy_business_info_fields(self, policy_record, policy_doc):

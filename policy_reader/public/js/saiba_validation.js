@@ -510,6 +510,75 @@ policy_reader.saiba._add_modal_styles = function() {
 };
 
 /**
+ * Mark fields that are required for SAIBA sync with a small blue "S" badge.
+ * Respects the saiba_enabled toggle — badges only appear when enabled.
+ * @param {object} frm - Frappe form object
+ * @param {string} policy_type - 'Motor' or 'Health'
+ */
+policy_reader.saiba.mark_required_fields = function(frm, policy_type) {
+    // Ensure indicator styles are injected
+    policy_reader.saiba._add_indicator_styles();
+
+    frappe.call({
+        method: 'policy_reader.policy_reader.services.saiba_validation_service.get_required_fields',
+        args: { policy_type: policy_type },
+        callback: function(r) {
+            if (!r.message || !r.message.length) return;
+
+            r.message.forEach(function(fieldname) {
+                const field = frm.fields_dict[fieldname];
+                if (!field || !field.$wrapper) return;
+
+                const $label = field.$wrapper.find('.control-label, label').first();
+                if (!$label.length) return;
+
+                // Skip if badge already present
+                if ($label.find('.saiba-required-indicator').length) return;
+
+                $label.append(
+                    '<span class="saiba-required-indicator" title="Required for SAIBA Sync">S</span>'
+                );
+            });
+        }
+    });
+};
+
+/**
+ * Inject CSS for SAIBA required-field indicator badges.
+ * Called once; subsequent calls are no-ops.
+ */
+policy_reader.saiba._add_indicator_styles = function() {
+    if (document.getElementById('saiba-indicator-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'saiba-indicator-styles';
+    style.textContent = `
+        .saiba-required-indicator {
+            display: inline-block;
+            margin-left: 5px;
+            padding: 0 5px;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 16px;
+            color: #fff;
+            background: #2490ef;
+            border-radius: 8px;
+            vertical-align: middle;
+            cursor: default;
+            letter-spacing: 0.3px;
+        }
+
+        /* Dark mode */
+        [data-theme="dark"] .saiba-required-indicator,
+        .dark .saiba-required-indicator {
+            background: #5fa8f5;
+            color: #1a1a2e;
+        }
+    `;
+    document.head.appendChild(style);
+};
+
+/**
  * Add "Validate for SAIBA" button to a form
  * @param {object} frm - Frappe form object
  * @param {string} policy_type - 'Motor' or 'Health'
