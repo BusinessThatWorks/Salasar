@@ -58,6 +58,9 @@ policy_reader.saiba.show_validation_modal = function(result, on_sync) {
     let html = policy_reader.saiba._build_summary_html(summary);
     html += policy_reader.saiba._build_categories_html(categories);
 
+    // Always show sync button, but add warning style if validation failed
+    const syncLabel = ready ? __('Sync to SAIBA') : __('Sync to SAIBA (with warnings)');
+
     // Create dialog
     const dialog = new frappe.ui.Dialog({
         title: __('SAIBA Validation - {0}', [result.policy_name]),
@@ -69,20 +72,33 @@ policy_reader.saiba.show_validation_modal = function(result, on_sync) {
                 options: `<div class="saiba-validation-modal">${html}</div>`
             }
         ],
-        primary_action_label: ready ? __('Sync to SAIBA') : null,
-        primary_action: ready ? function() {
-            dialog.hide();
-            if (on_sync) on_sync();
-        } : null,
+        primary_action_label: syncLabel,
+        primary_action: function() {
+            if (!ready) {
+                // Show confirmation before syncing with validation errors
+                frappe.confirm(
+                    __('Some required fields are missing or invalid. SAIBA may reject this policy. Continue anyway?'),
+                    function() {
+                        dialog.hide();
+                        if (on_sync) on_sync();
+                    }
+                );
+            } else {
+                dialog.hide();
+                if (on_sync) on_sync();
+            }
+        },
         secondary_action_label: __('Close'),
         secondary_action: function() {
             dialog.hide();
         }
     });
 
-    // Hide primary button if not ready
+    // Add warning style to sync button if validation failed
     if (!ready) {
-        dialog.$wrapper.find('.btn-primary').hide();
+        dialog.$wrapper.find('.btn-primary')
+            .removeClass('btn-primary')
+            .addClass('btn-warning');
     }
 
     dialog.show();
