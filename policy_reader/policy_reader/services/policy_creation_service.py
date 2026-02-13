@@ -148,6 +148,7 @@ class PolicyCreationService:
             'customer_pan',
             'customer_gst',
             'category',
+            'portability',
         ]
 
     def _get_current_user_employee_info(self):
@@ -279,6 +280,7 @@ class PolicyCreationService:
                 "checklist_customer_pan": "customer_pan",
                 "checklist_customer_gst": "customer_gst",
                 "checklist_category": "category",
+                "checklist_portability": "portability",
             }
 
             copied_count = 0

@@ -104,6 +104,11 @@ class MotorPolicy(Document):
 			self._copy_customer_info_from_policy_doc(policy_doc)
 			self._copy_insurer_info_from_policy_doc(policy_doc)
 
+			# Copy checklist, document attachment, and processor fields
+			policy_service._copy_checklist_fields(self, policy_doc)
+			policy_service._copy_document_fields(self, policy_doc)
+			policy_service._populate_processor_fields(self)
+
 			# Use extracted data directly (already parsed by Claude Vision Service)
 			extracted_data = frappe.parse_json(policy_doc.extracted_fields)
 			parsed_data = extracted_data if isinstance(extracted_data, dict) else {}
