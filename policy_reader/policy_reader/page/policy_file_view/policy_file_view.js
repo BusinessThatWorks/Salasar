@@ -139,7 +139,7 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 	// Create split pane layout
 	page.main.html(`
 		<!-- Header with Policy Document Link -->
-		<div class="policy-header" style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #d1d5db; margin-bottom: 0;">
+		<div class="policy-header" style="background: var(--subtle-fg, #f8f9fa); padding: 15px; border-bottom: 1px solid var(--border-color, #d1d5db); margin-bottom: 0;">
 			<div class="d-flex justify-content-between align-items-center">
 				<div>
 					<div class="d-flex align-items-center mb-2">
@@ -168,10 +168,10 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 			</div>
 		</div>
 
-		<div class="policy-viewer-container" style="height: calc(100vh - 180px); display: flex; border: 1px solid #d1d5db;">
+		<div class="policy-viewer-container" style="height: calc(100vh - 180px); display: flex; border: 1px solid var(--border-color, #d1d5db);">
 			<!-- PDF Viewer Pane -->
-			<div class="pdf-pane" style="flex: 1; min-width: 0; border-right: 1px solid #d1d5db; position: relative;">
-				<div class="pane-header" style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #d1d5db; display: flex; justify-content: space-between; align-items: center;">
+			<div class="pdf-pane" style="flex: 1; min-width: 0; border-right: 1px solid var(--border-color, #d1d5db); position: relative;">
+				<div class="pane-header" style="background: var(--subtle-fg, #f8f9fa); padding: 10px 15px; border-bottom: 1px solid var(--border-color, #d1d5db); display: flex; justify-content: space-between; align-items: center;">
 					<h5 class="mb-0">PDF Document</h5>
 					<div class="pdf-controls">
 						<button class="btn btn-sm btn-outline-secondary" id="zoom-out">-</button>
@@ -179,7 +179,7 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 						<button class="btn btn-sm btn-outline-secondary" id="zoom-in">+</button>
 					</div>
 				</div>
-				<div class="pdf-container" style="height: calc(100% - 50px); overflow: auto; background: #f5f5f5;">
+				<div class="pdf-container" style="height: calc(100% - 50px); overflow: auto; background: var(--bg-color, #f5f5f5);">
 					<div id="pdf-viewer" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
 						<div class="text-center">
 							<div class="spinner-border" role="status">
@@ -192,13 +192,13 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 			</div>
 
 			<!-- Resize Handle -->
-			<div class="resize-handle" style="width: 8px; background: #e5e7eb; cursor: col-resize; position: relative;" title="Drag to resize">
-				<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 30px; background: #9ca3af;"></div>
+			<div class="resize-handle" style="width: 8px; background: var(--border-color, #e5e7eb); cursor: col-resize; position: relative;" title="Drag to resize">
+				<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 30px; background: var(--text-muted, #9ca3af);"></div>
 			</div>
 
 			<!-- Motor Policy Fields Pane -->
 			<div class="fields-pane" style="flex: 1; min-width: 0; position: relative;">
-				<div class="pane-header" style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #d1d5db; display: flex; justify-content: space-between; align-items: center;">
+				<div class="pane-header" style="background: var(--subtle-fg, #f8f9fa); padding: 10px 15px; border-bottom: 1px solid var(--border-color, #d1d5db); display: flex; justify-content: space-between; align-items: center;">
 					<h5 class="mb-0">${motorPolicy ? "Motor Policy Fields" : "Extracted Fields"}</h5>
 					<div class="fields-controls">
 						${
@@ -211,7 +211,7 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 						}
 					</div>
 				</div>
-				<div class="fields-container" style="height: calc(100% - 50px); overflow: auto; padding: 15px; background: white;">
+				<div class="fields-container" style="height: calc(100% - 50px); overflow: auto; padding: 15px; background: var(--card-bg, white);">
 					<div id="policy-fields-content">
 						<!-- Content will be inserted here -->
 					</div>
@@ -316,12 +316,12 @@ function renderFieldsTable(extractedData, policyDoc = {}) {
 	// Create simple fields container
 	html += `
 		<div class="fields-simple-section">
-			<div class="fields-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
+			<div class="fields-header" style="background: var(--primary, #667eea); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
 				<h5 class="mb-0" style="font-weight: 600;">
 					<i class="fa fa-list"></i> Extracted Fields
 				</h5>
 			</div>
-			<div class="fields-content" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 8px 8px; padding: 16px 20px;">
+			<div class="fields-content" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #e9ecef); border-top: none; border-radius: 0 0 8px 8px; padding: 16px 20px;">
 	`;
 
 	// Render fields from data (handles both flat and nested structures)
@@ -354,11 +354,11 @@ function renderDataRows(data, prefix = "") {
 		} else {
 			// Simple key-value pair - cleaner line format
 			html += `
-				<div style="display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid #f1f3f4; margin-bottom: 4px;">
-					<div style="flex: 0 0 200px; font-weight: 600; color: #495057; padding-right: 16px; font-size: 13px;">
+				<div style="display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border-color, #f1f3f4); margin-bottom: 4px;">
+					<div style="flex: 0 0 200px; font-weight: 600; color: var(--text-muted, #495057); padding-right: 16px; font-size: 13px;">
 						${formatFieldLabel(displayKey)}:
 					</div>
-					<div style="flex: 1; color: #212529; font-size: 13px; line-height: 1.4;">
+					<div style="flex: 1; color: var(--text-color, #212529); font-size: 13px; line-height: 1.4;">
 						${formatFieldValue(value)}
 					</div>
 				</div>
@@ -507,12 +507,12 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 	fieldGroups.forEach((group) => {
 		html += `
 			<div class="field-group mb-4">
-				<div class="group-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 15px; border-radius: 6px 6px 0 0; margin-bottom: 0;">
+				<div class="group-header" style="background: var(--primary, #667eea); color: white; padding: 10px 15px; border-radius: 6px 6px 0 0; margin-bottom: 0;">
 					<h6 class="mb-0" style="font-weight: 600;">
 						<i class="fa fa-${group.icon}"></i> ${group.title}
 					</h6>
 				</div>
-				<div class="group-fields" style="background: white; border: 1px solid #e9ecef; border-top: none; border-radius: 0 0 6px 6px; padding: 15px;">
+				<div class="group-fields" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #e9ecef); border-top: none; border-radius: 0 0 6px 6px; padding: 15px;">
 					<div class="row">
 		`;
 
@@ -522,7 +522,7 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 
 			html += `
 				<div class="col-md-6 mb-3">
-					<label class="form-label" style="font-weight: 600; color: #495057;">
+					<label class="form-label" style="font-weight: 600; color: var(--text-muted, #495057);">
 						${field.label}
 						${
 							extractedValue

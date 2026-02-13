@@ -145,7 +145,7 @@ frappe.ui.form.on("Policy Document", {
 	show_processing_indicator: function (frm) {
 		$(".processing-indicator").remove();
 		const indicator =
-			$(`<div class="processing-indicator" style="position: fixed; top: 60px; right: 20px; z-index: 1050; background: #9c27b0; color: white; padding: 10px 15px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); max-width: 300px;">
+			$(`<div class="processing-indicator" style="position: fixed; top: 60px; right: 20px; z-index: 1050; background: var(--purple-500, #9c27b0); color: white; padding: 10px 15px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); max-width: 300px;">
 			<i class="fa fa-spin fa-brain"></i> Processing with Claude AI...
 			<button class="btn btn-sm" style="background: none; border: none; color: white; margin-left: 10px; padding: 0 5px; font-size: 16px;" title="Dismiss notification">&times;</button>
 		</div>`).appendTo("body");
@@ -199,16 +199,16 @@ frappe.ui.form.on("Policy Document", {
 					$(".api-status-bubble").remove();
 					const status = r.message;
 					const bubbleHtml = status.configured
-						? `<div class="api-status-bubble" style="display: inline-flex; align-items: center; gap: 12px; padding: 8px 16px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 6px; margin-left: 12px;">
+						? `<div class="api-status-bubble" style="display: inline-flex; align-items: center; gap: 12px; padding: 8px 16px; background: var(--alert-bg-success, #ecfdf5); border: 1px solid var(--green-500, #10b981); border-radius: 6px; margin-left: 12px;">
 							<div style="display: flex; align-items: center; gap: 6px;">
-								<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
-								<span style="color: #065f46; font-weight: 500; font-size: 13px;">Claude API Ready</span>
+								<span style="display: inline-block; width: 8px; height: 8px; background: var(--green-500, #10b981); border-radius: 50%;"></span>
+								<span style="color: var(--alert-text-success, #065f46); font-weight: 500; font-size: 13px;">Claude API Ready</span>
 							</div>
-							<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: white; border: 1px solid #d1d5db; color: #374151; padding: 2px 8px; font-size: 11px;">Test Connection</button>
+							<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #d1d5db); color: var(--text-color, #374151); padding: 2px 8px; font-size: 11px;">Test Connection</button>
 						</div>`
-						: `<div class="api-status-bubble" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: #fef2f2; border: 1px solid #ef4444; border-radius: 6px; margin-left: 12px;">
-							<span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
-							<span style="color: #991b1b; font-weight: 500; font-size: 13px;">API Key Not Configured</span>
+						: `<div class="api-status-bubble" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--alert-bg-danger, #fef2f2); border: 1px solid var(--red-500, #ef4444); border-radius: 6px; margin-left: 12px;">
+							<span style="display: inline-block; width: 8px; height: 8px; background: var(--red-500, #ef4444); border-radius: 50%;"></span>
+							<span style="color: var(--alert-text-danger, #991b1b); font-weight: 500; font-size: 13px;">API Key Not Configured</span>
 						</div>`;
 					$(".form-layout .title-area h1").after($(bubbleHtml));
 				}
@@ -225,11 +225,11 @@ frappe.ui.form.on("Policy Document", {
 					$(".api-status-bubble")
 						.html(`<div style="display: flex; align-items: center; gap: 12px;">
 						<div style="display: flex; align-items: center; gap: 6px;">
-							<span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite;"></span>
-							<span style="color: #065f46; font-weight: 500; font-size: 13px;">Claude API Healthy</span>
+							<span style="display: inline-block; width: 8px; height: 8px; background: var(--green-500, #10b981); border-radius: 50%; animation: pulse 2s infinite;"></span>
+							<span style="color: var(--alert-text-success, #065f46); font-weight: 500; font-size: 13px;">Claude API Healthy</span>
 						</div>
-						<span style="color: #6b7280; font-size: 11px;">Response: ${r.message.response_time}ms</span>
-						<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: white; border: 1px solid #d1d5db; color: #374151; padding: 2px 8px; font-size: 11px;">Retest</button>
+						<span style="color: var(--text-muted, #6b7280); font-size: 11px;">Response: ${r.message.response_time}ms</span>
+						<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #d1d5db); color: var(--text-color, #374151); padding: 2px 8px; font-size: 11px;">Retest</button>
 					</div>`);
 					frappe.show_alert({
 						message: __("Claude API is healthy! Response time: {0}ms", [
@@ -241,10 +241,10 @@ frappe.ui.form.on("Policy Document", {
 					$(".api-status-bubble")
 						.html(`<div style="display: flex; align-items: center; gap: 12px;">
 						<div style="display: flex; align-items: center; gap: 6px;">
-							<span style="display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></span>
-							<span style="color: #991b1b; font-weight: 500; font-size: 13px;">API Connection Failed</span>
+							<span style="display: inline-block; width: 8px; height: 8px; background: var(--red-500, #ef4444); border-radius: 50%;"></span>
+							<span style="color: var(--alert-text-danger, #991b1b); font-weight: 500; font-size: 13px;">API Connection Failed</span>
 						</div>
-						<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: white; border: 1px solid #d1d5db; color: #374151; padding: 2px 8px; font-size: 11px;">Retry</button>
+						<button class="btn btn-xs" onclick="frappe.cur_frm.trigger('test_api_health')" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #d1d5db); color: var(--text-color, #374151); padding: 2px 8px; font-size: 11px;">Retry</button>
 					</div>`);
 					frappe.show_alert({
 						message: __("Claude API test failed: {0}", [

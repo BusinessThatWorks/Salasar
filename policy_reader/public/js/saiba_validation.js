@@ -116,14 +116,14 @@ policy_reader.saiba.show_validation_modal = function(result, on_sync) {
 policy_reader.saiba._build_summary_html = function(summary) {
     const ready = summary.ready_to_sync;
     const statusClass = ready ? 'saiba-status-success' : 'saiba-status-error';
-    const iconBgColor = ready ? '#22c55e' : '#ef4444';
+    const iconClass = ready ? 'saiba-icon-valid' : 'saiba-icon-invalid';
     const icon = ready ? '&#10003;' : '&#10007;';
     const title = ready ? __('Ready to Sync') : __('Not Ready to Sync');
 
     return `
         <div class="validation-summary ${statusClass}">
             <div class="validation-summary-content">
-                <div class="validation-summary-icon" style="background: ${iconBgColor};">
+                <div class="validation-summary-icon ${iconClass}">
                     <span>${icon}</span>
                 </div>
                 <div class="validation-summary-text">
@@ -161,13 +161,12 @@ policy_reader.saiba._build_categories_html = function(categories) {
         category.fields.forEach(function(field) {
             const statusClass = field.is_valid ? 'saiba-field-valid' : 'saiba-field-invalid';
             const iconClass = field.is_valid ? 'saiba-icon-valid' : 'saiba-icon-invalid';
-            const iconBgColor = field.is_valid ? '#22c55e' : '#ef4444';
             const icon = field.is_valid ? '&#10003;' : '&#10007;';
 
             html += `
                 <tr class="validation-field-row">
                     <td class="validation-field-icon-cell">
-                        <span class="validation-field-icon ${iconClass}" style="background: ${iconBgColor};">
+                        <span class="validation-field-icon ${iconClass}">
                             ${icon}
                         </span>
                     </td>
@@ -249,6 +248,14 @@ policy_reader.saiba._add_modal_styles = function() {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
         }
 
+        .validation-summary-icon.saiba-icon-valid {
+            background: #22c55e;
+        }
+
+        .validation-summary-icon.saiba-icon-invalid {
+            background: #ef4444;
+        }
+
         .validation-summary-icon span {
             color: white;
             font-size: 26px;
@@ -320,12 +327,12 @@ policy_reader.saiba._add_modal_styles = function() {
 
         .saiba-badge-success {
             background: rgba(34, 197, 94, 0.15);
-            color: #16a34a;
+            color: var(--green-600, #16a34a);
         }
 
         .saiba-badge-error {
             background: rgba(239, 68, 68, 0.15);
-            color: #dc2626;
+            color: var(--red-600, #dc2626);
         }
 
         /* Fields table */
@@ -366,6 +373,14 @@ policy_reader.saiba._add_modal_styles = function() {
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         }
 
+        .validation-field-icon.saiba-icon-valid {
+            background: #22c55e;
+        }
+
+        .validation-field-icon.saiba-icon-invalid {
+            background: #ef4444;
+        }
+
         /* Label cell */
         .validation-field-label-cell {
             padding: 12px 8px;
@@ -380,7 +395,7 @@ policy_reader.saiba._add_modal_styles = function() {
 
         .validation-field-error {
             font-size: 12px;
-            color: #dc2626;
+            color: var(--red-600, #dc2626);
             margin-top: 4px;
         }
 
@@ -402,7 +417,7 @@ policy_reader.saiba._add_modal_styles = function() {
         }
 
         .validation-field-value-cell.saiba-field-invalid {
-            color: #dc2626;
+            color: var(--red-600, #dc2626);
             font-weight: 500;
         }
 
@@ -501,13 +516,17 @@ policy_reader.saiba._add_modal_styles = function() {
 
         /* Status icons - dark mode (darker backgrounds) */
         [data-theme="dark"] .validation-field-icon.saiba-icon-valid,
-        .dark .validation-field-icon.saiba-icon-valid {
-            background: #166534 !important;
+        [data-theme="dark"] .validation-summary-icon.saiba-icon-valid,
+        .dark .validation-field-icon.saiba-icon-valid,
+        .dark .validation-summary-icon.saiba-icon-valid {
+            background: #166534;
         }
 
         [data-theme="dark"] .validation-field-icon.saiba-icon-invalid,
-        .dark .validation-field-icon.saiba-icon-invalid {
-            background: #991b1b !important;
+        [data-theme="dark"] .validation-summary-icon.saiba-icon-invalid,
+        .dark .validation-field-icon.saiba-icon-invalid,
+        .dark .validation-summary-icon.saiba-icon-invalid {
+            background: #991b1b;
         }
 
         /* Category header - dark mode */
