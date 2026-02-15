@@ -12,7 +12,7 @@ frappe.pages["policy-file-view"].on_page_load = function (wrapper) {
 
 	if (!policyDocumentId) {
 		page.main.html(`
-			<div class="text-center" style="padding: 50px;">
+			<div class="text-center pfv-centered-message">
 				<h3>No Policy Document Selected</h3>
 				<p>Please select a policy document to view.</p>
 			</div>
@@ -27,7 +27,7 @@ frappe.pages["policy-file-view"].on_page_load = function (wrapper) {
 function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 	// Show loading state
 	page.main.html(`
-		<div class="text-center" style="padding: 50px;">
+		<div class="text-center pfv-centered-message">
 			<div class="spinner-border" role="status">
 				<span class="sr-only">Loading...</span>
 			</div>
@@ -73,7 +73,7 @@ function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 				renderSplitPane(page, policyDoc, motorPolicy);
 			} else {
 				page.main.html(`
-					<div class="text-center" style="padding: 50px;">
+					<div class="text-center pfv-centered-message">
 						<h3>Error Loading Document</h3>
 						<p>Could not load policy document: ${policyDocumentId}</p>
 					</div>
@@ -98,7 +98,7 @@ function loadPolicyDocument(page, policyDocumentId, motorPolicyId) {
 		error: function (err) {
 			console.error("Policy Document load error:", err);
 			page.main.html(`
-				<div class="text-center" style="padding: 50px;">
+				<div class="text-center pfv-centered-message">
 					<h3>Error Loading Policy Document</h3>
 					<p>Failed to load policy document: ${err.message || "Unknown error"}</p>
 				</div>
@@ -139,7 +139,7 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 	// Create split pane layout
 	page.main.html(`
 		<!-- Header with Policy Document Link -->
-		<div class="policy-header" style="background: var(--subtle-fg, #f8f9fa); padding: 15px; border-bottom: 1px solid var(--border-color, #d1d5db); margin-bottom: 0;">
+		<div class="policy-header">
 			<div class="d-flex justify-content-between align-items-center">
 				<div>
 					<div class="d-flex align-items-center mb-2">
@@ -168,10 +168,10 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 			</div>
 		</div>
 
-		<div class="policy-viewer-container" style="height: calc(100vh - 180px); display: flex; border: 1px solid var(--border-color, #d1d5db);">
+		<div class="policy-viewer-container">
 			<!-- PDF Viewer Pane -->
-			<div class="pdf-pane" style="flex: 1; min-width: 0; border-right: 1px solid var(--border-color, #d1d5db); position: relative;">
-				<div class="pane-header" style="background: var(--subtle-fg, #f8f9fa); padding: 10px 15px; border-bottom: 1px solid var(--border-color, #d1d5db); display: flex; justify-content: space-between; align-items: center;">
+			<div class="pdf-pane">
+				<div class="pane-header">
 					<h5 class="mb-0">PDF Document</h5>
 					<div class="pdf-controls">
 						<button class="btn btn-sm btn-outline-secondary" id="zoom-out">-</button>
@@ -179,8 +179,8 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 						<button class="btn btn-sm btn-outline-secondary" id="zoom-in">+</button>
 					</div>
 				</div>
-				<div class="pdf-container" style="height: calc(100% - 50px); overflow: auto; background: var(--bg-color, #f5f5f5);">
-					<div id="pdf-viewer" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+				<div class="pdf-container">
+					<div id="pdf-viewer">
 						<div class="text-center">
 							<div class="spinner-border" role="status">
 								<span class="sr-only">Loading PDF...</span>
@@ -192,13 +192,13 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 			</div>
 
 			<!-- Resize Handle -->
-			<div class="resize-handle" style="width: 8px; background: var(--border-color, #e5e7eb); cursor: col-resize; position: relative;" title="Drag to resize">
-				<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2px; height: 30px; background: var(--text-muted, #9ca3af);"></div>
+			<div class="resize-handle" title="Drag to resize">
+				<div class="resize-handle-indicator"></div>
 			</div>
 
 			<!-- Motor Policy Fields Pane -->
-			<div class="fields-pane" style="flex: 1; min-width: 0; position: relative;">
-				<div class="pane-header" style="background: var(--subtle-fg, #f8f9fa); padding: 10px 15px; border-bottom: 1px solid var(--border-color, #d1d5db); display: flex; justify-content: space-between; align-items: center;">
+			<div class="fields-pane">
+				<div class="pane-header">
 					<h5 class="mb-0">${motorPolicy ? "Motor Policy Fields" : "Extracted Fields"}</h5>
 					<div class="fields-controls">
 						${
@@ -211,7 +211,7 @@ function renderSplitPane(page, policyDoc, motorPolicy) {
 						}
 					</div>
 				</div>
-				<div class="fields-container" style="height: calc(100% - 50px); overflow: auto; padding: 15px; background: var(--card-bg, white);">
+				<div class="fields-container">
 					<div id="policy-fields-content">
 						<!-- Content will be inserted here -->
 					</div>
@@ -253,7 +253,7 @@ function getStatusBadgeClass(status) {
 function formatExtractedFields(policyDoc) {
 	if (!policyDoc.extracted_fields) {
 		return `
-			<div class="text-center text-muted" style="padding: 40px;">
+			<div class="text-center text-muted pfv-no-data-message">
 				<i class="fa fa-exclamation-triangle fa-3x mb-3"></i>
 				<h5>No Extracted Fields Available</h5>
 				<p>This document hasn't been processed yet or extraction failed.</p>
@@ -269,7 +269,7 @@ function formatExtractedFields(policyDoc) {
 
 		if (!extractedData || Object.keys(extractedData).length === 0) {
 			return `
-				<div class="text-center text-muted" style="padding: 40px;">
+				<div class="text-center text-muted pfv-no-data-message">
 					<i class="fa fa-info-circle fa-3x mb-3"></i>
 					<h5>No Fields Extracted</h5>
 					<p>The extraction process completed but no fields were found.</p>
@@ -316,12 +316,12 @@ function renderFieldsTable(extractedData, policyDoc = {}) {
 	// Create simple fields container
 	html += `
 		<div class="fields-simple-section">
-			<div class="fields-header" style="background: var(--primary, #667eea); color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
-				<h5 class="mb-0" style="font-weight: 600;">
+			<div class="fields-header">
+				<h5 class="mb-0">
 					<i class="fa fa-list"></i> Extracted Fields
 				</h5>
 			</div>
-			<div class="fields-content" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #e9ecef); border-top: none; border-radius: 0 0 8px 8px; padding: 16px 20px;">
+			<div class="fields-content">
 	`;
 
 	// Render fields from data (handles both flat and nested structures)
@@ -354,11 +354,11 @@ function renderDataRows(data, prefix = "") {
 		} else {
 			// Simple key-value pair - cleaner line format
 			html += `
-				<div style="display: flex; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border-color, #f1f3f4); margin-bottom: 4px;">
-					<div style="flex: 0 0 200px; font-weight: 600; color: var(--text-muted, #495057); padding-right: 16px; font-size: 13px;">
+				<div class="extracted-field-row">
+					<div class="extracted-field-label">
 						${formatFieldLabel(displayKey)}:
 					</div>
-					<div style="flex: 1; color: var(--text-color, #212529); font-size: 13px; line-height: 1.4;">
+					<div class="extracted-field-value">
 						${formatFieldValue(value)}
 					</div>
 				</div>
@@ -507,12 +507,12 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 	fieldGroups.forEach((group) => {
 		html += `
 			<div class="field-group mb-4">
-				<div class="group-header" style="background: var(--primary, #667eea); color: white; padding: 10px 15px; border-radius: 6px 6px 0 0; margin-bottom: 0;">
-					<h6 class="mb-0" style="font-weight: 600;">
+				<div class="group-header">
+					<h6 class="mb-0">
 						<i class="fa fa-${group.icon}"></i> ${group.title}
 					</h6>
 				</div>
-				<div class="group-fields" style="background: var(--card-bg, white); border: 1px solid var(--border-color, #e9ecef); border-top: none; border-radius: 0 0 6px 6px; padding: 15px;">
+				<div class="group-fields">
 					<div class="row">
 		`;
 
@@ -522,7 +522,7 @@ function renderMotorPolicyFields(motorPolicy, policyDoc) {
 
 			html += `
 				<div class="col-md-6 mb-3">
-					<label class="form-label" style="font-weight: 600; color: var(--text-muted, #495057);">
+					<label class="form-label">
 						${field.label}
 						${
 							extractedValue
@@ -768,20 +768,6 @@ function addPageNavigation(pdf, canvas, context) {
 	// Create navigation controls
 	const navControls = document.createElement("div");
 	navControls.className = "pdf-navigation";
-	navControls.style.cssText = `
-		position: absolute;
-		bottom: 10px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: rgba(0,0,0,0.7);
-		color: white;
-		padding: 8px 15px;
-		border-radius: 20px;
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		z-index: 10;
-	`;
 
 	navControls.innerHTML = `
 		<button class="btn btn-sm btn-outline-light" id="prev-page" ${
@@ -842,7 +828,7 @@ function renderPDFFallback(policyFile) {
 			<h5>PDF Viewer</h5>
 			<p class="text-muted">File: ${policyFile.split("/").pop()}</p>
 			<p class="text-muted">PDF.js not available. Using fallback viewer.</p>
-			<iframe src="${policyFile}" style="width: 100%; height: 500px; border: none;" title="PDF Document"></iframe>
+			<div class="pdf-fallback"><iframe src="${policyFile}" title="PDF Document"></iframe></div>
 			<br><br>
 			<a href="${policyFile}" target="_blank" class="btn btn-primary">
 				<i class="fa fa-external-link"></i> Open PDF in New Tab
@@ -1077,16 +1063,6 @@ function createSaveStatusIndicator() {
 	if (!statusEl) {
 		statusEl = document.createElement("div");
 		statusEl.id = "save-status";
-		statusEl.style.cssText = `
-			position: fixed;
-			top: 20px;
-			right: 20px;
-			z-index: 1000;
-			padding: 8px 16px;
-			border-radius: 4px;
-			font-size: 14px;
-			display: none;
-		`;
 		document.body.appendChild(statusEl);
 	}
 

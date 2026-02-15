@@ -162,6 +162,29 @@ class SaibaSyncService:
             return default
         return cstr(value)
 
+    def _get_required_saiba_fields(self, policy_type):
+        """Get set of required SAIBA field names from validation rules"""
+        try:
+            validation_settings = frappe.get_single("SAIBA Validation Settings")
+            if policy_type.lower() == "motor":
+                rules = validation_settings.motor_validation_rules or []
+            else:
+                rules = validation_settings.health_validation_rules or []
+            return {r.saiba_field for r in rules if r.is_required}
+        except Exception:
+            return set()
+
+    def _filter_required_only(self, payload, policy_type):
+        """Filter payload to only required fields if setting is enabled"""
+        if not self.settings.saiba_sync_required_only:
+            return payload
+
+        required_fields = self._get_required_saiba_fields(policy_type)
+        if not required_fields:
+            return payload  # Fallback: send everything if no rules found
+
+        return {k: v for k, v in payload.items() if k in required_fields}
+
     def _build_motor_policy_payload(self, policy_doc):
         """Build the payload for Motor Policy sync"""
         return {
@@ -390,6 +413,7 @@ class SaibaSyncService:
 
             # Build payload
             payload = self._build_motor_policy_payload(policy_doc)
+            payload = self._filter_required_only(payload, "Motor")
 
             # Make API request
             response = self._make_api_request(self.MOTOR_ENDPOINT, payload)
@@ -428,6 +452,7 @@ class SaibaSyncService:
 
             # Build payload
             payload = self._build_health_policy_payload(policy_doc)
+            payload = self._filter_required_only(payload, "Health")
 
             # Make API request
             response = self._make_api_request(self.HEALTH_ENDPOINT, payload)

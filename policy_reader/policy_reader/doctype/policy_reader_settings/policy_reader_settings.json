@@ -11,6 +11,7 @@
   "claude_model",
   "saiba_integration_section",
   "saiba_enabled",
+  "saiba_sync_required_only",
   "saiba_base_url",
   "column_break_saiba",
   "saiba_username",
@@ -69,6 +70,14 @@
    "fieldname": "saiba_enabled",
    "fieldtype": "Check",
    "label": "Enable SAIBA Sync"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.saiba_enabled",
+   "description": "When checked, only mandatory fields (as defined in SAIBA Validation Settings) will be sent during sync. Optional fields will be excluded from the payload.",
+   "fieldname": "saiba_sync_required_only",
+   "fieldtype": "Check",
+   "label": "Sync Required Fields Only"
   },
   {
    "default": "http://3.108.100.243:8085",

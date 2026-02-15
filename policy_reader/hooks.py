@@ -25,7 +25,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/policy_reader/css/policy_reader.css"
+app_include_css = "/assets/policy_reader/css/saiba_validation.css"
 app_include_js = "/assets/policy_reader/js/saiba_validation.js"
 
 # include js, css files in header of web template

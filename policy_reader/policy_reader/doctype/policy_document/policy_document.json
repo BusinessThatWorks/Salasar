@@ -309,12 +309,14 @@
   },
   {
    "fetch_from": "customer_code.customer_pan",
+   "fetch_if_empty": 1,
    "fieldname": "checklist_customer_pan",
    "fieldtype": "Data",
    "label": "Customer PAN"
   },
   {
    "fetch_from": "customer_code.customer_gst",
+   "fetch_if_empty": 1,
    "fieldname": "checklist_customer_gst",
    "fieldtype": "Data",
    "label": "Customer GST"
