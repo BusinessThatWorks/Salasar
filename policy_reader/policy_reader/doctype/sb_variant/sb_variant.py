@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class MotorPolicy(Document):
+class SBVariant(Document):
 	pass

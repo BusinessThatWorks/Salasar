@@ -211,3 +211,19 @@ class MotorPolicy(Document):
 
 		except Exception as e:
 			frappe.logger().error(f"Error copying insurer info from Policy Document: {str(e)}")
+	@frappe.whitelist()
+	def sync_motor_policy(self):
+		ai_extracted_fields = [
+			'sum_insured', 'year_of_man', 'fuel', 'policy_no',
+			'policy_expiry_date', 'policy_issuance_date', 'make',
+			'ncb', 'model', 'vehicle_no', 'new_renewal',
+			'chasis_no', 'net_od_premium', 'engine_no',
+			'policy_start_date', 'gst', 'variant',
+			'tp_premium', 'bank_name', 'cc','rto_code'
+		]
+
+		for field in ai_extracted_fields:
+			if not self.get(field):
+				frappe.throw(f"{field} is missing")
+		self.approval_status = "Approved"
+		self.save()

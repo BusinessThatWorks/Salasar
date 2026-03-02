@@ -1,9 +1,40 @@
 // Copyright (c) 2025, Clapgrow Software and contributors
 // For license information, please see license.txt
-console.log("Motor Policy client script loaded ✅");
-
 frappe.ui.form.on("Motor Policy", {
 	refresh(frm) {
+		frm.set_value("payment_mode_1", "Bank Transfer");
+		frm.set_value("bank_name", "NONE");
+		frm.set_value("pos_misp_ref", "YES");
+		frm.set_value("policy_enquiry_remarks", "NA");
+
+		// Mark AI fields first so indicators are always visible regardless of status
+		if (!frm.doc.__islocal && typeof policy_reader !== "undefined" && policy_reader.saiba) {
+			policy_reader.saiba.mark_saiba_ai_fields(frm, "Motor");
+		}
+		// for enabling users to check ai_extracted_fields manually and then allow them to mark it as approved
+		if (!frm.is_new() && frm.doc.approval_status !== "Approved") {
+			frm.add_custom_button(
+				__("Approve"),
+				() => {
+					frappe.confirm(
+						__("Are you sure you want to approve this Motor Policy?"),
+						() => {
+							frappe.call({
+								method: "sync_motor_policy",
+								doc: frm.doc,
+								freeze: true,
+								callback() {
+									frm.reload_doc();
+								}
+							});
+						}
+					);
+				},
+				__("Actions")
+			);
+		}
+
+
 		if (frm.doc.vehicle_no && !frm.doc.rto_code) {
 			frm.trigger("vehicle_no");
 		}
@@ -11,12 +42,13 @@ frappe.ui.form.on("Motor Policy", {
 		set_type_of_vehicle(frm);
 		frm._rto_code_manual = false;
 		// Add SAIBA buttons (sync + validation)
-		if (!frm.doc.__islocal) {
+		if (!frm.doc.__islocal && frm.doc.approval_status === "Approved") {
 			add_saiba_sync_button(frm);
 			// Add SAIBA validation button and field indicators (uses shared functions from saiba_validation.js)
 			if (typeof policy_reader !== "undefined" && policy_reader.saiba) {
 				policy_reader.saiba.add_validate_button(frm, "Motor");
 				policy_reader.saiba.mark_required_fields(frm, "Motor");
+				// policy_reader.saiba.mark_saiba_ai_fields(frm, "Motor");
 			}
 		}
 	},

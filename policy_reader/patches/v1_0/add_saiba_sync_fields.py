@@ -26,7 +26,7 @@ def execute():
             "fieldname": "saiba_sync_status",
             "fieldtype": "Select",
             "label": "SAIBA Sync Status",
-            "options": "Not Synced\nSynced\nFailed\nPending",
+            "options": "Not Synced\nSynced\nFailed\nPending\nDupliacte Entry\nApproved",
             "default": "Not Synced",
             "read_only": 1,
             "in_list_view": 1,

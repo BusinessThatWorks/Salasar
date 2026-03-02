@@ -287,3 +287,70 @@ policy_reader.saiba._perform_sync = function(frm, policy_type) {
         }
     });
 };
+
+
+policy_reader.saiba.mark_saiba_ai_fields = function(frm, policy_type) {
+    console.log("mark_saiba_ai_fields called");
+
+    frappe.call({
+        method: 'policy_reader.policy_reader.services.saiba_validation_service.get_saiba_ai_fields',
+        args: { policy_type: policy_type },
+        callback: function(r) {
+            const saibaAiFields = r.message || [];
+
+            frm._saiba_ai_fields = saibaAiFields;
+
+            saibaAiFields.forEach(function(fieldname) {
+                const field = frm.fields_dict[fieldname];
+                if (!field || !field.$wrapper) return;
+
+                field.$wrapper.css({
+                    "background-color": "#eef6ff",
+                    "border-left": "4px solid #4c9aff",
+                    "padding-left": "6px"
+                });
+
+                // AI badge
+                const $label = field.$wrapper.find('.control-label, label').first();
+                if ($label && !$label.find('.ai-saiba-indicator').length) {
+                    $label.append(
+                        '<span class="ai-saiba-indicator" ' +
+                        'title="AI extracted & required for SAIBA" ' +
+                        'style="margin-left:6px;color:#4c9aff;font-weight:600;">AI</span>'
+                    );
+                }
+            });
+
+            policy_reader.saiba.show_ai_progress(frm);
+        }
+    });
+};
+
+policy_reader.saiba.show_ai_progress = function(frm) {
+    const fields = frm._saiba_ai_fields || [];
+    if (!fields.length) return;
+
+    let filled = 0;
+    fields.forEach(f => {
+        const v = frm.doc[f];
+        if (v !== null && v !== undefined && v !== "") {
+            filled++;
+        }
+    });
+
+    const total = fields.length;
+    // const percent = Math.round((filled / total) * 100);
+
+    frm.dashboard.clear_headline();
+    frm.dashboard.set_headline(
+        `AI Extraction (SAIBA): ${filled} / ${total}`
+    );
+
+    // if (frm.dashboard.add_progress) {
+    //     frm.dashboard.add_progress(
+    //         __('AI Extraction Coverage'),
+    //         percent,
+    //         percent < 50 ? 'red' : percent < 80 ? 'orange' : 'green'
+    //     );
+    // }
+};

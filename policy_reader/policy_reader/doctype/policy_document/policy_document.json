@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "autoincrement",
  "creation": "2025-08-01 07:59:23.913137",
  "doctype": "DocType",
@@ -548,7 +547,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-31 19:57:14.852905",
+ "modified": "2026-02-17 18:35:16.320358",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

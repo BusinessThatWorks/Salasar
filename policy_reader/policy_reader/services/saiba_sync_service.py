@@ -173,6 +173,49 @@ class SaibaSyncService:
             return {r.saiba_field for r in rules if r.is_required}
         except Exception:
             return set()
+        
+    def _validate_vehicle_master(self, policy_doc):
+        """
+        Rules:
+        - Make must exist → else throw error
+        - Model must exist for that make → else throw error  
+        - Variant missing/not found → send as "NA" (no error)
+        - Model missing/not found but make exists → send model & variant as "NA"
+        """
+        make = self._safe_str(policy_doc.make)
+        print("mm",make)
+        model = self._safe_str(policy_doc.model)
+        variant = self._safe_str(policy_doc.variant)
+        make_exists = frappe.db.exists("SB Make", make)
+        print("mm",make_exists)
+        if not make_exists:
+            frappe.throw(
+                f"Make '{make}' does not exist in SB Make master. Cannot sync with SAIBA."
+            )
+        resolved_model = "NA"
+        resolved_variant = "NA"
+
+        if model:
+            model_exists = frappe.db.exists("SB Model", {"make": make_exists, "model": model})
+            if not model_exists:
+                resolved_model = "NA"
+                resolved_variant = "NA"
+            else:
+                resolved_model = model
+                if variant:
+                    variant_exists = frappe.db.exists("SB Variant", {
+                        "make": make_exists,
+                        "model": model_exists,
+                        "variant": variant
+                    })
+                    resolved_variant = variant if variant_exists else "NA"
+                else:
+                    resolved_variant = "NA"
+        else:
+            resolved_model = "NA"
+            resolved_variant = "NA"
+
+        return resolved_model, resolved_variant
 
     def _filter_required_only(self, payload, policy_type):
         """Filter payload to only required fields if setting is enabled"""
@@ -184,10 +227,12 @@ class SaibaSyncService:
             return payload  # Fallback: send everything if no rules found
 
         return {k: v for k, v in payload.items() if k in required_fields}
+    
 
     def _build_motor_policy_payload(self, policy_doc):
+        resolved_model, resolved_variant = self._validate_vehicle_master(policy_doc)
         """Build the payload for Motor Policy sync"""
-        return {
+        return{ 
             "custCode": self._safe_int(policy_doc.customer_code),
             "posPolicy": self._safe_str(policy_doc.pos_misp_ref) or "No",
             "bizType": self._safe_str(policy_doc.biz_type) or "New",
@@ -200,6 +245,7 @@ class SaibaSyncService:
             "policyReceivedFormat": "Recd in Hard Copy",
             "policyType": self._safe_str(policy_doc.policy_type),
             "department": self._safe_str(policy_doc.department),
+            # "coverageType": self._safe_str(policy_doc.coverage_type) or "1+1",
             "coverageType": self._safe_str(policy_doc.coverage_type) or "1+1",
             "policyVertical": self._safe_str(policy_doc.customer_vertical),
             "policyNo": self._safe_str(policy_doc.policy_no),
@@ -208,8 +254,8 @@ class SaibaSyncService:
             "prevPolicy": self._safe_str(policy_doc.prev_policy_no) or "No",
             "vehicleNo": self._safe_str(policy_doc.vehicle_no),
             "make": self._safe_str(policy_doc.make),
-            "model": self._safe_str(policy_doc.model),
-            "variant": self._safe_str(policy_doc.variant),
+            "model": resolved_model,
+            "variant": resolved_variant,
             "registrationDate": self._format_date_for_saiba(policy_doc.registration_date or policy_doc.policy_start_date),
             "typeofVehicle": self._safe_str(policy_doc.type_of_vehicle) or "Private",
             "yearOfMan": self._safe_int(policy_doc.year_of_man),
@@ -218,7 +264,7 @@ class SaibaSyncService:
             "cc": self._safe_str(policy_doc.cc),
             "seat": self._safe_str(policy_doc.seats),
             "fuel": self._safe_str(policy_doc.fuel),
-            "rtoCode": self._safe_str(policy_doc.rto_code),
+            "rtocode" : self._safe_str(policy_doc.rto_code),
             "ncb": self._safe_int(policy_doc.ncb),
             "odd": self._safe_int(policy_doc.odd),
             "vehicleCategory": self._safe_str(policy_doc.category) or "PCV",
@@ -227,11 +273,11 @@ class SaibaSyncService:
             "noOfPassenger": self._safe_str(policy_doc.no_of_passenger),
             "sumInsured": self._safe_int(policy_doc.sum_insured),
             "netODPremium": self._safe_int(policy_doc.net_od_premium),
-            "premRate": self._safe_int(policy_doc.prem_rate),
+            "premRate": self._safe_str(policy_doc.prem_rate),
             "tpPremium": self._safe_int(policy_doc.tp_premium),
             "lpodPremium": self._safe_int(policy_doc.lpod_premium),
             "coverangeOrTP": self._safe_str(policy_doc.coverage_tp),
-            "gst": self._safe_int(policy_doc.gst),
+            "gst": self._safe_int(policy_doc.gst) or 18,
             "stampDuty": self._safe_int(policy_doc.stamp_duty),
             "paymentMode": self._safe_str(policy_doc.payment_mode_1),
             "bankName": self._safe_str(policy_doc.bank_name),
@@ -240,6 +286,7 @@ class SaibaSyncService:
             "remarks": self._safe_str(policy_doc.policy_enquiry_remarks),
             "policyStatus": self._safe_str(policy_doc.policy_status_na) or "NA"
         }
+    
 
     def _build_health_policy_payload(self, policy_doc):
         """Build the payload for Health Policy sync"""
@@ -287,13 +334,18 @@ class SaibaSyncService:
     def _make_api_request(self, endpoint, payload):
         """Make API request to SAIBA"""
         base_url = self._get_base_url()
+        print("base_url",base_url)
         url = f"{base_url}{endpoint}"
+        print("url",url)
         token = self._get_auth_token()
+        print("token",token)
+        print("pay",payload)
 
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}"
         }
+        print("heaesd",headers)
 
         try:
             response = requests.post(
@@ -302,6 +354,7 @@ class SaibaSyncService:
                 headers=headers,
                 timeout=60
             )
+            print("kkkkkkkkkkkkkk",response.text)
 
             # Handle 401/403 - try refreshing token once
             if response.status_code in [401, 403]:
@@ -358,8 +411,40 @@ class SaibaSyncService:
                 request_payload=request_payload
             )
             return {"success": True, "control_number": control_no, "message": data.get("result")}
+
+
         else:
             error_msg = data.get("error") or data.get("validations") or data.get("message") or f"HTTP {response.status_code}"
+            # Normalize to string
+            if isinstance(error_msg, list):
+                error_text = " ".join(error_msg)
+            else:
+                error_text = str(error_msg)
+
+            # Google-Sheet-style regex usage
+            match = re.search(
+                r'policy\s*no.*already\s*exists\s*in\s*saiba.*control\s*no\s*:\s*(\d+)',
+                error_text,
+                re.IGNORECASE
+            )
+
+            if match:
+                control_no = match.group(1)
+
+                self._update_sync_status(
+                    policy_doc,
+                    status="Duplicate Entry",
+                    control_number=control_no,
+                    error=error_text,
+                    response=data,
+                    request_payload=request_payload
+                )
+
+                return {
+                    "success": False,
+                    "control_number": control_no,
+                    "error":error_text
+                }
             self._update_sync_status(
                 policy_doc,
                 status="Failed",
@@ -402,24 +487,31 @@ class SaibaSyncService:
     def sync_motor_policy(self, policy_name):
         """Sync a Motor Policy to SAIBA"""
         if not self._is_enabled():
+            # print("llllllll",self,self._is_enabled)
             return {"success": False, "error": "SAIBA integration is not enabled"}
+        # if self.saiba_sync_status!="Approved":
+        #     frappe.throw("Please approve first to sync with saiba")
 
         payload = None
         try:
             policy_doc = frappe.get_doc("Motor Policy", policy_name)
-
-            # Mark as pending
-            self._update_sync_status(policy_doc, status="Pending")
-
-            # Build payload
+        #     # we have to check if model,make and variant are matching with the variant , model and make in sb master doc 
+        #     # need to check if already there is a doc as completed state...if exist , then we should not allow the data to siaba and set the status as duplicate entry
+    
+                # Build payload
             payload = self._build_motor_policy_payload(policy_doc)
+
+            print("build_payload",payload)
             payload = self._filter_required_only(payload, "Motor")
+            print("payload",payload)
 
             # Make API request
             response = self._make_api_request(self.MOTOR_ENDPOINT, payload)
+            print("rrr",response)
 
             # Handle response (pass payload for debugging)
             return self._handle_api_response(response, policy_doc, request_payload=payload)
+    
 
         except Exception as e:
             frappe.log_error(f"Motor Policy sync error: {str(e)}", "SAIBA Sync Error")
@@ -452,6 +544,7 @@ class SaibaSyncService:
 
             # Build payload
             payload = self._build_health_policy_payload(policy_doc)
+            
             payload = self._filter_required_only(payload, "Health")
 
             # Make API request
@@ -496,6 +589,8 @@ class SaibaSyncService:
 
         except Exception as e:
             return {"success": False, "error": str(e)}
+        
+
 
 
 # Whitelisted API methods

@@ -534,9 +534,11 @@ frappe.ui.form.on("Policy Document", {
 						}
 						if (emp.rm_code) {
 							frm.set_value("checklist_rm_code", emp.rm_code);
+							console.log("found",emp.rm_code)
 						}
 						if (emp.csc_code) {
 							frm.set_value("checklist_csc_code", emp.csc_code);
+							console.log('mo')
 						}
 
 						console.log("Successfully populated processor and checklist fields");
