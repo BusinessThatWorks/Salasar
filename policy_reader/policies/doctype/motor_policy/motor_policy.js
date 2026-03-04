@@ -33,6 +33,25 @@ frappe.ui.form.on("Motor Policy", {
 				__("Actions")
 			);
 		}
+		if (frm.doc.vehicle_no && frm.doc.approval_status !== "Approved") {
+			const raw = frm.doc.vehicle_no;
+			const normalized = raw.toUpperCase().replace(/[\s\-]/g, "");
+			
+			if (normalized !== raw) {
+				frm.set_value("vehicle_no", normalized);
+			}
+			
+			if (normalized.length >= 4) {
+				const derived_rto = normalized.slice(0, 4);
+				if (frm.doc.rto_code !== derived_rto) {
+					frm.set_value("rto_code", derived_rto);
+					// frappe.show_alert({
+					// 	message: `RTO Code auto-set to ${derived_rto} from Vehicle No`,
+					// 	indicator: "blue"
+					// }, 3);
+				}
+       	 	}
+    	}
 
 
 		if (frm.doc.vehicle_no && !frm.doc.rto_code) {
