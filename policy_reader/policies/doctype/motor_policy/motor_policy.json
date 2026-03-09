@@ -1000,7 +1000,7 @@
    "fieldname": "coverage_type",
    "fieldtype": "Select",
    "label": "Coverage Type",
-   "options": "NA (1+1) Years\n1+3\n(1+5) Years\nSTANDALONE TP 1Yr Policy (0+1) Year\nSTANDALONE OD 1Yr Policy (1+0) Year\n(3+3) Years\n(5+5) Years\""
+   "options": "1+1\n1+3\n1+5\n0+1\n1+0\n3+3\n5+5"
   },
   {
    "fieldname": "branch_code",
@@ -1030,7 +1030,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-02 12:00:10.872349",
+ "modified": "2026-03-06 11:46:59.218492",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",

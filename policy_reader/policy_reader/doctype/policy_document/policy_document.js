@@ -448,18 +448,10 @@ frappe.ui.form.on("Policy Document", {
 			"MOTOR COMMERCIAL VEHICLE",
 			"MOTOR PRIVATE CAR",
 			"MOTOR TWO WHEELER",
-			"Motor Vehicle Liability"
+			"Motor Vehicle Liability",
 		];
 
-		const motor_coverage_types = [
-			"NA (1+1) Years",
-			"(1+3) Years",
-			"(1+5) Years",
-			"STANDALONE TP 1Yr Policy (0+1) Year",
-			"STANDALONE OD 1Yr Policy (1+0) Year",
-			"(3+3) Years",
-			"(5+5) Years"
-		];
+		const motor_coverage_types = ["1+1", "1+3", "1+5", "0+1", "1+0", "3+3", "5+5"];
 
 		// Define options for Health department
 		const health_policy_types = [
@@ -469,32 +461,42 @@ frappe.ui.form.on("Policy Document", {
 			"HOSPITAL CASH",
 			"INDIVIDUAL MEDICLAIM",
 			"PERSONAL ACCIDENT",
-			"SUPER TOP UP"
+			"SUPER TOP UP",
 		];
 
-		const health_coverage_types = [
-			"1 YEAR",
-			"2 YEAR",
-			"3 YEAR",
-			"4 YEAR",
-			"5 YEAR"
-		];
+		const health_coverage_types = ["1 YEAR", "2 YEAR", "3 YEAR", "4 YEAR", "5 YEAR"];
 
 		// Set options based on department selection
 		const department = frm.doc.checklist_department;
 
 		if (department === "Motor") {
 			frm.set_df_property("checklist_policy_type", "options", motor_policy_types.join("\n"));
-			frm.set_df_property("checklist_coverage_type", "options", motor_coverage_types.join("\n"));
+			frm.set_df_property(
+				"checklist_coverage_type",
+				"options",
+				motor_coverage_types.join("\n")
+			);
 		} else if (department === "Health") {
-			frm.set_df_property("checklist_policy_type", "options", health_policy_types.join("\n"));
-			frm.set_df_property("checklist_coverage_type", "options", health_coverage_types.join("\n"));
+			frm.set_df_property(
+				"checklist_policy_type",
+				"options",
+				health_policy_types.join("\n")
+			);
+			frm.set_df_property(
+				"checklist_coverage_type",
+				"options",
+				health_coverage_types.join("\n")
+			);
 		} else {
 			// If no department selected, show all options
 			const all_policy_types = [...motor_policy_types, ...health_policy_types];
 			const all_coverage_types = [...motor_coverage_types, ...health_coverage_types];
 			frm.set_df_property("checklist_policy_type", "options", all_policy_types.join("\n"));
-			frm.set_df_property("checklist_coverage_type", "options", all_coverage_types.join("\n"));
+			frm.set_df_property(
+				"checklist_coverage_type",
+				"options",
+				all_coverage_types.join("\n")
+			);
 		}
 
 		frm.refresh_field("checklist_policy_type");
@@ -534,11 +536,11 @@ frappe.ui.form.on("Policy Document", {
 						}
 						if (emp.rm_code) {
 							frm.set_value("checklist_rm_code", emp.rm_code);
-							console.log("found",emp.rm_code)
+							console.log("found", emp.rm_code);
 						}
 						if (emp.csc_code) {
 							frm.set_value("checklist_csc_code", emp.csc_code);
-							console.log('mo')
+							console.log("mo");
 						}
 
 						console.log("Successfully populated processor and checklist fields");
@@ -547,9 +549,9 @@ frappe.ui.form.on("Policy Document", {
 						console.log("Full response:", r.message);
 					}
 				},
-				error: function(err) {
+				error: function (err) {
 					console.error("Error fetching Insurance Employee:", err);
-				}
+				},
 			});
 		} else {
 			console.log("Processor fields already populated, skipping auto-population");
