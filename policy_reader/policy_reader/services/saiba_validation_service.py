@@ -3,6 +3,8 @@
 
 import frappe
 from frappe.utils import cint, flt, getdate
+from policy_reader.policy_reader.services.common_service import CommonService
+from policy_reader.policy_reader.services.policy_creation_service import PolicyCreationService
 
 
 class SaibaValidationService:
@@ -286,6 +288,17 @@ class SaibaValidationService:
                 "success": False,
                 "error": str(e)
             }
+    def get_saiba_ai_fields(self, policy_type):
+        # SAIBA-required fields (29)
+        saiba_fields = set(get_required_fields(policy_type))
+        print("ss",saiba_fields)
+        #ai_feilds
+        ai_fields = set(
+            CommonService.get_field_mapping_for_policy_type(policy_type).values()
+        ) - set(PolicyCreationService()._get_protected_fields())
+        print("aii",ai_fields)
+        print(list(saiba_fields&ai_fields))
+        return list(saiba_fields & ai_fields)
 
 
 # Whitelisted API methods
@@ -316,3 +329,10 @@ def get_required_fields(policy_type):
     service = SaibaValidationService()
     rules = service.get_validation_rules(policy_type)
     return [r.doctype_field for r in rules if r.is_required]
+
+
+@frappe.whitelist()
+def get_saiba_ai_fields(policy_type):
+    """Return SAIBA-required fields that are AI-extracted"""
+    service = SaibaValidationService()
+    return service.get_saiba_ai_fields(policy_type)

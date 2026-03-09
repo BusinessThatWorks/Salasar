@@ -149,6 +149,7 @@ class PolicyCreationService:
             'customer_gst',
             'category',
             'portability',
+            # 'rto_code'
         ]
 
     def _get_current_user_employee_info(self):

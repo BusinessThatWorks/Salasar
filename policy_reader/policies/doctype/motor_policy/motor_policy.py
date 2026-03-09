@@ -1,13 +1,15 @@
 # Copyright (c) 2025, Clapgrow Software and contributors
 # For license information, please see license.txt
 
-import frappe
 import json
+
+import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, cstr
-from policy_reader.policy_reader.services.policy_creation_service import PolicyCreationService
+from frappe.utils import cstr, getdate
+
 from policy_reader.policy_reader.services.common_service import CommonService
 from policy_reader.policy_reader.services.field_mapping_service import FieldMappingService
+from policy_reader.policy_reader.services.policy_creation_service import PolicyCreationService
 
 
 class MotorPolicy(Document):
@@ -20,16 +22,16 @@ class MotorPolicy(Document):
 		self.validate_policy_dates()
 		self.validate_required_fields()
 		self.validate_renewable_policy()
-	
+
 	def validate_policy_dates(self):
 		"""Validate policy date logic"""
 		if self.policy_start_date and self.policy_expiry_date:
 			start_date = getdate(self.policy_start_date)
 			expiry_date = getdate(self.policy_expiry_date)
-			
+
 			if start_date >= expiry_date:
 				frappe.throw("Policy start date must be before expiry date")
-	
+
 	def validate_required_fields(self):
 		"""Validate critical SAIBA fields with better error messages"""
 		# Removed mandatory validation to allow document creation without all fields
@@ -40,10 +42,10 @@ class MotorPolicy(Document):
 		"""Validate that renewable policies have Old Control Number"""
 		if self.is_renewable == "Yes" and not self.old_control_number:
 			settings = frappe.get_single("Policy Reader Settings")
-			handling = getattr(settings, 'renewable_ocn_handling', 'Block Creation')
+			handling = getattr(settings, "renewable_ocn_handling", "Block Creation")
 
 			if handling == "Use Default Value":
-				default_ocn = getattr(settings, 'default_old_control_number', 'DEF_CN_1') or 'DEF_CN_1'
+				default_ocn = getattr(settings, "default_old_control_number", "DEF_CN_1") or "DEF_CN_1"
 				self.old_control_number = default_ocn
 			else:
 				frappe.throw("Old Control Number is required when policy is marked as Renewable")
@@ -60,11 +62,7 @@ class MotorPolicy(Document):
 					return
 
 				# Get Insurance Employee record for current user
-				employee = frappe.db.get_value(
-					"Insurance Employee",
-					{"user": current_user},
-					"name"
-				)
+				employee = frappe.db.get_value("Insurance Employee", {"user": current_user}, "name")
 
 				if employee:
 					self.rm_csc_ref = employee
@@ -75,7 +73,7 @@ class MotorPolicy(Document):
 		except Exception as e:
 			frappe.logger().error(f"Error auto-populating rm_csc_ref: {str(e)}")
 			# Don't throw - this is a non-critical operation
-	
+
 	@frappe.whitelist()
 	def populate_fields_from_policy_document(self, policy_document_name):
 		"""
@@ -85,6 +83,7 @@ class MotorPolicy(Document):
 		IMPORTANT: Customer and Insurer information from Policy Document takes precedence
 		over AI-extracted values and will not be overwritten.
 		"""
+		# breakpoint()
 		try:
 			# Get the Policy Document
 			policy_doc = frappe.get_doc("Policy Document", policy_document_name)
@@ -93,7 +92,7 @@ class MotorPolicy(Document):
 			if not policy_doc.extracted_fields:
 				return {
 					"success": False,
-					"error": "No extracted fields found in Policy Document. Please process the document first."
+					"error": "No extracted fields found in Policy Document. Please process the document first.",
 				}
 
 			# Use the existing PolicyCreationService
@@ -128,11 +127,13 @@ class MotorPolicy(Document):
 			if not field_mapping:
 				return {
 					"success": False,
-					"error": "No field mapping found for Motor policy. Please check Policy Reader Settings."
+					"error": "No field mapping found for Motor policy. Please check Policy Reader Settings.",
 				}
 
 			# Debug: Log the specific fields we're trying to map
-			chasis_related = [k for k in parsed_data.keys() if 'chasis' in k.lower() or 'chassis' in k.lower()]
+			chasis_related = [
+				k for k in parsed_data.keys() if "chasis" in k.lower() or "chassis" in k.lower()
+			]
 			if chasis_related:
 				frappe.logger().info(f"Found chassis-related fields in parsed data: {chasis_related}")
 				for field in chasis_related:
@@ -149,7 +150,6 @@ class MotorPolicy(Document):
 			mapping_results = field_mapping_service.map_fields_dynamically(
 				parsed_data, field_mapping, self, "Motor", protected_fields
 			)
-
 			# Save the Motor Policy with populated fields
 			self.save()
 
@@ -158,15 +158,14 @@ class MotorPolicy(Document):
 				"populated_fields": mapping_results["mapped_count"],
 				"protected_fields": mapping_results.get("protected_count", 0),
 				"unmapped_fields": mapping_results["unmapped_fields"],
-				"message": f"Successfully populated {mapping_results['mapped_count']} fields from Policy Document. {mapping_results.get('protected_count', 0)} fields protected from overwriting."
+				"message": f"Successfully populated {mapping_results['mapped_count']} fields from Policy Document. {mapping_results.get('protected_count', 0)} fields protected from overwriting.",
 			}
 
 		except Exception as e:
-			frappe.log_error(f"Error populating Motor Policy fields: {str(e)}", "Motor Policy Population Error")
-			return {
-				"success": False,
-				"error": str(e)
-			}
+			frappe.log_error(
+				f"Error populating Motor Policy fields: {str(e)}", "Motor Policy Population Error"
+			)
+			return {"success": False, "error": str(e)}
 
 	def _copy_customer_info_from_policy_doc(self, policy_doc):
 		"""Copy customer information from Policy Document to Motor Policy"""
@@ -181,7 +180,9 @@ class MotorPolicy(Document):
 
 			if policy_doc.customer_group_name:
 				self.customer_group = policy_doc.customer_group_name
-				frappe.logger().info(f"Copied customer_group from Policy Document: {policy_doc.customer_group_name}")
+				frappe.logger().info(
+					f"Copied customer_group from Policy Document: {policy_doc.customer_group_name}"
+				)
 
 		except Exception as e:
 			frappe.logger().error(f"Error copying customer info from Policy Document: {str(e)}")
@@ -191,7 +192,9 @@ class MotorPolicy(Document):
 		try:
 			if policy_doc.insurance_company_branch:
 				self.insurance_company_branch = policy_doc.insurance_company_branch
-				frappe.logger().info(f"Copied insurance_company_branch from Policy Document: {policy_doc.insurance_company_branch}")
+				frappe.logger().info(
+					f"Copied insurance_company_branch from Policy Document: {policy_doc.insurance_company_branch}"
+				)
 
 			if policy_doc.insurer_name:
 				self.insurer_name = policy_doc.insurer_name
@@ -203,11 +206,47 @@ class MotorPolicy(Document):
 
 			if policy_doc.insurer_branch:
 				self.insurer_branch = policy_doc.insurer_branch
-				frappe.logger().info(f"Copied insurer_branch from Policy Document: {policy_doc.insurer_branch}")
+				frappe.logger().info(
+					f"Copied insurer_branch from Policy Document: {policy_doc.insurer_branch}"
+				)
 
 			if policy_doc.insurer_branch_code:
 				self.insurer_branch_code = policy_doc.insurer_branch_code
-				frappe.logger().info(f"Copied insurer_branch_code from Policy Document: {policy_doc.insurer_branch_code}")
+				frappe.logger().info(
+					f"Copied insurer_branch_code from Policy Document: {policy_doc.insurer_branch_code}"
+				)
 
 		except Exception as e:
 			frappe.logger().error(f"Error copying insurer info from Policy Document: {str(e)}")
+
+	@frappe.whitelist()
+	def sync_motor_policy(self):
+		ai_extracted_fields = [
+			"sum_insured",
+			"year_of_man",
+			"fuel",
+			"policy_no",
+			"policy_expiry_date",
+			"policy_issuance_date",
+			"make",
+			"ncb",
+			"model",
+			"vehicle_no",
+			"new_renewal",
+			"chasis_no",
+			"net_od_premium",
+			"engine_no",
+			"policy_start_date",
+			"gst",
+			"variant",
+			"tp_premium",
+			"bank_name",
+			"cc",
+			"rto_code",
+		]
+
+		for field in ai_extracted_fields:
+			if not self.get(field):
+				frappe.throw(f"{field} is missing")
+		self.approval_status = "Approved"
+		self.save()

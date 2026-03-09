@@ -1,0 +1,39 @@
+{
+ "cards": [
+  {
+   "card": "Synced to SAIBA"
+  },
+  {
+   "card": "Not Synced to SAIBA"
+  },
+  {
+   "card": "Sync Failed"
+  },
+  {
+   "card": "Pending Sync"
+  },
+  {
+   "card": "Awaiting Approval"
+  },
+  {
+   "card": "Approved Not Synced"
+  }
+ ],
+ "charts": [
+  {
+   "width": "Full"
+  }
+ ],
+ "creation": "2026-03-05 11:34:51.957901",
+ "dashboard_name": "SAIBA Report",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2026-03-06 16:16:21.344661",
+ "modified_by": "Administrator",
+ "module": "Policy Reader",
+ "name": "SAIBA Report",
+ "owner": "Administrator"
+}

@@ -1,9 +1,61 @@
 // Copyright (c) 2025, Clapgrow Software and contributors
 // For license information, please see license.txt
-console.log("Motor Policy client script loaded ✅");
-
 frappe.ui.form.on("Motor Policy", {
 	refresh(frm) {
+		if (!frm.payment_mode_1) {
+			frm.set_value("payment_mode_1", "Bank Transfer");
+		}
+		if (!frm.doc.bank_name) {
+			frm.set_value("bank_name", "NONE");
+		}
+		if (!frm.doc.gst) {
+			frm.set_value("gst", 18);
+		}
+		frm.set_value("pos_misp_ref", "YES");
+		frm.set_value("policy_enquiry_remarks", "NA");
+
+		// Mark AI fields first so indicators are always visible regardless of status
+		if (!frm.doc.__islocal && typeof policy_reader !== "undefined" && policy_reader.saiba) {
+			policy_reader.saiba.mark_saiba_ai_fields(frm, "Motor");
+		}
+		// for enabling users to check ai_extracted_fields manually and then allow them to mark it as approved
+		if (!frm.is_new() && frm.doc.approval_status !== "Approved") {
+			frm.add_custom_button(
+				__("Approve"),
+				() => {
+					frappe.confirm(
+						__("Are you sure you want to approve this Motor Policy?"),
+						() => {
+							frappe.call({
+								method: "sync_motor_policy",
+								doc: frm.doc,
+								freeze: true,
+								callback() {
+									frm.reload_doc();
+								},
+							});
+						}
+					);
+				},
+				__("Actions")
+			);
+		}
+		if (frm.doc.vehicle_no && frm.doc.approval_status !== "Approved") {
+			const raw = frm.doc.vehicle_no;
+			const normalized = raw.toUpperCase().replace(/[\s\-]/g, "");
+
+			if (normalized !== raw) {
+				frm.set_value("vehicle_no", normalized);
+			}
+
+			if (normalized.length >= 4) {
+				const derived_rto = normalized.slice(0, 4);
+				if (frm.doc.rto_code !== derived_rto) {
+					frm.set_value("rto_code", derived_rto);
+				}
+			}
+		}
+
 		if (frm.doc.vehicle_no && !frm.doc.rto_code) {
 			frm.trigger("vehicle_no");
 		}
@@ -11,7 +63,7 @@ frappe.ui.form.on("Motor Policy", {
 		set_type_of_vehicle(frm);
 		frm._rto_code_manual = false;
 		// Add SAIBA buttons (sync + validation)
-		if (!frm.doc.__islocal) {
+		if (!frm.doc.__islocal && frm.doc.approval_status === "Approved") {
 			add_saiba_sync_button(frm);
 			// Add SAIBA validation button and field indicators (uses shared functions from saiba_validation.js)
 			if (typeof policy_reader !== "undefined" && policy_reader.saiba) {
@@ -63,7 +115,7 @@ frappe.ui.form.on("Motor Policy", {
 					const url = `/app/policy-file-view?policy_document=${frm.doc.policy_document}&motor_policy=${frm.doc.name}`;
 					window.open(url, "_blank");
 				},
-				__("Actions"),
+				__("Actions")
 			);
 		}
 
@@ -74,7 +126,7 @@ frappe.ui.form.on("Motor Policy", {
 				function () {
 					populate_motor_policy_fields(frm);
 				},
-				__("Actions"),
+				__("Actions")
 			);
 		}
 	},
@@ -152,14 +204,16 @@ function populate_motor_policy_fields(frm) {
 
 				frappe.show_alert({
 					message: __(
-						`✅ Populated ${response.message.populated_fields} fields successfully!`,
+						`✅ Populated ${response.message.populated_fields} fields successfully!`
 					),
 					indicator: "green",
 				});
 			} else {
 				frappe.show_alert({
 					message: __(
-						`❌ Failed to populate fields: ${response.message.error || "Unknown error"}`,
+						`❌ Failed to populate fields: ${
+							response.message.error || "Unknown error"
+						}`
 					),
 					indicator: "red",
 				});
@@ -188,7 +242,7 @@ function add_saiba_sync_button(frm) {
 			function () {
 				sync_motor_policy_to_saiba(frm);
 			},
-			__("Actions"),
+			__("Actions")
 		);
 
 		// Update button color based on sync status
@@ -245,10 +299,23 @@ function sync_motor_policy_to_saiba(frm) {
 					});
 					frm.reload_doc();
 				} else {
-					frappe.show_alert({
-						message: __("Sync failed: {0}", [
-							response.message.error || "Unknown error",
-						]),
+					// frappe.show_alert({
+					// 	message: __("Sync failed: {0}", [
+					// 		response.message.error || "Unknown error",
+					// 	]),
+					// 	indicator: "red",
+					// });
+					// frm.reload_doc();
+					// clear_saiba_highlights(frm)
+					const error_fields = response.message?.error_fields || [];
+					error_fields.forEach((fieldname) => highlight_saiba_field(frm, fieldname));
+
+					const validations = response.message?.validations || [];
+					frappe.msgprint({
+						title: __("❌ SAIBA Sync Failed"),
+						message: validations.length
+							? validations.join("<br>")
+							: response.message?.error || "Unknown error",
 						indicator: "red",
 					});
 					frm.reload_doc();
@@ -263,5 +330,27 @@ function sync_motor_policy_to_saiba(frm) {
 				frm.reload_doc();
 			},
 		});
+	});
+}
+
+function highlight_saiba_field(frm, fieldname) {
+	const field = frm.fields_dict[fieldname];
+	if (!field || !field.$wrapper) return;
+
+	field.$wrapper.addClass("saiba-error-field").css({
+		background: "#fff1f1",
+		border: "2px solid #e53e3e",
+		"border-radius": "6px",
+		padding: "6px",
+	});
+
+	field.$wrapper.find("label").css("color", "#e53e3e");
+}
+
+function clear_saiba_highlights(frm) {
+	frm.wrapper.find(".saiba-error-field").each(function () {
+		$(this).css({ background: "", border: "", padding: "" });
+		$(this).find("label").css("color", "");
+		$(this).removeClass("saiba-error-field");
 	});
 }
