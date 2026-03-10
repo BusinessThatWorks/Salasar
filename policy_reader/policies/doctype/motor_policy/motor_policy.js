@@ -1,8 +1,9 @@
 // Copyright (c) 2025, Clapgrow Software and contributors
 // For license information, please see license.txt
+/* global policy_reader */
 frappe.ui.form.on("Motor Policy", {
 	refresh(frm) {
-		if (!frm.payment_mode_1) {
+		if (!frm.doc.payment_mode_1) {
 			frm.set_value("payment_mode_1", "Bank Transfer");
 		}
 		if (!frm.doc.bank_name) {
