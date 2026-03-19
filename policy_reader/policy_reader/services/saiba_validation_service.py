@@ -120,8 +120,8 @@ class SaibaValidationService:
             # Must be New or Renew
             if value is None or str(value).strip() == "":
                 return False, "Required"
-            if str(value).lower() not in ["new", "renew"]:
-                return False, "Must be New or Renew"
+            if str(value).lower() not in ["new", "renewal"]:
+                return False, "Must be New or Renewal"
             return True, None
 
         elif validation_type == "gcv_pcv_misc":
@@ -291,13 +291,10 @@ class SaibaValidationService:
     def get_saiba_ai_fields(self, policy_type):
         # SAIBA-required fields (29)
         saiba_fields = set(get_required_fields(policy_type))
-        print("ss",saiba_fields)
-        #ai_feilds
+        #AI_feilds
         ai_fields = set(
             CommonService.get_field_mapping_for_policy_type(policy_type).values()
         ) - set(PolicyCreationService()._get_protected_fields())
-        print("aii",ai_fields)
-        print(list(saiba_fields&ai_fields))
         return list(saiba_fields & ai_fields)
 
 

@@ -282,7 +282,11 @@ class PolicyCreationService:
                 "checklist_customer_gst": "customer_gst",
                 "checklist_category": "category",
                 "checklist_portability": "portability",
-            }
+                "rm": "rm",
+                "rm_code":"rm_rm_code",
+                "csc":"csc",
+                "csc_code":"csc_csc_code"
+                }
 
             copied_count = 0
             for source_field, target_field in checklist_mapping.items():
@@ -443,8 +447,9 @@ class PolicyCreationService:
             
             if not field:
                 return value
-            
-            # Convert based on field type
+            # for handling make , model and variant
+            if field_name in ['make', 'model', 'variant']:
+                return None
             if field.fieldtype == "Date":
                 return self.convert_date_value(value)
             elif field.fieldtype == "Datetime":

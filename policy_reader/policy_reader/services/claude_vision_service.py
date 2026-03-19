@@ -25,6 +25,7 @@ class ClaudeVisionService:
             
             # Prepare Claude API request with direct PDF support
             headers = ClaudeVisionService._prepare_headers(api_key)
+
             content = ClaudeVisionService._build_content_array(pdf_data, prompt_text)
             payload = ClaudeVisionService._build_payload(settings, content)
             
@@ -45,7 +46,6 @@ class ClaudeVisionService:
     def _encode_pdf_file(file_path):
         """Encode PDF file to base64"""
         CommonService.validate_file_access(file_path)
-        
         with open(file_path, 'rb') as pdf_file:
             return base64.standard_b64encode(pdf_file.read()).decode('utf-8')
     
@@ -60,9 +60,9 @@ class ClaudeVisionService:
             # Get canonical fields (fields that map to themselves)
             canonical_fields = [k for k, v in mapping.items() if k == v]
             canonical_fields = sorted(set(canonical_fields))
-            
             if canonical_fields:
                 fields_list = "\n".join([f"- {field}" for field in canonical_fields])
+
                 
                 prompt = f"""Analyze this {policy_type.lower()} insurance policy PDF and extract the following information as a flat JSON object:
 
@@ -76,6 +76,152 @@ EXTRACTION RULES:
 - Numbers: Extract as strings unless specified otherwise
 - If a field is not found, use null
 - Return ONLY valid JSON, no explanations or markdown
+
+MAKE, MODEL, AND VARIANT — LABEL-DRIVEN EXTRACTION:
+
+You are an expert at reading Indian motor insurance policy documents.
+Extract make, model, and variant ONLY based on what the document 
+explicitly labels or what the model string itself tells you.
+Never guess. Never infer from unrelated fields.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — IDENTIFY THE COLUMN/LABEL FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Before reading any value, look at what the column header/label says:
+
+  → "Make/Model" or "Make & Model" or "Make - Model"
+      Extract make and model.
+      Then apply STEP 2 to check if variant is embedded in the model string.
+
+  → "Make/Model/Variant" or "Make/Model & Variant"
+      Extract all three segments directly.
+
+  → Separate columns "Make" | "Model" | "Variant"
+      Extract each from its own column only.
+      If Variant column is blank / dash / NA / not present → variant = null
+      Do NOT extract variant from the model column in this case.
+
+  → "Make" | "Model" columns only (no Variant column exists)
+      Extract make and model.
+      Then apply STEP 2 to check if variant is embedded in model string.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — SPLITTING MAKE FROM MODEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Combined columns may use these separators between make and model:
+  /  (slash)
+  -  (hyphen/dash)
+  newline (next line in same cell)
+
+  Segment before separator → make (manufacturer name)
+  Segment after separator  → model string (apply STEP 3 next)
+
+  IMPORTANT — Full manufacturer names:
+  Some policies write the full registered company name as make:
+    "HONDA MOTORCYCLE AND SCOOTER INDIA (P) LTD"
+    "TVSMOTORCOMPANY LTD"
+    "BAJAJ AUTO LTD"
+    "HERO MOTOCORP LTD"
+    "ROYAL ENFIELD"
+  Treat the entire name before the separator as make.
+  Do not split the manufacturer name itself.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — EXTRACTING MODEL AND VARIANT FROM MODEL STRING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+After isolating the model string (everything after the make separator),
+apply these rules to split model vs variant:
+
+RULE A — NUMBERS ARE ALWAYS PART OF THE MODEL:
+  Numbers (standalone or attached to letters) are NEVER variant.
+  They are part of the model name.
+    "CD 110"      → model = CD 110     (110 is the model number)
+    "SP125"       → model = SP125      (125 is part of model code)
+    "PULSAR 150"  → model = PULSAR 150
+    "FZ 25"       → model = FZ 25
+    "Classic 350" → model = Classic 350
+    "INTRA V30"   → model = INTRA V30  (V30 is alphanumeric code)
+
+  NEVER do this:
+    "CD 110"  → model = CD, variant = 110   ← WRONG
+    "FZ 25"   → model = FZ, variant = 25    ← WRONG
+    "V30"     → model = V, variant = 30     ← WRONG
+
+RULE B — VARIANT IS THE FIRST PURELY ALPHABETIC WORD 
+         AFTER THE LAST NUMERIC/ALPHANUMERIC TOKEN:
+  If a purely alphabetic descriptive word appears AFTER 
+  the model code (after all numbers/alphanumeric codes are done),
+  that word is the variant.
+
+    "SP125 DISC"           → model = SP125,      variant = DISC
+    "CD 110 DREAM"         → model = CD 110,     variant = DREAM
+    "ACTIVA 6G DLX"        → model = ACTIVA 6G,  variant = DLX
+    "PULSAR NS200 ABS"     → model = PULSAR NS200, variant = ABS
+    "CLASSIC 350 SIGNALS"  → model = CLASSIC 350, variant = SIGNALS
+    "FZ S VERSION 2.0"     → model = FZ,         variant = S VERSION 2.0
+    "CB SHINE SP"          → model = CB SHINE,   variant = SP
+
+  If NO alphabetic descriptor follows the last numeric token → variant = null
+    "CD 110"       → model = CD 110,   variant = null
+    "SP125"        → model = SP125,    variant = null
+    "INTRA V30"    → model = INTRA V30, variant = null
+    "ACTIVA 6G"    → model = ACTIVA 6G, variant = null
+
+RULE C — REPEATED MODEL SEGMENTS ARE NOT VARIANT:
+  Some policies write the model twice (alternate spelling or spacing):
+    "INTRA V30 / INTRA V 30"  → model = INTRA V30, variant = null
+    "i20 / I 20"              → model = i20,        variant = null
+  If the segment after the model looks like the same model 
+  with different spacing/casing → discard it, variant = null
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — THINGS THAT ARE NEVER VARIANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Even if they appear after the model string, set variant = null for:
+
+  Body Type:   CAGE, TIPPER, TANKER, TRUCK, BUS, VAN, 
+               CHASSIS, PICK UP, FLAT BED, DUMPER, FULL BODY
+  Fuel Type:   PETROL, DIESEL, CNG, EV, ELECTRIC, LPG, HYBRID
+  Category:    GCV, PCV, PCO, LCV, HCV, TAXI, PRIVATE, PUBLIC
+  Generic:     NEW, USED, OLD, STANDARD, BASIC, REGULAR, N.A
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMPLETE EXAMPLES ACROSS ALL FORMATS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  "HONDA - SP125 DISC"
+  → make=Honda, model=SP125, variant=DISC
+
+  "HONDA MOTORCYCLE AND SCOOTER INDIA (P) LTD / CD 110 DREAM"
+  → make=Honda Motorcycle And Scooter India (P) Ltd, model=CD 110, variant=DREAM
+
+  "Tata Motors / INTRA V30 / INTRA V 30"
+  → make=Tata Motors, model=INTRA V30, variant=null (third segment repeats model)
+
+  "Maruti Suzuki / Swift / VXI"
+  → make=Maruti Suzuki, model=Swift, variant=VXI (label was Make/Model/Variant)
+
+  "BAJAJ / PULSAR NS200 ABS"
+  → make=Bajaj, model=PULSAR NS200, variant=ABS
+
+  "HERO MOTOCORP / SPLENDOR PLUS"
+  → make=Hero Motocorp, model=Splendor, variant=Plus
+
+  "ROYAL ENFIELD / CLASSIC 350"
+  → make=Royal Enfield, model=Classic 350, variant=null
+
+  "TVS / APACHE RTR 160 4V"
+  → make=TVS, model=Apache RTR 160 4V, variant=null (4V is alphanumeric)
+
+  "YAMAHA / MT15 VERSION 2"
+  → make=Yamaha, model=MT15, variant=Version 2
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FINAL RULE — WHEN IN DOUBT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  variant = null
+
+  A null variant is always correct.
+  A wrong variant is always a data corruption error.
 
 RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
 
