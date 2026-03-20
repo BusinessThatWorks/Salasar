@@ -37,6 +37,10 @@
   "branch_name",
   "column_break_business_info",
   "policy_type_biz",
+  "rm",
+  "rm_rm_code",
+  "csc",
+  "csc_csc_code",
   "rm_code",
   "csc_code",
   "tc_code",
@@ -73,6 +77,7 @@
   "vehicle_information_tab",
   "basic_vehicle_section",
   "vehicle_no",
+  "vehicle_info_text",
   "make",
   "model",
   "type_of_vehicle",
@@ -404,9 +409,10 @@
   {
    "description": "SAIBA(Model)",
    "fieldname": "model",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Model",
-   "length": 100
+   "length": 100,
+   "options": "SB Model"
   },
   {
    "description": "SAIBA(Type of Vehicle)",
@@ -422,9 +428,10 @@
   {
    "description": "SAIBA(Variant)",
    "fieldname": "variant",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Variant",
-   "length": 150
+   "length": 150,
+   "options": "SB Variant"
   },
   {
    "description": "SAIBA(YearofMan)",
@@ -1025,13 +1032,46 @@
    "label": "Approval Status",
    "options": "Approved\nNot Approved",
    "read_only": 1
+  },
+  {
+   "description": "Raw AI-extracted Make / Model / Variant (for reference when master lookup fails)",
+   "fieldname": "vehicle_info_text",
+   "fieldtype": "Small Text",
+   "label": "AI Extracted Vehicle Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm",
+   "fieldtype": "Link",
+   "label": "RM ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"RM\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "rm.employee_code",
+   "fieldname": "rm_rm_code",
+   "fieldtype": "Data",
+   "label": "RM code"
+  },
+  {
+   "fieldname": "csc",
+   "fieldtype": "Link",
+   "label": "CSC ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "csc.employee_code",
+   "fieldname": "csc_csc_code",
+   "fieldtype": "Data",
+   "label": "CSC code"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 13:24:57.292216",
+ "modified": "2026-03-18 18:12:12.297997",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",

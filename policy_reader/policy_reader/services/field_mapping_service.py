@@ -29,6 +29,7 @@ class FieldMappingService:
 		unmapped_fields = []
 		suggestions = {}
 		protected_count = 0
+		self._vehicle_info = {}
 
 		frappe.logger().info(f"=== FIELD MAPPING DEBUG ===")
 		frappe.logger().info(f"Parsed data keys: {list(parsed_data.keys())}")
@@ -92,6 +93,8 @@ class FieldMappingService:
 		frappe.logger().info(f"Protected fields skipped: {protected_count}")
 		frappe.logger().info(f"Unmapped fields: {len(unmapped_fields)}")
 		frappe.logger().info(f"Unmapped: {unmapped_fields}")
+		if hasattr(self, "_vehicle_info"):
+			policy_record.vehicle_info_text = ", ".join(f"{k}: {v}" for k, v in self._vehicle_info.items())
 		return {
 			"mapped_count": mapped_count,
 			"unmapped_fields": unmapped_fields,
@@ -132,6 +135,23 @@ class FieldMappingService:
 			if not field_meta:
 				return value
 
+			if field_name in ["make", "model", "variant"]:
+				if not hasattr(self, "_vehicle_info"):
+					self._vehicle_info = {}
+
+				self._vehicle_info[field_name] = str(value).strip()
+				doctype_map = {"make": "SB Make", "model": "SB Model", "variant": "SB Variant"}
+
+				exists = frappe.db.exists(doctype_map[field_name], str(value).strip())
+
+				if exists:
+					return str(value).strip()
+
+				if field_name in ["model", "variant"]:
+					if frappe.db.exists(doctype_map[field_name], "NA"):
+						return "NA"
+
+				return None
 			# Handle different field types
 			if field_meta.fieldtype == "Date":
 				return self._convert_to_date(value)

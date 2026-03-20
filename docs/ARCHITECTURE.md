@@ -104,11 +104,11 @@ frappe.ui.form.on("Motor Policy", {
     }
   },
 
-  customer_code(frm) {
+  (frm) {
     // Field change handler - fetch related data
-    if (frm.doc.customer_code) {
+    if (frm.doc.) {
       frappe.db
-        .get_value("Insurance Customer", frm.doc.customer_code, "customer_name")
+        .get_value("Insurance Customer", frm.doc., "customer_name")
         .then((r) => {
           frm.set_value("customer_name", r.message.customer_name);
         });
@@ -179,7 +179,7 @@ api_key = CommonService.get_api_key(settings)
 
 These are set from master data selection, never from AI extraction:
 
-- `customer_code`, `customer_name`, `customer_group`
+- ``, `customer_name`, `customer_group`
 - `insurance_company_branch`, `insurer_name`, `insurer_city`
 - `processor_employee_*` fields
 

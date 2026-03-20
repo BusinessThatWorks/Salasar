@@ -166,43 +166,6 @@ class SaibaSyncService:
 		except Exception:
 			return set()
 
-	def _validate_vehicle_master(self, policy_doc):
-		"""
-		Rules:
-		- Make must exist → else throw error
-		- Model must exist for that make → else throw error
-		- Variant missing/not found → send as "NA" (no error)
-		- Model missing/not found but make exists → send model & variant as "NA"
-		"""
-		make = self._safe_str(policy_doc.make)
-		model = self._safe_str(policy_doc.model)
-		variant = self._safe_str(policy_doc.variant)
-		make_exists = frappe.db.exists("SB Make", make)
-		if not make_exists:
-			frappe.throw(f"Make '{make}' does not exist in SB Make master. Cannot sync with SAIBA.")
-		resolved_model = "NA"
-		resolved_variant = "NA"
-
-		if model:
-			model_exists = frappe.db.exists("SB Model", {"make": make_exists, "model": model})
-			if not model_exists:
-				resolved_model = "NA"
-				resolved_variant = "NA"
-			else:
-				resolved_model = model
-				if variant:
-					variant_exists = frappe.db.exists(
-						"SB Variant", {"make": make_exists, "model": model_exists, "variant": variant}
-					)
-					resolved_variant = variant if variant_exists else "NA"
-				else:
-					resolved_variant = "NA"
-		else:
-			resolved_model = "NA"
-			resolved_variant = "NA"
-
-		return resolved_model, resolved_variant
-
 	def _validate_bank_master(self, policy_doc):
 		bank_name = self._safe_str(policy_doc.bank_name)
 		bank_name_exists = frappe.db.exists("SB Bank Master", bank_name)
@@ -251,7 +214,6 @@ class SaibaSyncService:
 		return detected
 
 	def _build_motor_policy_payload(self, policy_doc):
-		resolved_model, resolved_variant = self._validate_vehicle_master(policy_doc)
 		bank_name = self._validate_bank_master(policy_doc)
 		"""Build the payload for Motor Policy sync"""
 		return {
@@ -269,7 +231,6 @@ class SaibaSyncService:
 			"policyReceivedFormat": "Recd in Hard Copy",
 			"policyType": self._safe_str(policy_doc.policy_type),
 			"department": self._safe_str(policy_doc.department),
-			# "coverageType": self._safe_str(policy_doc.coverage_type) or "1+1",
 			"coverageType": self._safe_str(policy_doc.coverage_type) or "1+1",
 			"policyVertical": self._safe_str(policy_doc.customer_vertical),
 			"policyNo": self._safe_str(policy_doc.policy_no),
@@ -278,8 +239,8 @@ class SaibaSyncService:
 			"prevPolicy": self._safe_str(policy_doc.prev_policy_no) or "No",
 			"vehicleNo": self._safe_str(policy_doc.vehicle_no),
 			"make": self._safe_str(policy_doc.make),
-			"model": resolved_model,
-			"variant": resolved_variant,
+			"model": self._safe_str(policy_doc.model),
+			"variant": self._safe_str(policy_doc.variant),
 			"registrationDate": self._format_date_for_saiba(
 				policy_doc.registration_date or policy_doc.policy_start_date
 			),
