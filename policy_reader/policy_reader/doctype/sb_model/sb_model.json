@@ -7,16 +7,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "sb_make",
   "sb_model"
  ],
  "fields": [
-  {
-   "fieldname": "sb_make",
-   "fieldtype": "Link",
-   "label": "Make",
-   "options": "SB Make"
-  },
   {
    "fieldname": "sb_model",
    "fieldtype": "Data",
@@ -27,7 +20,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-19 12:18:47.731435",
+ "modified": "2026-03-23 16:07:56.398083",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "SB Model",
