@@ -74,6 +74,7 @@ EXTRACTION RULES:
 - Numbers: Extract as strings unless specified otherwise
 - If a field is not found, use null
 - Return ONLY valid JSON, no explanations or markdown
+- Vehicle/Registration No, Chassis No, Engine No: Remove ALL spaces, hyphens, and special characters — return ONLY the raw alphanumeric string. Example: "BR - 26 - M - 4619" → "BR26M4619"
 
 MAKE, MODEL, AND VARIANT — LABEL-DRIVEN EXTRACTION:
 
