@@ -19,6 +19,7 @@
   "policy_links_section",
   "motor_policy",
   "health_policy",
+  "view_ai_extracted_data",
   "extracted_fields",
   "raw_ocr_text",
   "used_prompt",
@@ -171,6 +172,7 @@
    "options": "Health Policy"
   },
   {
+   "depends_on": "eval:doc.view_ai_extracted_data",
    "fieldname": "extracted_fields",
    "fieldtype": "JSON",
    "label": "Extracted Fields",
@@ -291,7 +293,7 @@
    "options": "New\nRenewal"
   },
   {
-   "depends_on": "eval: doc.checklist_biz_type == \"RENEWAL\"",
+   "depends_on": "eval: doc.checklist_biz_type == \"Renewal\"",
    "fieldname": "checklist_old_control_number",
    "fieldtype": "Data",
    "label": "Old Control Number"
@@ -540,12 +542,19 @@
    "label": "CSC",
    "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
    "options": "Insurance Employee"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.status==\"Completed\"",
+   "fieldname": "view_ai_extracted_data",
+   "fieldtype": "Check",
+   "label": " View AI Extracted Data"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-16 14:10:24.428301",
+ "modified": "2026-03-23 17:15:12.062547",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

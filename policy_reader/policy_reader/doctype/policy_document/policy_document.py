@@ -22,6 +22,27 @@ class PolicyDocument(Document):
 
         # Auto-populate processor information
         self._populate_processor_info()
+        if (
+        cstr(self.checklist_biz_type).strip().lower() == "renewal"
+        and self.extracted_fields
+        and not self.checklist_old_control_number):  
+            try:
+                extracted = frappe.parse_json(self.extracted_fields)
+                engine_no = extracted.get("engine_no")
+                old_ctrl = self._fetch_old_control_number(engine_no)
+                if old_ctrl:
+                    self.checklist_old_control_number = old_ctrl
+                    frappe.logger().info(
+                        f"Auto-populated old_control_number: {old_ctrl} "
+                        f"via before_save for {self.name}"
+                    )
+                else:
+                    frappe.logger().warning(
+                        f"{self.name}: biz_type set to Renewal but no synced "
+                        f"Motor Policy found for engine_no: {engine_no}"
+                    )
+            except Exception as e:
+                frappe.logger().error(f"Error auto-populating old_control_number: {str(e)}")
 
     def validate(self):
         if self.status == "Completed" and not self.extracted_fields:
@@ -222,8 +243,6 @@ class PolicyDocument(Document):
             self.processing_method = "claude_vision"
             self.tokens_used = result.get("tokens_used", 0)
             self.error_message = ""
-            
-            frappe.logger().info(f"Claude Vision processing completed for {self.name}")
         else:
             self.status = "Failed"
             self.error_message = result.get("error", "Unknown error occurred")
@@ -307,11 +326,22 @@ class PolicyDocument(Document):
             frappe.log_error(f"Error parsing extracted fields for {self.name}: {str(e)}", "Policy OCR JSON Error")
             return {}
     
-    
-    
-    
-    
-    
+    def _fetch_old_control_number(self, engine_no):
+        """Fetch saiba_control_number from the most recent synced Motor Policy for this engine number"""
+        if not engine_no:
+            return None
+        results = frappe.get_all("Motor Policy",filters={"engine_no": engine_no,"saiba_sync_status": "Synced"},
+            fields=["saiba_control_number"],
+            order_by="policy_expiry_date desc",
+            limit=1
+        )
+        if results:
+            frappe.logger().info(f"Found old_control_number: {results[0].get('saiba_control_number')} for engine_no: {engine_no}")
+            return results[0].get("saiba_control_number")
+
+        frappe.logger().warning(f"No synced Motor Policy found for engine_no: {engine_no}")
+        return None
+      
     
     @frappe.whitelist()
     def reset_processing_status(self):

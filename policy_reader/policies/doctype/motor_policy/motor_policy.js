@@ -2,14 +2,6 @@
 // For license information, please see license.txt
 /* global policy_reader */
 frappe.ui.form.on("Motor Policy", {
-	make(frm) {
-		frm.set_value("model", "");
-		frm.set_value("variant", "");
-	},
-
-	model(frm) {
-		frm.set_value("variant", "");
-	},
 	refresh(frm) {
 		frm.refresh_field("vehicle_info_text");
 		if (!frm.doc.payment_mode_1) {
@@ -87,31 +79,6 @@ frappe.ui.form.on("Motor Policy", {
 				policy_reader.saiba.mark_required_fields(frm, "Motor");
 			}
 		}
-
-		frm.set_query("model", () => {
-			if (frm.doc.make) {
-				return {
-					filters: [["sb_make", "in", [frm.doc.make, ""]]],
-				};
-			}
-			return {};
-		});
-
-		frm.set_query("variant", () => {
-			if (frm.doc.make && frm.doc.model) {
-				return {
-					filters: [
-						["sb_make", "in", [frm.doc.make, ""]],
-						["sb_model", "in", [frm.doc.model, ""]],
-					],
-				};
-			} else if (frm.doc.make) {
-        	return {
-            	filters: [["sb_make", "in", [frm.doc.make, ""]]],
-        };
-    }
-			return {};
-		});
 	},
 	policy_type(frm) {
 		// Auto-set type_of_vehicle when policy_type changes

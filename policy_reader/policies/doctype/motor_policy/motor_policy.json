@@ -140,6 +140,7 @@
   "approval_status",
   "column_break_saiba_sync",
   "saiba_control_number",
+  "view_the_reqres",
   "saiba_sync_error",
   "saiba_sync_response",
   "documents_tab",
@@ -217,7 +218,7 @@
    "fieldname": "new_renewal",
    "fieldtype": "Select",
    "label": "New/Renewal",
-   "options": "New\nRenew"
+   "options": "New\nRenewal"
   },
   {
    "description": "SAIBA(PrevPolicy) - Previous policy number if renewal",
@@ -859,7 +860,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "SAIBA Sync Status",
-   "options": "Not Synced\nSynced\nFailed\nPending\nDuplicate Entry\nApproved",
+   "options": "Not Synced\nSynced\nFailed\nPending\nDuplicate Entry",
    "read_only": 1
   },
   {
@@ -890,7 +891,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.saiba_sync_status === 'Failed' || doc.saiba_sync_status === 'Synced' || doc.saiba_sync_status === 'Duplicate'",
+   "depends_on": "eval:doc.view_the_reqres",
    "description": "Full API request/response from SAIBA (for debugging)",
    "fieldname": "saiba_sync_response",
    "fieldtype": "JSON",
@@ -1065,13 +1066,20 @@
    "fieldname": "csc_csc_code",
    "fieldtype": "Data",
    "label": "CSC code"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:[\"Duplicate Entry\", \"Failed\", \"Synced\"].includes(doc.saiba_sync_status)",
+   "fieldname": "view_the_reqres",
+   "fieldtype": "Check",
+   "label": "View the req/res "
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-18 18:12:12.297997",
+ "modified": "2026-03-25 16:51:51.957580",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",

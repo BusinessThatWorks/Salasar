@@ -303,7 +303,7 @@ class SaibaSyncService:
 			"remarks": self._safe_str(policy_doc.remarks),
 			"policyStatus": "NA",
 		}
-
+	
 		# Add insured persons (1-5 for SAIBA API)
 		for i in range(1, 6):
 			name_field = f"insured_{i}_name"
@@ -328,7 +328,6 @@ class SaibaSyncService:
 
 		try:
 			response = requests.post(url, json=payload, headers=headers, timeout=60)
-
 			# Handle 401/403 - try refreshing token once
 			if response.status_code in [401, 403]:
 				# Clear token and retry
