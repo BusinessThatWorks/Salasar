@@ -75,7 +75,38 @@ EXTRACTION RULES:
 - If a field is not found, use null
 - Return ONLY valid JSON, no explanations or markdown
 - Vehicle/Registration No, Chassis No, Engine No: Remove ALL spaces, hyphens, and special characters — return ONLY the raw alphanumeric string. Example: "BR - 26 - M - 4619" → "BR26M4619"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VEHICLE NUMBER — LABEL ALIASES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The field `vehicle_no` may appear under ANY of these labels:
+  → "Registration Number"
+  → "Registration No."
+  → "Reg. No."
+  → "Regd. No."
+  → "Vehicle No."
 
+CRITICAL: If a short alphanumeric code like "AS11J7259" appears next
+to any of these labels — even in a customer details section — that is
+vehicle_no. Do NOT map it to customer_code or any other field.
+customer_code is a separate insurer-assigned identifier and will have
+its own distinct label like "Customer ID" or "Partner Code".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMBINED MODEL/VARIANT COLUMN — GO DIGIT & SIMILAR FORMATS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Some insurers use a single column labeled:
+  "Model/Vehicle Variant (Sub-Type)"
+  "Model/Variant"
+  "Vehicle Model & Variant"
+
+Treat this exactly like a "Make/Model" column but for model+variant:
+  - First segment (before /) → model
+  - Remaining segments       → apply STEP 3 rules for variant
+
+  Example: Make=MARUTI SUZUKI, "Model/Vehicle Variant"=GYPSY/King MPI BSIV
+  → make=Maruti Suzuki, model=GYPSY, variant=King MPI BSIV
+
+  Do NOT put the entire string into variant and leave model as null.
 MAKE, MODEL, AND VARIANT — LABEL-DRIVEN EXTRACTION:
 
 You are an expert at reading Indian motor insurance policy documents.

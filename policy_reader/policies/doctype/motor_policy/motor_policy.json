@@ -218,7 +218,7 @@
    "fieldname": "new_renewal",
    "fieldtype": "Select",
    "label": "New/Renewal",
-   "options": "New\nRenew"
+   "options": "New\nRenewal"
   },
   {
    "description": "SAIBA(PrevPolicy) - Previous policy number if renewal",
@@ -1079,7 +1079,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-24 15:50:13.009195",
+ "modified": "2026-03-25 16:51:51.957580",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
