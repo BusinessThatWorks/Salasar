@@ -70,11 +70,9 @@ class SaibaSyncService:
 		try:
 			url = f"{base_url}{self.TOKEN_ENDPOINT}"
 			payload = {"userName": username, "password": password}
-
 			response = requests.post(
 				url, json=payload, headers={"Content-Type": "application/json"}, timeout=30
 			)
-
 			if response.status_code == 200:
 				data = response.json()
 				token = data.get("token") or data.get("access_token") or data.get("Token")
@@ -259,7 +257,7 @@ class SaibaSyncService:
 			"gvw": self._safe_str(policy_doc.gvw_ton_kg),
 			"noOfPassenger": self._safe_str(policy_doc.no_of_passenger),
 			"sumInsured": self._safe_int(policy_doc.sum_insured),
-			"netODPremium": self._safe_int(policy_doc.net_od_premium),
+			"odPremium": self._safe_int(policy_doc.net_od_premium),
 			"premRate": self._safe_str(policy_doc.prem_rate),
 			"tpPremium": self._safe_int(policy_doc.tp_premium),
 			"lpodPremium": self._safe_int(policy_doc.lpod_premium),
@@ -275,36 +273,89 @@ class SaibaSyncService:
 			"policyStatus": self._safe_str(policy_doc.policy_status_na) or "NA",
 		}
 
+	# def _build_health_policy_payload(self, policy_doc):
+	# 	"""Build the payload for Health Policy sync"""
+	# 	payload = {
+	# 		"custCode": self._safe_int(policy_doc.customer_code),
+	# 		"posPolicy": self._safe_str(policy_doc.pos_policy) or "No",
+	# 		"bizType": self._safe_str(policy_doc.biz_type) or "New",
+	# 		"insBranchCode": self._safe_int(policy_doc.insurer_branch_code),
+	# 		"issuenceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
+	# 		"startDate": self._format_date_for_saiba(policy_doc.policy_start_date),
+	# 		"expiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
+	# 		"policyType": self._safe_str(policy_doc.policy_type),
+	# 		"policyNo": self._safe_str(policy_doc.policy_no),
+	# 		"planName": self._safe_str(policy_doc.plan_name),
+	# 		"isRenewable": "Yes" if policy_doc.is_renewable == "Yes" else "No",
+	# 		"coverageType": self._safe_str(policy_doc.coverage_type),
+	# 		"policyVertical": self._safe_str(policy_doc.policy_vertical),
+	# 		"prevPolicy": "Yes" if policy_doc.prev_policy else "No",
+	# 		"sumInsured": self._safe_int(policy_doc.sum_insured),
+	# 		"netODPremium": self._safe_int(policy_doc.net_od_premium),
+	# 		"gst": self._safe_int(policy_doc.gst_tax_percent) or 18,
+	# 		"stampDuty": self._safe_int(policy_doc.stamp_duty),
+	# 		"paymentMode": "Online",
+	# 		"bankName": "",
+	# 		"paymentTranNo": "",
+	# 		"campaignName": "No Campaign",
+	# 		"remarks": self._safe_str(policy_doc.remarks),
+	# 		"policyStatus": "NA",
+	# 	}
+
+	# 	# Add insured persons (1-5 for SAIBA API)
+	# 	for i in range(1, 6):
+	# 		name_field = f"insured_{i}_name"
+	# 		gender_field = f"insured_{i}_gender"
+	# 		dob_field = f"insured_{i}_dob"
+	# 		relation_field = f"insured_{i}_relation"
+
+	# 		payload[f"insured{i}Name"] = self._safe_str(getattr(policy_doc, name_field, ""))
+	# 		payload[f"insured{i}Gender"] = self._safe_str(getattr(policy_doc, gender_field, ""))
+	# 		payload[f"insured{i}DOB"] = self._format_date_for_saiba(getattr(policy_doc, dob_field, None))
+	# 		payload[f"insured{i}Relation"] = self._safe_str(getattr(policy_doc, relation_field, ""))
+
+	# 	return payload
 	def _build_health_policy_payload(self, policy_doc):
-		"""Build the payload for Health Policy sync"""
 		payload = {
-			"custCode": self._safe_int(policy_doc.customer_code),
+			# ✅ FIXED FIELD NAMES
+			"customerCode": self._safe_int(policy_doc.customer_code),
 			"posPolicy": self._safe_str(policy_doc.pos_policy) or "No",
-			"bizType": self._safe_str(policy_doc.biz_type) or "New",
-			"insBranchCode": self._safe_int(policy_doc.insurer_branch_code),
-			"issuenceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
-			"startDate": self._format_date_for_saiba(policy_doc.policy_start_date),
-			"expiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
+			"policyBizType": self._safe_str(policy_doc.biz_type) or "New",
+			"insurerBranchCode": self._safe_int(policy_doc.insurer_branch_code),
+
+			"policyIssuanceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
+			"policyStartDate": self._format_date_for_saiba(policy_doc.policy_start_date),
+			"policyExpiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
+
 			"policyType": self._safe_str(policy_doc.policy_type),
 			"policyNo": self._safe_str(policy_doc.policy_no),
 			"planName": self._safe_str(policy_doc.plan_name),
+
 			"isRenewable": "Yes" if policy_doc.is_renewable == "Yes" else "No",
-			"coverageType": self._safe_str(policy_doc.coverage_type),
-			"policyVertical": self._safe_str(policy_doc.policy_vertical),
 			"prevPolicy": "Yes" if policy_doc.prev_policy else "No",
+
 			"sumInsured": self._safe_int(policy_doc.sum_insured),
-			"netODPremium": self._safe_int(policy_doc.net_od_premium),
+
+			# ✅ FIXED NAME
+			"netodPremium": self._safe_int(policy_doc.net_od_premium),
+
 			"gst": self._safe_int(policy_doc.gst_tax_percent) or 18,
 			"stampDuty": self._safe_int(policy_doc.stamp_duty),
+
 			"paymentMode": "Online",
-			"bankName": "",
-			"paymentTranNo": "",
-			"campaignName": "No Campaign",
-			"remarks": self._safe_str(policy_doc.remarks),
-			"policyStatus": "NA",
+
+			# ✅ REQUIRED → SHOULD NOT BE EMPTY
+			"bankName": self._safe_str(getattr(policy_doc, "bank_name", "")) or "NA",
+
+			# ✅ FIXED NAME
+			"paymentTransactionNo": self._safe_str(getattr(policy_doc, "payment_txn_no", "")) or "NA",
+
+			# ✅ DEFAULT FIX
+			"remarks": self._safe_str(policy_doc.remarks) or "NA",
+			"policyStatus": "Issued",
 		}
-	
-		# Add insured persons (1-5 for SAIBA API)
+
+		# ✅ KEEP YOUR LOOP (THIS IS PERFECT)
 		for i in range(1, 6):
 			name_field = f"insured_{i}_name"
 			gender_field = f"insured_{i}_gender"

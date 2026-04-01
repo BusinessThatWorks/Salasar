@@ -5,3 +5,4 @@
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
 policy_reader.patches.v1_0.update_saiba_validation_rules
+policy_reader.patches.v1_0.delete_company_insurance_records
