@@ -47,7 +47,6 @@ class PolicyDocument(Document):
 					)
 			except Exception as e:
 				frappe.logger().error(f"Error auto-populating old_control_number: {str(e)}")
-		
 
 	def validate(self):
 		if self.status == "Completed" and not self.extracted_fields:
@@ -134,6 +133,7 @@ class PolicyDocument(Document):
 	def get_policy_reader_settings(self):
 		"""Get Policy Reader Settings with fallback to defaults"""
 		return CommonService.get_policy_reader_settings()
+
 	def _populate_insurance_company_branch(self):
 		"""
 		Auto-populate company branch link from extracted fields.
@@ -143,29 +143,40 @@ class PolicyDocument(Document):
 		try:
 			extracted = frappe.parse_json(self.extracted_fields)
 			company_name = cstr(extracted.get("insurance_company_name", "")).strip()
-			branch_code  = cstr(extracted.get("insurer_branch_code", "")).strip()
+			branch_code = cstr(extracted.get("insurer_branch_code", "")).strip()
 			matched_branch = None
 			if not branch_code:
 				# Private company — only company name, single branch in master
-				matched_branch = frappe.db.get_value("Insurance Company Branch",{"insurance_company": company_name},"name")
+				matched_branch = frappe.db.get_value(
+					"Insurance Company Branch", {"insurance_company": company_name}, "name"
+				)
 			else:
 				# Public company — match by both company name and branch code
 				matched_branch = frappe.db.get_value(
-					"Insurance Company Branch",{"branch_office_code": branch_code},"name")
+					"Insurance Company Branch", {"branch_office_code": branch_code}, "name"
+				)
 			if matched_branch:
 				self.insurance_company_branch = matched_branch  # adjust field name to yours
-				branch_doc = frappe.db.get_value("Insurance Company Branch",matched_branch,["insurance_company", "city", "branch_name", "branch_auto_code"],as_dict=True)
+				branch_doc = frappe.db.get_value(
+					"Insurance Company Branch",
+					matched_branch,
+					["insurance_company", "city", "branch_name", "branch_auto_code"],
+					as_dict=True,
+				)
 				if branch_doc:
-					self.insurer_name        = branch_doc.get("insurance_company")
-					self.insurer_city        = branch_doc.get("city")
-					self.insurer_branch      = branch_doc.get("branch_name")
+					self.insurer_name = branch_doc.get("insurance_company")
+					self.insurer_city = branch_doc.get("city")
+					self.insurer_branch = branch_doc.get("branch_name")
 					self.insurer_branch_code = branch_doc.get("branch_auto_code")
-					frappe.logger().info(f"{self.name}: Auto-populated company_branch_name = '{matched_branch}'")
+					frappe.logger().info(
+						f"{self.name}: Auto-populated company_branch_name = '{matched_branch}'"
+					)
 			else:
 				self._branch_warning = f"Insurance Company Branch for '{company_name}' was not found in the master. Please link it manually."
 				frappe.logger().warning(
 					f"{self.name}: No match found in Insurance Company Branch for "
-					f"company_name='{company_name}', branch_code='{branch_code}'")
+					f"company_name='{company_name}', branch_code='{branch_code}'"
+				)
 		except Exception as e:
 			frappe.logger().error(f"{self.name}: Error in _populate_insurance_company_branch: {str(e)}")
 
@@ -403,14 +414,9 @@ class PolicyDocument(Document):
 		"""Fetch saiba_control_number from the most recent synced Motor Policy for this engine number"""
 		if not engine_no:
 			return None
-		# results = frappe.get_all(
-		# 	"Motor Policy",
-		# 	filters={"engine_no": engine_no, "saiba_sync_status": "Synced"},
-		# 	fields=["saiba_control_number"],
-		# 	order_by="policy_expiry_date desc",
-		# 	limit=1,
-		# )
-		results = frappe.get_value("Motor Policy",filters={"engine_no": engine_no,"saiba_sync_status": "Synced"},
+		results = frappe.get_value(
+			"Motor Policy",
+			filters={"engine_no": engine_no, "saiba_sync_status": "Synced"},
 			fieldname="saiba_control_number",
 			order_by="policy_expiry_date desc",
 		)

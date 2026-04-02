@@ -315,6 +315,7 @@ class SaibaSyncService:
 			payload[f"insured{i}Relation"] = self._safe_str(getattr(policy_doc, relation_field, ""))
 
 		return payload
+
 	# def _build_health_policy_payload(self, policy_doc):
 	# 	payload = {
 	# 		"customerCode": self._safe_int(policy_doc.customer_code),
