@@ -90,7 +90,52 @@ to any of these labels — even in a customer details section — that is
 vehicle_no. Do NOT map it to customer_code or any other field.
 customer_code is a separate insurer-assigned identifier and will have
 its own distinct label like "Customer ID" or "Partner Code".
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSURANCE COMPANY NAME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The field `insurance_company_name` is the name of the insurer that
+issued this policy — NOT the policyholder/customer name.
 
+It may appear under labels such as:
+  → "Insurer" / "Insurance Company" / "Underwritten by" / "Issued by"
+  → Company name in the document header or letterhead
+
+RULES:
+  - Extract the full legal name as printed
+    (e.g. "HDFC ERGO General Insurance Company Limited")
+  - Do NOT abbreviate or shorten
+  - Do NOT confuse with the insured person's name
+  - Prefer the most prominent/official occurrence (header or labelled field)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INSURER BRANCH CODE — CONDITIONAL EXTRACTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+The field `insurer_branch_code` must ONLY be extracted if the
+insurance_company_name is one of these 4 public sector insurers:
+
+  1. NATIONAL INSURANCE CO. LTD.
+  2. THE NEW INDIA ASSURANCE CO. LTD.
+  3. THE ORIENTAL INSURANCE CO. LTD.
+  4. UNITED INDIA INSURANCE CO. LTD.
+
+IF the company IS one of the above 4:
+  - Look for a branch/office code in the document
+  - It may appear under labels like:
+      → "Branch Code"
+      → "Office Code"
+      → "Issuing Office Code"
+      → "DO Code" / "Divisional Office Code"
+      → "Branch No" / "Branch ID"
+  - Extract the exact alphanumeric code as printed
+  - Example: "Branch Code: 050300" → insurer_branch_code = "050300"
+
+IF the company is ANY OTHER insurer (private or otherwise):
+  - Set insurer_branch_code = null
+  - Do NOT search for or guess any branch code value
+
+DECISION FLOW:
+  insurance_company_name == one of the 4 public insurers above?
+    YES → extract insurer_branch_code from the document
+    NO  → insurer_branch_code = null
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 COMBINED MODEL/VARIANT COLUMN — GO DIGIT & SIMILAR FORMATS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
