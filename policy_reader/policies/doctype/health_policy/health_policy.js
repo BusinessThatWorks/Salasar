@@ -13,11 +13,11 @@ frappe.ui.form.on("Health Policy", {
 		}
 
 		// Add "Populate Fields" button if policy_document is linked
-		if (frm.doc.policy_document && !frm.doc.__islocal) {
-			frm.add_custom_button(__('Populate Fields'), function() {
-				populate_health_policy_fields(frm);
-			}, __('Actions'));
-		}
+		// if (frm.doc.policy_document && !frm.doc.__islocal) {
+		// 	frm.add_custom_button(__('Populate Fields'), function() {
+		// 		populate_health_policy_fields(frm);
+		// 	}, __('Actions'));
+		// }
 
 		// Add SAIBA buttons (sync + validation)
 		if (!frm.doc.__islocal) {

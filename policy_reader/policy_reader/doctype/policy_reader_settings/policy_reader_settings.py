@@ -156,6 +156,8 @@ class PolicyReaderSettings(Document):
 				"cse_id": ["CSE ID", "CSEID", "cse_id", "CSE_ID"],
 				"rm_id": ["RM ID", "RMID", "rm_id", "RM_ID"],
 				"old_control_number": ["Old Control Number", "OldControlNumber", "old_control_number", "Old_Control_Number"],
+				"insurance_company_name": ["insurance_company_name","Insurance Company Name","Insurance Company","InsuranceCompany","InsuranceCompanyName","Insurer",
+    									"Insurer Name","InsurerName","insurer_name","Underwritten by","Issued by"]
 			}
 		elif policy_type_lower == "health":
 			alias_map = {

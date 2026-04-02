@@ -142,35 +142,30 @@ class PolicyDocument(Document):
 		"""
 		try:
 			extracted = frappe.parse_json(self.extracted_fields)
-			print("eeeeeeee",extracted)
 			company_name = cstr(extracted.get("insurance_company_name", "")).strip()
-			print("company_nmae",company_name)
 			branch_code  = cstr(extracted.get("insurer_branch_code", "")).strip()
-			print("branch_code",branch_code)
 			matched_branch = None
 			if not branch_code:
 				# Private company — only company name, single branch in master
 				matched_branch = frappe.db.get_value("Insurance Company Branch",{"insurance_company": company_name},"name")
 			else:
 				# Public company — match by both company name and branch code
-				print("yessssss branch_code")
 				matched_branch = frappe.db.get_value(
 					"Insurance Company Branch",{"branch_office_code": branch_code},"name")
-			print("matched_branch",matched_branch)
 			if matched_branch:
 				self.insurance_company_branch = matched_branch  # adjust field name to yours
-			branch_doc = frappe.db.get_value("Insurance Company Branch",matched_branch,["insurance_company", "city", "branch_name", "branch_auto_code"],as_dict=True)
-			if branch_doc:
-				self.insurer_name        = branch_doc.get("insurance_company")
-				self.insurer_city        = branch_doc.get("city")
-				self.insurer_branch      = branch_doc.get("branch_name")
-				self.insurer_branch_code = branch_doc.get("branch_auto_code")
-				frappe.logger().info(f"{self.name}: Auto-populated company_branch_name = '{matched_branch}'")
+				branch_doc = frappe.db.get_value("Insurance Company Branch",matched_branch,["insurance_company", "city", "branch_name", "branch_auto_code"],as_dict=True)
+				if branch_doc:
+					self.insurer_name        = branch_doc.get("insurance_company")
+					self.insurer_city        = branch_doc.get("city")
+					self.insurer_branch      = branch_doc.get("branch_name")
+					self.insurer_branch_code = branch_doc.get("branch_auto_code")
+					frappe.logger().info(f"{self.name}: Auto-populated company_branch_name = '{matched_branch}'")
 			else:
+				self._branch_warning = f"Insurance Company Branch for '{company_name}' was not found in the master. Please link it manually."
 				frappe.logger().warning(
 					f"{self.name}: No match found in Insurance Company Branch for "
-					f"company_name='{company_name}', branch_code='{branch_code}'"
-				)
+					f"company_name='{company_name}', branch_code='{branch_code}'")
 		except Exception as e:
 			frappe.logger().error(f"{self.name}: Error in _populate_insurance_company_branch: {str(e)}")
 
@@ -322,10 +317,17 @@ class PolicyDocument(Document):
 
 	def _notify_processing_completion(self, result, processing_time):
 		"""Notify user via real-time updates"""
+		branch_warning = getattr(self, "_branch_warning", None)
+		# notification_message = (
+		# 	"Claude Vision processing completed successfully" if result.get("success") else self.error_message
+		# )
 		notification_message = (
-			"Claude Vision processing completed successfully" if result.get("success") else self.error_message
+			f"Processing complete. ⚠️ {branch_warning}"
+			if result.get("success") and branch_warning
+			else "Claude Vision processing completed successfully"
+			if result.get("success")
+			else self.error_message
 		)
-
 		frappe.publish_realtime(
 			event="policy_processing_complete",
 			message={
@@ -390,7 +392,6 @@ class PolicyDocument(Document):
 			return {}
 
 		try:
-			print("ppppppppppp",frappe.parse_json(self.extracted_fields))
 			return frappe.parse_json(self.extracted_fields)
 		except Exception as e:
 			frappe.log_error(
