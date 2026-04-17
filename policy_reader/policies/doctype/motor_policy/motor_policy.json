@@ -27,6 +27,7 @@
   "receive_date",
   "is_renewable",
   "prev_policy_no",
+  "prev_policy",
   "business_information_tab",
   "business_information_section",
   "new_renewal",
@@ -171,6 +172,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_zchk",
+   "fieldtype": "Column Break"
+  },
+  {
    "description": "Upload policy PDF document for processing",
    "fieldname": "policy_file",
    "fieldtype": "Attach",
@@ -191,11 +196,16 @@
    "length": 100
   },
   {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
    "description": "SAIBA(Policy Type)",
    "fieldname": "policy_type",
    "fieldtype": "Select",
    "label": "Policy Type",
-   "options": "MOTOR COMMERCIAL VEHICLE\nMOTOR PRIVATE CAR\nMOTOR TWO WHEELER\nMotor Vechile Liability\nPassenger Carring Vehicle\nTRADE PLATE [MOTOR]"
+   "options": "MOTOR COMMERCIAL VEHICLE\nMOTOR PRIVATE CAR\nMOTOR TWO WHEELER\nMotor Vechile Liability"
   },
   {
    "description": "SAIBA(Insured/Proposer Name)",
@@ -205,27 +215,10 @@
    "length": 200
   },
   {
-   "default": "YES",
-   "description": "SAIBA(IsRenewable)",
-   "fieldname": "is_renewable",
-   "fieldtype": "Select",
-   "label": "Is Renewable",
-   "options": "YES\nNO"
-  },
-  {
-   "default": "New",
-   "description": "SAIBA(NewRenewal) - New or Renew policy",
-   "fieldname": "new_renewal",
-   "fieldtype": "Select",
-   "label": "New/Renewal",
-   "options": "New\nRenewal"
-  },
-  {
-   "description": "SAIBA(PrevPolicy) - Previous policy number if renewal",
-   "fieldname": "prev_policy_no",
-   "fieldtype": "Data",
-   "label": "Previous Policy Number",
-   "length": 100
+   "description": "SAIBA(PolicyIssuanceDate)",
+   "fieldname": "policy_issuance_date",
+   "fieldtype": "Date",
+   "label": "Policy Issuance Date"
   },
   {
    "description": "SAIBA(BusBrokDate) - Business/Brokerage date",
@@ -238,10 +231,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "SAIBA(PolicyIssuanceDate)",
-   "fieldname": "policy_issuance_date",
-   "fieldtype": "Date",
-   "label": "Policy Issuance Date"
+   "fieldname": "coverage_type",
+   "fieldtype": "Select",
+   "label": "Coverage Type",
+   "options": "1+1\n1+3\n1+5\n0+1\n1+0\n3+3\n5+5"
+  },
+  {
+   "description": "Coverage type - If OD premium extracted select 'Extension-Coverage', if TP extracted select 'ThirdParty(TP)'",
+   "fieldname": "coverage_tp",
+   "fieldtype": "Select",
+   "label": "Coverage/TP",
+   "options": "Extension-Coverage\nThirdParty(TP)\nOwnerDriver(LPD)\nRoadside Assistance"
   },
   {
    "description": "SAIBA(PolicyStartDate)",
@@ -264,9 +264,159 @@
    "label": "Receive Date"
   },
   {
+   "default": "YES",
+   "description": "SAIBA(IsRenewable)",
+   "fieldname": "is_renewable",
+   "fieldtype": "Select",
+   "label": "Is Renewable",
+   "options": "YES\nNO"
+  },
+  {
+   "description": "SAIBA(PrevPolicy) - Previous policy number if renewal",
+   "fieldname": "prev_policy_no",
+   "fieldtype": "Data",
+   "label": "Previous Policy Number",
+   "length": 100
+  },
+  {
    "fieldname": "business_information_tab",
    "fieldtype": "Tab Break",
    "label": "Business Information"
+  },
+  {
+   "fieldname": "business_information_section",
+   "fieldtype": "Section Break",
+   "label": "Business Information"
+  },
+  {
+   "default": "New",
+   "description": "SAIBA(NewRenewal) - New or Renew policy",
+   "fieldname": "new_renewal",
+   "fieldtype": "Select",
+   "label": "New/Renewal",
+   "options": "New\nRenewal"
+  },
+  {
+   "description": "Old control number/ID",
+   "fieldname": "old_control_number",
+   "fieldtype": "Data",
+   "label": "Old Control Number"
+  },
+  {
+   "fieldname": "biz_type",
+   "fieldtype": "Data",
+   "label": "Biz Type"
+  },
+  {
+   "fieldname": "customer_vertical",
+   "fieldtype": "Data",
+   "label": "Customer Vertical"
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code"
+  },
+  {
+   "fieldname": "branch_name",
+   "fieldtype": "Data",
+   "label": "Branch Name"
+  },
+  {
+   "fieldname": "column_break_business_info",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "policy_type_biz",
+   "fieldtype": "Data",
+   "label": "Policy Type"
+  },
+  {
+   "fieldname": "rm",
+   "fieldtype": "Link",
+   "label": "RM ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"RM\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "rm.employee_code",
+   "fieldname": "rm_rm_code",
+   "fieldtype": "Data",
+   "label": "RM code"
+  },
+  {
+   "fieldname": "csc",
+   "fieldtype": "Link",
+   "label": "CSC ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "csc.employee_code",
+   "fieldname": "csc_csc_code",
+   "fieldtype": "Data",
+   "label": "CSC code"
+  },
+  {
+   "fieldname": "rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code"
+  },
+  {
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code"
+  },
+  {
+   "fieldname": "tc_code",
+   "fieldtype": "Data",
+   "label": "TC Code"
+  },
+  {
+   "fieldname": "ref_code",
+   "fieldtype": "Data",
+   "label": "Ref Code"
+  },
+  {
+   "fieldname": "pos_misp_ref",
+   "fieldtype": "Data",
+   "label": "POS/MISP/Ref"
+  },
+  {
+   "description": "Additional remarks or notes about the policy",
+   "fieldname": "policy_enquiry_remarks",
+   "fieldtype": "Long Text",
+   "label": "Policy/Enquiry Remarks"
+  },
+  {
+   "fieldname": "payment_information_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Information"
+  },
+  {
+   "description": "Primary payment mode",
+   "fieldname": "payment_mode_1",
+   "fieldtype": "Data",
+   "label": "Payment Mode 1",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(PaymentTranNo) - Payment transaction number",
+   "fieldname": "payment_tran_no",
+   "fieldtype": "Data",
+   "label": "Payment Transaction No",
+   "length": 100
+  },
+  {
+   "fieldname": "column_break_qqmf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(BankName) - Bank name for payment",
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name",
+   "length": 100
   },
   {
    "fieldname": "customer_insurer_info_tab",
@@ -279,11 +429,9 @@
    "label": "Customer Information"
   },
   {
-   "default": "NO GROUP",
-   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
-   "fieldname": "customer_group",
+   "fieldname": "customer_code",
    "fieldtype": "Data",
-   "label": "Customer Group"
+   "label": "Customer Code"
   },
   {
    "description": "Dr. ; M/S ; Mr. ; Mrs. ; Ms.",
@@ -300,9 +448,26 @@
    "length": 200
   },
   {
+   "default": "NO GROUP",
+   "description": "Full Legal Name of the Entity, if individual then enter 'NO GROUP'",
+   "fieldname": "customer_group",
+   "fieldtype": "Data",
+   "label": "Customer Group"
+  },
+  {
    "fieldname": "customer_address",
    "fieldtype": "Small Text",
    "label": "Customer Address"
+  },
+  {
+   "fieldname": "customer_gst",
+   "fieldtype": "Data",
+   "label": "Customer GST"
+  },
+  {
+   "fieldname": "customer_pan",
+   "fieldtype": "Data",
+   "label": "Customer PAN"
   },
   {
    "fieldname": "column_break_customer",
@@ -333,6 +498,11 @@
    "fieldname": "email_id",
    "fieldtype": "Data",
    "label": "Email ID"
+  },
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Data",
+   "label": "Customer ID"
   },
   {
    "fieldname": "insurer_info_section",
@@ -400,6 +570,13 @@
    "length": 100
   },
   {
+   "description": "Raw AI-extracted Make / Model / Variant (for reference when master lookup fails)",
+   "fieldname": "vehicle_info_text",
+   "fieldtype": "Small Text",
+   "label": "AI Extracted Vehicle Details",
+   "read_only": 1
+  },
+  {
    "description": "SAIBA(Make)",
    "fieldname": "make",
    "fieldtype": "Link",
@@ -423,6 +600,11 @@
    "options": "PRIVATE\nCOMMERCIAL"
   },
   {
+   "fieldname": "vehicle_class",
+   "fieldtype": "Data",
+   "label": "Vehicle Class"
+  },
+  {
    "fieldname": "column_break_vehicle_basic",
    "fieldtype": "Column Break"
   },
@@ -439,6 +621,24 @@
    "fieldname": "year_of_man",
    "fieldtype": "Int",
    "label": "Year of Manufacture"
+  },
+  {
+   "description": "SAIBA(RegistrationDate) - Vehicle registration date",
+   "fieldname": "registration_date",
+   "fieldtype": "Date",
+   "label": "Vehicle Registration Date"
+  },
+  {
+   "description": "SAIBA(RTO Code)",
+   "fieldname": "rto_code",
+   "fieldtype": "Data",
+   "label": "RTO Code",
+   "length": 100
+  },
+  {
+   "fieldname": "passengergvw",
+   "fieldtype": "Data",
+   "label": "Passenger/GVW"
   },
   {
    "fieldname": "vehicle_specs_section",
@@ -458,6 +658,13 @@
    "fieldtype": "Data",
    "label": "Engine No",
    "length": 100
+  },
+  {
+   "description": "SAIBA(NCB)",
+   "fieldname": "ncb",
+   "fieldtype": "Int",
+   "label": "NCB",
+   "precision": "2"
   },
   {
    "fieldname": "column_break_specs",
@@ -489,24 +696,11 @@
    "label": "Registration Details"
   },
   {
-   "description": "SAIBA(RegistrationDate) - Vehicle registration date",
-   "fieldname": "registration_date",
-   "fieldtype": "Date",
-   "label": "Vehicle Registration Date"
-  },
-  {
-   "description": "SAIBA(RTO Code)",
-   "fieldname": "rto_code",
-   "fieldtype": "Data",
-   "label": "RTO Code",
-   "length": 100
-  },
-  {
    "description": "SAIBA(Category)",
    "fieldname": "category",
    "fieldtype": "Select",
    "label": "Category",
-   "options": "PCV\nGSV\nMISC."
+   "options": "PCV\nGSV\nMISC"
   },
   {
    "fieldname": "column_break_registration",
@@ -544,23 +738,16 @@
   {
    "description": "SAIBA(Sum Insured)",
    "fieldname": "sum_insured",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "Sum Insured",
    "precision": "2"
   },
   {
    "description": "SAIBA(Net/OD Premium)",
    "fieldname": "net_od_premium",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "Net/OD Premium",
    "precision": "2"
-  },
-  {
-   "description": "Coverage type - If OD premium extracted select 'Extension-Coverage', if TP extracted select 'ThirdParty(TP)'",
-   "fieldname": "coverage_tp",
-   "fieldtype": "Select",
-   "label": "Coverage/TP",
-   "options": "Extension-Coverage\nThirdParty(TP)\nOwnerDriver(LPD)\nRoadside Assistance"
   },
   {
    "fieldname": "column_break_premium",
@@ -569,7 +756,7 @@
   {
    "description": "SAIBA(TP Premium)",
    "fieldname": "tp_premium",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "TP Premium",
    "precision": "2"
   },
@@ -589,7 +776,7 @@
   {
    "description": "SAIBA(GST)",
    "fieldname": "gst",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "GST",
    "precision": "2"
   },
@@ -603,13 +790,6 @@
   {
    "fieldname": "column_break_tax",
    "fieldtype": "Column Break"
-  },
-  {
-   "description": "SAIBA(NCB)",
-   "fieldname": "ncb",
-   "fieldtype": "Float",
-   "label": "NCB",
-   "precision": "2"
   },
   {
    "default": "0",
@@ -633,20 +813,6 @@
    "fieldtype": "Currency",
    "label": "LPOD Premium",
    "precision": "2"
-  },
-  {
-   "description": "SAIBA(BankName) - Bank name for payment",
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "length": 100
-  },
-  {
-   "description": "SAIBA(PaymentTranNo) - Payment transaction number",
-   "fieldname": "payment_tran_no",
-   "fieldtype": "Data",
-   "label": "Payment Transaction No",
-   "length": 100
   },
   {
    "fieldname": "internal_information_tab",
@@ -693,87 +859,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "business_information_section",
-   "fieldtype": "Section Break",
-   "label": "Business Information"
-  },
-  {
-   "description": "Old control number/ID",
-   "fieldname": "old_control_number",
-   "fieldtype": "Data",
-   "label": "Old Control Number"
-  },
-  {
-   "fieldname": "biz_type",
-   "fieldtype": "Data",
-   "label": "Biz Type"
-  },
-  {
-   "fieldname": "customer_vertical",
-   "fieldtype": "Data",
-   "label": "Customer Vertical"
-  },
-  {
-   "fieldname": "customer_pan",
-   "fieldtype": "Data",
-   "label": "Customer PAN"
-  },
-  {
-   "fieldname": "customer_gst",
-   "fieldtype": "Data",
-   "label": "Customer GST"
-  },
-  {
-   "fieldname": "column_break_business_info",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "policy_type_biz",
-   "fieldtype": "Data",
-   "label": "Policy Type"
-  },
-  {
-   "fieldname": "rm_code",
-   "fieldtype": "Data",
-   "label": "RM Code"
-  },
-  {
-   "fieldname": "csc_code",
-   "fieldtype": "Data",
-   "label": "CSC Code"
-  },
-  {
-   "fieldname": "tc_code",
-   "fieldtype": "Data",
-   "label": "TC Code"
-  },
-  {
-   "fieldname": "ref_code",
-   "fieldtype": "Data",
-   "label": "Ref Code"
-  },
-  {
-   "fieldname": "pos_misp_ref",
-   "fieldtype": "Data",
-   "label": "POS/MISP/Ref"
-  },
-  {
-   "description": "Additional remarks or notes about the policy",
-   "fieldname": "policy_enquiry_remarks",
-   "fieldtype": "Long Text",
-   "label": "Policy/Enquiry Remarks"
-  },
-  {
    "fieldname": "internal_business_section",
    "fieldtype": "Section Break",
    "label": "Internal Business Information"
-  },
-  {
-   "description": "Primary payment mode",
-   "fieldname": "payment_mode_1",
-   "fieldtype": "Data",
-   "label": "Payment Mode 1",
-   "length": 100
   },
   {
    "default": "15",
@@ -871,6 +959,14 @@
    "read_only": 1
   },
   {
+   "default": "Not Approved",
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "label": "Approval Status",
+   "options": "Approved\nNot Approved",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_saiba_sync",
    "fieldtype": "Column Break"
   },
@@ -881,6 +977,13 @@
    "label": "SAIBA Control Number",
    "length": 50,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:[\"Duplicate Entry\", \"Failed\", \"Synced\"].includes(doc.saiba_sync_status)",
+   "fieldname": "view_the_reqres",
+   "fieldtype": "Check",
+   "label": "View the req/res "
   },
   {
    "depends_on": "eval:doc.saiba_sync_status !== 'Synced'",
@@ -973,113 +1076,18 @@
    "label": "Payment Details (Cheque/NEFT/Online Payment)"
   },
   {
-   "fieldname": "column_break_zchk",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "customer_id",
-   "fieldtype": "Data",
-   "label": "Customer ID"
-  },
-  {
-   "fieldname": "vehicle_class",
-   "fieldtype": "Data",
-   "label": "Vehicle Class"
-  },
-  {
-   "fieldname": "passengergvw",
-   "fieldtype": "Data",
-   "label": "Passenger/GVW"
-  },
-  {
-   "fieldname": "payment_information_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Information"
-  },
-  {
-   "fieldname": "column_break_qqmf",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "department",
-   "fieldtype": "Data",
-   "label": "Department"
-  },
-  {
-   "fieldname": "coverage_type",
+   "default": "No",
+   "fieldname": "prev_policy",
    "fieldtype": "Select",
-   "label": "Coverage Type",
-   "options": "1+1\n1+3\n1+5\n0+1\n1+0\n3+3\n5+5"
-  },
-  {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "branch_name",
-   "fieldtype": "Data",
-   "label": "Branch Name"
-  },
-  {
-   "fieldname": "customer_code",
-   "fieldtype": "Data",
-   "label": "Customer Code"
-  },
-  {
-   "default": "Not Approved",
-   "fieldname": "approval_status",
-   "fieldtype": "Select",
-   "label": "Approval Status",
-   "options": "Approved\nNot Approved",
-   "read_only": 1
-  },
-  {
-   "description": "Raw AI-extracted Make / Model / Variant (for reference when master lookup fails)",
-   "fieldname": "vehicle_info_text",
-   "fieldtype": "Small Text",
-   "label": "AI Extracted Vehicle Details",
-   "read_only": 1
-  },
-  {
-   "fieldname": "rm",
-   "fieldtype": "Link",
-   "label": "RM ",
-   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"RM\"]]",
-   "options": "Insurance Employee"
-  },
-  {
-   "fetch_from": "rm.employee_code",
-   "fieldname": "rm_rm_code",
-   "fieldtype": "Data",
-   "label": "RM code"
-  },
-  {
-   "fieldname": "csc",
-   "fieldtype": "Link",
-   "label": "CSC ",
-   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
-   "options": "Insurance Employee"
-  },
-  {
-   "fetch_from": "csc.employee_code",
-   "fieldname": "csc_csc_code",
-   "fieldtype": "Data",
-   "label": "CSC code"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:[\"Duplicate Entry\", \"Failed\", \"Synced\"].includes(doc.saiba_sync_status)",
-   "fieldname": "view_the_reqres",
-   "fieldtype": "Check",
-   "label": "View the req/res "
+   "label": "Prev Policy",
+   "options": "Yes\nNo"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-25 16:51:51.957580",
+ "modified": "2026-04-16 18:08:49.852650",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",

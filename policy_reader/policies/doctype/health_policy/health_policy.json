@@ -25,6 +25,7 @@
   "plan_name",
   "prev_policy",
   "column_break_2",
+  "policy_status",
   "business_information_tab",
   "business_information_section",
   "policy_enquiry_remarks",
@@ -44,6 +45,11 @@
   "portability",
   "is_renewable",
   "pos_misp_ref",
+  "payment_information_section",
+  "payment_mode",
+  "payment_transaction_no",
+  "column_break_olyq",
+  "bank_name",
   "customer_insurer_info_tab",
   "insurer_info_section",
   "insurance_company_branch",
@@ -153,6 +159,7 @@
   "saiba_sync_tab",
   "saiba_sync_section",
   "saiba_sync_status",
+  "approval_status",
   "saiba_sync_datetime",
   "column_break_saiba_sync",
   "saiba_control_number",
@@ -739,24 +746,24 @@
    "options": "Insurance Company Branch"
   },
   {
-   "fetch_from": "insurance_company_branch.insurance_company",
    "description": "SAIBA(Insurer Name)",
+   "fetch_from": "insurance_company_branch.insurance_company",
    "fieldname": "insurer_name",
    "fieldtype": "Data",
    "label": "Insurer Name",
    "length": 150
   },
   {
-   "fetch_from": "insurance_company_branch.city",
    "description": "SAIBA(Insurer City)",
+   "fetch_from": "insurance_company_branch.city",
    "fieldname": "insurer_city",
    "fieldtype": "Data",
    "label": "Insurer City",
    "length": 100
   },
   {
-   "fetch_from": "insurance_company_branch.branch_name",
    "description": "SAIBA(Insurer Branch)",
+   "fetch_from": "insurance_company_branch.branch_name",
    "fieldname": "insurer_branch",
    "fieldtype": "Data",
    "label": "Insurer Branch",
@@ -767,8 +774,8 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "insurance_company_branch.branch_auto_code",
    "description": "SAIBA(Insurer Branch Code)",
+   "fetch_from": "insurance_company_branch.branch_auto_code",
    "fieldname": "insurer_branch_code",
    "fieldtype": "Data",
    "label": "Insurer Branch Code",
@@ -1111,11 +1118,54 @@
    "fieldname": "payment_details_doc",
    "fieldtype": "Attach",
    "label": "Payment Details (Cheque/NEFT/Online Payment)"
+  },
+  {
+   "default": "Not Approved",
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "label": "Approval Status",
+   "options": "Approved\nNot Approved"
+  },
+  {
+   "fieldname": "policy_status",
+   "fieldtype": "Data",
+   "label": "Policy Status"
+  },
+  {
+   "fieldname": "payment_information_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Information"
+  },
+  {
+   "fieldname": "column_break_olyq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "SAIBA(BankName) - Bank name for payment",
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name",
+   "length": 100
+  },
+  {
+   "description": "SAIBA(PaymentTranNo) - Payment transaction number",
+   "fieldname": "payment_transaction_no",
+   "fieldtype": "Data",
+   "label": "Payment Transaction No",
+   "length": 100
+  },
+  {
+   "description": "Primary payment mode",
+   "fieldname": "payment_mode",
+   "fieldtype": "Data",
+   "label": "Payment Mode ",
+   "length": 100
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-22 16:59:32.472408",
+ "modified": "2026-04-07 13:55:58.521799",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",
@@ -1161,7 +1211,7 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "policy_no,insured1name,customer_code",
+ "search_fields": "policy_no,insured_1_name,customer_code",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

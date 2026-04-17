@@ -266,7 +266,7 @@ class SaibaValidationService:
 			return {"success": False, "error": str(e)}
 
 	def get_saiba_ai_fields(self, policy_type):
-		# SAIBA-required fields (29)
+		# SAIBA-required fields (29-> motor and 25->health)
 		saiba_fields = set(get_required_fields(policy_type))
 		# AI_feilds
 		ai_fields = set(CommonService.get_field_mapping_for_policy_type(policy_type).values()) - set(

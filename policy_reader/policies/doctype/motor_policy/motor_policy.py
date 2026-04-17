@@ -43,7 +43,6 @@ class MotorPolicy(Document):
 		if self.is_renewable == "Yes" and not self.old_control_number:
 			settings = frappe.get_single("Policy Reader Settings")
 			handling = getattr(settings, "renewable_ocn_handling", "Block Creation")
-
 			if handling == "Use Default Value":
 				default_ocn = getattr(settings, "default_old_control_number", "DEF_CN_1") or "DEF_CN_1"
 				self.old_control_number = default_ocn
@@ -219,6 +218,8 @@ class MotorPolicy(Document):
 		except Exception as e:
 			frappe.logger().error(f"Error copying insurer info from Policy Document: {str(e)}")
 
+		
+
 	@frappe.whitelist()
 	def sync_motor_policy(self):
 		ai_extracted_fields = [
@@ -246,7 +247,8 @@ class MotorPolicy(Document):
 		]
 
 		for field in ai_extracted_fields:
-			if not self.get(field):
+			value=self.get(field)
+			if value is None or value == "":
 				frappe.throw(f"{field} is missing")
 		self.approval_status = "Approved"
 		self.save()

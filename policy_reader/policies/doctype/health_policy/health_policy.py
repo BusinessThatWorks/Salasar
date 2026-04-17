@@ -203,3 +203,38 @@ class HealthPolicy(Document):
 
 		except Exception as e:
 			frappe.logger().error(f"Error copying insurer info from Policy Document: {str(e)}")
+
+	@frappe.whitelist()
+	def sync_health_policy(self):
+		ai_extracted_fields = [
+			"insured_1_name",
+			"sum_insured",
+			"plan_name",
+			"pos_policy",
+			"payment_transaction_no",
+			"policy_start_date",
+			"remarks",
+			"policy_no",
+			"payment_mode",
+			"stamp_duty",
+			"insured_1_relation",
+			"is_renewable",
+			"insured_1_dob",
+			"policy_expiry_date",
+			"prev_policy",
+			"insured_1_gender",
+			"policy_issuance_date",
+			"net_od_premium",
+			"bank_name",
+		]
+
+
+		self.approval_status = "Approved"
+		self.save()
+
+		for field in ai_extracted_fields:
+			if not self.get(field):
+				frappe.throw(f"{field} is missing")
+		
+		self.approval_status = "Approved"
+		self.save()

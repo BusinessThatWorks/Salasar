@@ -14,6 +14,7 @@ class SaibaSyncService:
 
 	MOTOR_ENDPOINT = "/api/MotorPolicyEntryS"
 	HEALTH_ENDPOINT = "/api/HealthPolicyEntryS"
+	CUSTOMER_ENDPOINT="/api/InsertCustomerDetails"
 	TOKEN_ENDPOINT = "/GetToken"
 
 	# Token validity duration (23 hours to be safe)
@@ -164,15 +165,15 @@ class SaibaSyncService:
 		except Exception:
 			return set()
 
-	def _validate_bank_master(self, policy_doc):
-		bank_name = self._safe_str(policy_doc.bank_name)
-		bank_name_exists = frappe.db.exists("SB Bank Master", bank_name)
-		if not bank_name_exists:
-			bank_name = "NONE"
-			frappe.db.set_value(
-				policy_doc.doctype, policy_doc.name, "bank_name", "NONE", update_modified=False
-			)
-		return bank_name
+	# def _validate_bank_master(self, policy_doc):
+	# 	bank_name = self._safe_str(policy_doc.bank_name)
+	# 	bank_name_exists = frappe.db.exists("SB Bank Master", bank_name)
+	# 	if not bank_name_exists:
+	# 		bank_name = "NONE"
+	# 		frappe.db.set_value(
+	# 			policy_doc.doctype, policy_doc.name, "bank_name", "NONE", update_modified=False
+	# 		)
+	# 	return bank_name
 
 	def _filter_required_only(self, payload, policy_type):
 		"""Filter payload to only required fields if setting is enabled"""
@@ -212,7 +213,6 @@ class SaibaSyncService:
 		return detected
 
 	def _build_motor_policy_payload(self, policy_doc):
-		bank_name = self._validate_bank_master(policy_doc)
 		"""Build the payload for Motor Policy sync"""
 		return {
 			"custCode": self._safe_int(policy_doc.customer_code),
@@ -234,7 +234,7 @@ class SaibaSyncService:
 			"policyNo": self._safe_str(policy_doc.policy_no),
 			"isRenewable": "Yes" if policy_doc.is_renewable == "YES" else "No",
 			"newRenewal": self._safe_str(policy_doc.new_renewal) or "New",
-			"prevPolicy": self._safe_str(policy_doc.prev_policy_no) or "No",
+			"prevPolicy": self._safe_str(policy_doc.prev_policy) or "No",
 			"vehicleNo": self._safe_str(policy_doc.vehicle_no),
 			"make": self._safe_str(policy_doc.make),
 			"model": self._safe_str(policy_doc.model),
@@ -265,8 +265,7 @@ class SaibaSyncService:
 			"gst": self._safe_int(policy_doc.gst) or 18,
 			"stampDuty": self._safe_int(policy_doc.stamp_duty),
 			"paymentMode": self._safe_str(policy_doc.payment_mode_1),
-			# "bankName": self._safe_str(policy_doc.bank_name),
-			"bankName": bank_name,
+			"bankName": self._safe_str(policy_doc.bank_name),
 			"paymentTranNo": self._safe_str(policy_doc.payment_tran_no),
 			"campaignName": self._safe_str(policy_doc.campaign_name) or "No Campaign",
 			"remarks": self._safe_str(policy_doc.policy_enquiry_remarks),
@@ -275,31 +274,38 @@ class SaibaSyncService:
 
 	def _build_health_policy_payload(self, policy_doc):
 		"""Build the payload for Health Policy sync"""
+		# bank_name = self._validate_bank_master(policy_doc)
 		payload = {
-			"custCode": self._safe_int(policy_doc.customer_code),
+			# "customerCode": self._safe_int(policy_doc.customer_code),
+			"CustCode":self._safe_int(policy_doc.customer_code),
 			"posPolicy": self._safe_str(policy_doc.pos_policy) or "No",
-			"bizType": self._safe_str(policy_doc.biz_type) or "New",
-			"insBranchCode": self._safe_int(policy_doc.insurer_branch_code),
+			"policyBizType": self._safe_str(policy_doc.biz_type) or "New",
+			"insurerBranchCode": self._safe_int(policy_doc.insurer_branch_code),
+			# "policyIssuanceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
 			"issuenceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
+			# "policyStartDate": self._format_date_for_saiba(policy_doc.policy_start_date),
 			"startDate": self._format_date_for_saiba(policy_doc.policy_start_date),
-			"expiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
+			# "policyExpiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
+			"expiryDate":self._format_date_for_saiba(policy_doc.policy_expiry_date),
 			"policyType": self._safe_str(policy_doc.policy_type),
 			"policyNo": self._safe_str(policy_doc.policy_no),
 			"planName": self._safe_str(policy_doc.plan_name),
 			"isRenewable": "Yes" if policy_doc.is_renewable == "Yes" else "No",
-			"coverageType": self._safe_str(policy_doc.coverage_type),
-			"policyVertical": self._safe_str(policy_doc.policy_vertical),
-			"prevPolicy": "Yes" if policy_doc.prev_policy else "No",
+			# "newRenewal": "Yes" if policy_doc.is_renewable == "Yes" else "No",
+			# "coverageType": self._safe_str(policy_doc.coverage_type),
+			# "policyVertical": self._safe_str(policy_doc.policy_vertical),
+			"prevPolicy": self._safe_str(policy_doc.prev_policy),
 			"sumInsured": self._safe_int(policy_doc.sum_insured),
-			"netODPremium": self._safe_int(policy_doc.net_od_premium),
+			"netodPremium": self._safe_int(policy_doc.net_od_premium),
 			"gst": self._safe_int(policy_doc.gst_tax_percent) or 18,
 			"stampDuty": self._safe_int(policy_doc.stamp_duty),
-			"paymentMode": "Online",
-			"bankName": "",
-			"paymentTranNo": "",
-			"campaignName": "No Campaign",
+			"paymentMode": self._safe_str(policy_doc.payment_mode),
+			"bankName": self._safe_str(policy_doc.bank_name),
+			# "paymentTransactionNo": self._safe_str(policy_doc.payment_transaction_no),
+			"paymentTranNo":self._safe_str(policy_doc.payment_transaction_no),
+			"Chq/DD/Trn No": self._safe_str(policy_doc.payment_transaction_no),
 			"remarks": self._safe_str(policy_doc.remarks),
-			"policyStatus": "NA",
+			"policyStatus": self._safe_str(policy_doc.policy_status),
 		}
 
 		# Add insured persons (1-5 for SAIBA API)
@@ -313,46 +319,39 @@ class SaibaSyncService:
 			payload[f"insured{i}Gender"] = self._safe_str(getattr(policy_doc, gender_field, ""))
 			payload[f"insured{i}DOB"] = self._format_date_for_saiba(getattr(policy_doc, dob_field, None))
 			payload[f"insured{i}Relation"] = self._safe_str(getattr(policy_doc, relation_field, ""))
-
 		return payload
 
-	# def _build_health_policy_payload(self, policy_doc):
-	# 	payload = {
-	# 		"customerCode": self._safe_int(policy_doc.customer_code),
-	# 		"posPolicy": self._safe_str(policy_doc.pos_policy) or "No",
-	# 		"policyBizType": self._safe_str(policy_doc.biz_type) or "New",
-	# 		"insurerBranchCode": self._safe_int(policy_doc.insurer_branch_code),
-	# 		"policyIssuanceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
-	# 		"policyStartDate": self._format_date_for_saiba(policy_doc.policy_start_date),
-	# 		"policyExpiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
-	# 		"policyType": self._safe_str(policy_doc.policy_type),
-	# 		"policyNo": self._safe_str(policy_doc.policy_no),
-	# 		"planName": self._safe_str(policy_doc.plan_name),
-	# 		"isRenewable": "Yes" if policy_doc.is_renewable == "Yes" else "No",
-	# 		"prevPolicy": "Yes" if policy_doc.prev_policy else "No",
-	# 		"sumInsured": self._safe_int(policy_doc.sum_insured),
-	# 		"netodPremium": self._safe_int(policy_doc.net_od_premium),
-	# 		"gst": self._safe_int(policy_doc.gst_tax_percent) or 18,
-	# 		"stampDuty": self._safe_int(policy_doc.stamp_duty),
-	# 		"paymentMode": "Online",
-	# 		"bankName": self._safe_str(getattr(policy_doc, "bank_name", "")) or "NA",
-	# 		"paymentTransactionNo": self._safe_str(getattr(policy_doc, "payment_txn_no", "")) or "NA",
-	# 		"remarks": self._safe_str(policy_doc.remarks) or "NA",
-	# 		"policyStatus": "Issued",
-	# 	}
 
-	# 	for i in range(1, 6):
-	# 		name_field = f"insured_{i}_name"
-	# 		gender_field = f"insured_{i}_gender"
-	# 		dob_field = f"insured_{i}_dob"
-	# 		relation_field = f"insured_{i}_relation"
+	def _build_customer_payload(self,customer_doc):
+		return {
+			"title":self._safe_str(customer_doc.title),
+			"name":self._safe_str(customer_doc.customer_name),
+			"groupName":self._safe_str(customer_doc.customer_group) if customer_doc.customer_group else "NO GROUP",
+			"shortName":self._safe_str(customer_doc.short_name),
+			"gender": self._safe_str(customer_doc.gender),
+			"dob": self._format_date_for_saiba(customer_doc.dob_doi),
+			"address":self._safe_str(customer_doc.address),
+			"state":self._safe_str(customer_doc.state),
+			"city": self._safe_str(customer_doc.city),
+			"custCountry":self._safe_str(customer_doc.country),
+			"location":self._safe_str(customer_doc.location),
+			"pinCode":self._safe_str(customer_doc.pin),
+			"phoneNo":self._safe_str(customer_doc.phone_no),
+			"mobileNo":self._safe_str(customer_doc.mobile_no),
+			"email":self._safe_str(customer_doc.email),
+			"panNo":self._safe_str(customer_doc.customer_pan),
+			"aadhaarNo": self._safe_str(customer_doc.customer_aadhaar_no),
+			"gstin": self._safe_str(customer_doc.customer_gst),
+			"vertical": self._safe_str(customer_doc.vertical),
+			"industrySegment": self._safe_str(customer_doc.industry_segment),
+			"formOfOrg": self._safe_str(customer_doc.form_of_organization),
+			"category": self._safe_str(customer_doc.customer_category),
+			"branchCode": self._safe_int(customer_doc.branch_code),
+			"rmCode": self._safe_int(customer_doc.rm_code),
+			"cscCode": self._safe_int(customer_doc.csc_code),
+			"posRefMispCode": self._safe_int(customer_doc.posrefmisp_code)
+		}
 
-	# 		payload[f"insured{i}Name"] = self._safe_str(getattr(policy_doc, name_field, ""))
-	# 		payload[f"insured{i}Gender"] = self._safe_str(getattr(policy_doc, gender_field, ""))
-	# 		payload[f"insured{i}DOB"] = self._format_date_for_saiba(getattr(policy_doc, dob_field, None))
-	# 		payload[f"insured{i}Relation"] = self._safe_str(getattr(policy_doc, relation_field, ""))
-
-	# 	return payload
 
 	def _make_api_request(self, endpoint, payload):
 		"""Make API request to SAIBA"""
@@ -396,6 +395,12 @@ class SaibaSyncService:
 
 		match = re.search(r"Control No\s*:\s*(\d+)", result_text, re.IGNORECASE)
 		return match.group(1) if match else None
+	# def _parse_customer_code(self,result_text):
+	# 	"""Extract customer code from 'Successfully Saved with customer Code :1'"""
+	# 	if not result_text:
+	# 		return None
+	# 	match=re.search(r"customer Code\s*:\s*(\d+)", result_text, re.IGNORECASE)
+	# 	return match.group(1) if match else None
 
 	def _handle_api_response(self, response, policy_doc, request_payload=None):
 		"""Handle API response and update sync status"""
@@ -404,16 +409,24 @@ class SaibaSyncService:
 		except Exception:
 			data = {"error": response.text, "status_code": response.status_code}
 
-		if response.status_code == 200 and data.get("status") == "Success":
-			control_no = self._parse_control_number(data.get("result", ""))
+		if response.status_code == 200 and data.get("status") in ["Success", "Sucess"]:
+			customer_code=None
+			control_no=None
+			if policy_doc.doctype == "Insurance Customer":
+				# customer_code=self._parse_customer_code(data.get("result", ""))
+				# customer_code = data.get("response", {}).get("custCode")
+				customer_code=data.get("custCode")
+			else:
+				control_no = self._parse_control_number(data.get("result", ""))
 			self._update_sync_status(
 				policy_doc,
 				status="Synced",
 				control_number=control_no,
+				customer_code=customer_code,
 				response=data,
 				request_payload=request_payload,
 			)
-			return {"success": True, "control_number": control_no, "message": data.get("result")}
+			return {"success": True, "control_number": control_no, "customer_code": customer_code, "message": data.get("result")}
 
 		else:
 			error_msg = (
@@ -471,7 +484,7 @@ class SaibaSyncService:
 			}
 
 	def _update_sync_status(
-		self, policy_doc, status, error=None, control_number=None, response=None, request_payload=None
+		self, policy_doc, status, error=None, control_number=None, response=None, request_payload=None,customer_code=None
 	):
 		"""Update the sync status fields on the policy document"""
 		doctype = policy_doc.doctype
@@ -486,6 +499,8 @@ class SaibaSyncService:
 
 		if control_number:
 			update_data["saiba_control_number"] = control_number
+		if customer_code:
+			update_data["saiba_customer_code"]=customer_code
 
 		# Store both request and response for debugging
 		if response or request_payload:
@@ -541,7 +556,6 @@ class SaibaSyncService:
 
 			# Build payload
 			payload = self._build_health_policy_payload(policy_doc)
-
 			payload = self._filter_required_only(payload, "Health")
 
 			# Make API request
@@ -556,6 +570,27 @@ class SaibaSyncService:
 			# Try to update status if we have the doc
 			try:
 				policy_doc = frappe.get_doc("Health Policy", policy_name)
+				self._update_sync_status(policy_doc, status="Failed", error=str(e), request_payload=payload)
+			except Exception:
+				pass
+
+			return {"success": False, "error": str(e)}
+	def sync_customer_details(self,doc):
+		if not self._is_enabled():
+			return {"success": False, "error": "SAIBA integration is not enabled"}
+
+		payload=None
+		try:
+			policy_doc=frappe.get_doc("Insurance Customer",doc)
+			self._update_sync_status(policy_doc, status="Pending")
+			# need to update the status 
+			payload=self._build_customer_payload(policy_doc)
+			response=self._make_api_request(self.CUSTOMER_ENDPOINT,payload)
+			return self._handle_api_response(response,policy_doc,request_payload=payload)
+		except Exception as e:
+			frappe.log_error(f"Customer Insertion error :{str(e)}","SAIBA sync error")
+			try:
+				policy_doc = frappe.get_doc("Insurance Customer", policy_doc)
 				self._update_sync_status(policy_doc, status="Failed", error=str(e), request_payload=payload)
 			except Exception:
 				pass
@@ -602,3 +637,9 @@ def sync_health_policy(policy_name):
 def test_saiba_connection():
 	"""Whitelisted method to test SAIBA API connectivity"""
 	return SaibaSyncService.test_connection()
+
+@frappe.whitelist()
+def sync_customer_details(customer_name):
+    """Whitelisted method to sync an Insurance Customer to SAIBA"""
+    service = SaibaSyncService()
+    return service.sync_customer_details(customer_name)
