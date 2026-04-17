@@ -17,13 +17,13 @@ class InsuranceCustomer(Document):
         if not self.short_name:
             self.short_name=0
         if not self.vertical:
-            self.vertical="Retail"
+            self.vertical="RETAIL"
         if not self.customer_category:
             self.customer_category="Small Account"
         if not self.industry_segment:
             self.industry_segment="NA"
         if not self.form_of_organization:
-            self.form_of_organization="Individual"    
+            self.form_of_organization="INDIVIDUAL"    
            
         
     def check_for_saiba_fields(self):
