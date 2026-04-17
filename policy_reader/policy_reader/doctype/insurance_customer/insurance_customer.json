@@ -9,14 +9,55 @@
  "field_order": [
   "customer_information_section",
   "customer_name",
+  "title",
   "customer_code",
+  "gender",
+  "dob_doi",
   "column_break_customer",
   "customer_group",
   "customer_group_name",
+  "short_name",
+  "address_information_section",
+  "address",
+  "country",
+  "column_break_vmvm",
+  "city",
+  "state",
+  "pin",
+  "location",
+  "contact_information_section",
+  "phone_no",
+  "mobile_no",
+  "column_break_svij",
+  "email",
+  "tab_2_tab",
   "tax_information_section",
   "customer_pan",
-  "column_break_tax",
-  "customer_gst"
+  "customer_aadhaar_no",
+  "column_break_jcxg",
+  "customer_gst",
+  "section_break_yiql",
+  "vertical",
+  "industry_segment",
+  "column_break_gefa",
+  "customer_category",
+  "form_of_organization",
+  "section_break_zfjz",
+  "branch",
+  "branch_code",
+  "posrefmisp_code",
+  "column_break_kijm",
+  "rm",
+  "rm_code",
+  "csc",
+  "csc_code",
+  "tab_3_tab",
+  "saiba_sync_status",
+  "saiba_sync_datetime",
+  "column_break_ymzs",
+  "saiba_customer_code",
+  "saiba_sync_error",
+  "saiba_sync_response"
  ],
  "fields": [
   {
@@ -39,7 +80,6 @@
    "in_standard_filter": 1,
    "label": "Customer Code",
    "length": 50,
-   "read_only": 1,
    "reqd": 1,
    "unique": 1
   },
@@ -74,20 +114,254 @@
    "length": 20
   },
   {
-   "fieldname": "column_break_tax",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "customer_gst",
    "fieldtype": "Data",
    "label": "Customer GST",
    "length": 20
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Select",
+   "label": "Title",
+   "options": "Mr.\nMrs.\nMs.\nM/s\nDr."
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOthers"
+  },
+  {
+   "fieldname": "dob_doi",
+   "fieldtype": "Date",
+   "label": "DOB/DOI"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "default": "India",
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Link",
+   "label": "State",
+   "options": "SB State"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Link",
+   "label": "City",
+   "options": "SB City"
+  },
+  {
+   "fieldname": "pin",
+   "fieldtype": "Data",
+   "label": "PIN Code"
+  },
+  {
+   "fieldname": "address_information_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Address Information"
+  },
+  {
+   "fieldname": "column_break_vmvm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "short_name",
+   "fieldtype": "Data",
+   "label": "Short Name"
+  },
+  {
+   "fieldname": "contact_information_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Contact Information"
+  },
+  {
+   "fieldname": "phone_no",
+   "fieldtype": "Data",
+   "label": "Phone No"
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No"
+  },
+  {
+   "fieldname": "column_break_svij",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Customer details"
+  },
+  {
+   "fieldname": "customer_aadhaar_no",
+   "fieldtype": "Data",
+   "label": "Customer Aadhaar No"
+  },
+  {
+   "fieldname": "column_break_jcxg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_yiql",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "RETAIL",
+   "fieldname": "vertical",
+   "fieldtype": "Data",
+   "label": "Vertical"
+  },
+  {
+   "default": "NA",
+   "fieldname": "industry_segment",
+   "fieldtype": "Data",
+   "label": "Industry Segment"
+  },
+  {
+   "default": "INDIVIDUAL",
+   "fieldname": "form_of_organization",
+   "fieldtype": "Data",
+   "label": "Form Of Organization"
+  },
+  {
+   "fieldname": "column_break_gefa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Small Account",
+   "fieldname": "customer_category",
+   "fieldtype": "Data",
+   "label": "Customer Category"
+  },
+  {
+   "fieldname": "section_break_zfjz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "branch.branch_code",
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "label": "Branch Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_kijm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rm.rm_code",
+   "fieldname": "rm_code",
+   "fieldtype": "Data",
+   "label": "RM Code",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "csc.csc_code",
+   "fieldname": "csc_code",
+   "fieldtype": "Data",
+   "label": "CSC Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "posrefmisp_code",
+   "fieldtype": "Data",
+   "label": "POS/REF/MISP Code"
+  },
+  {
+   "fieldname": "tab_3_tab",
+   "fieldtype": "Tab Break",
+   "label": " SAIBA"
+  },
+  {
+   "default": "Not Synced",
+   "fieldname": "saiba_sync_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Saiba customer sync status",
+   "options": "Not Synced\nSynced\nFailed\nPending",
+   "read_only": 1
+  },
+  {
+   "fieldname": "saiba_sync_datetime",
+   "fieldtype": "Datetime",
+   "label": "SAIBA Sync Datetime",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ymzs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "saiba_sync_error",
+   "fieldtype": "Small Text",
+   "label": "Saiba Sync Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "saiba_customer_code",
+   "fieldtype": "Data",
+   "label": "SAIBA Customer Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "saiba_sync_response",
+   "fieldtype": "Long Text",
+   "label": "SAIBA Sync Response",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "RM ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"RM\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fieldname": "csc",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "CSC ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Broker Branch"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-31 17:14:37.068506",
+ "modified": "2026-04-17 16:15:49.213213",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Insurance Customer",

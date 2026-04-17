@@ -49,6 +49,7 @@
   "rm_code",
   "csc",
   "csc_code",
+  "remarks",
   "checklist_section_2",
   "checklist_department",
   "checklist_policy_type",
@@ -282,6 +283,7 @@
    "label": "Checklist Fields"
   },
   {
+   "fetch_from": "customer_code.branch_code",
    "fieldname": "checklist_branch_code",
    "fieldtype": "Data",
    "label": "Branch Code"
@@ -515,20 +517,22 @@
    "read_only": 1
   },
   {
-   "fetch_from": "rm.employee_code",
+   "fetch_from": "rm.rm_code",
    "fieldname": "rm_code",
    "fieldtype": "Data",
    "label": "RM Code",
    "read_only": 1
   },
   {
-   "fetch_from": "csc.employee_code",
+   "fetch_from": "csc.csc_code",
    "fieldname": "csc_code",
    "fieldtype": "Data",
    "label": "CSC Code",
    "read_only": 1
   },
   {
+   "fetch_from": "customer_code.rm",
+   "fetch_if_empty": 1,
    "fieldname": "rm",
    "fieldtype": "Link",
    "label": "RM",
@@ -537,6 +541,7 @@
   },
   {
    "fetch_from": "rm_code.employee_code",
+   "fetch_if_empty": 1,
    "fieldname": "csc",
    "fieldtype": "Link",
    "label": "CSC",
@@ -549,12 +554,17 @@
    "fieldname": "view_ai_extracted_data",
    "fieldtype": "Check",
    "label": " View AI Extracted Data"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-23 17:15:12.062547",
+ "modified": "2026-04-13 11:13:05.937093",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

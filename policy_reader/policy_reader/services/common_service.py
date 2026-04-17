@@ -29,7 +29,7 @@ class CommonService:
         """Get default settings object"""
         class DefaultSettings:
             anthropic_api_key = None
-            claude_model = "claude-sonnet-4-20250514"
+            claude_model = "claude-sonnet-4-6"
             timeout = 180
             queue_type = "short"
         return DefaultSettings()

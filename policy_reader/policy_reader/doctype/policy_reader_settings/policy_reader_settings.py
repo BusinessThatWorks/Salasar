@@ -343,12 +343,13 @@ class PolicyReaderSettings(Document):
 				"gender": ["Gender", "gender"],
 				"cse_id": ["CSE ID", "CSEID", "cse_id", "CSE_ID"],
 				"rm_id": ["RM ID", "RMID", "rm_id", "RM_ID"],
-				"old_control_number": [
-					"Old Control Number",
-					"OldControlNumber",
-					"old_control_number",
-					"Old_Control_Number",
-				],
+				# "old_control_number": [
+				# 	"Old Control Number",
+				# 	"OldControlNumber",
+				# 	"old_control_number",
+				# 	"Old_Control_Number",
+				# ],
+				"prev_policy_no": ["PrevPolicyNo", "Previous PolicyNo", "Prev Policy No", "prev_policy_no"],
 				"insurance_company_name": [
 					"insurance_company_name",
 					"Insurance Company Name",
@@ -396,7 +397,7 @@ class PolicyReaderSettings(Document):
 				"policy_type": ["Policy Type", "PolicyType", "policy_type"],
 				"policy_no": ["PolicyNo", "Policy No", "Policy Number", "PolicyNumber", "policy_no"],
 				"plan_name": ["Plan Name", "PlanName", "plan_name"],
-				"is_renewable": ["IsRenewable", "Is Renewable", "Renewable", "is_renewable"],
+				"new_renewable": ["IsRenewable", "Is Renewable", "Renewable", "is_renewable"],
 				"prev_policy": ["PrevPolicy", "Previous Policy", "Prev Policy", "prev_policy"],
 				# Insured Person 1
 				"insured_1_relation": [
@@ -775,6 +776,19 @@ class PolicyReaderSettings(Document):
 					"Payment Transaction No",
 					"Transaction No",
 					"payment_transaction_no",
+				],
+				"insurance_company_name": [
+					"insurance_company_name",
+					"Insurance Company Name",
+					"Insurance Company",
+					"InsuranceCompany",
+					"InsuranceCompanyName",
+					"Insurer",
+					"Insurer Name",
+					"InsurerName",
+					"insurer_name",
+					"Underwritten by",
+					"Issued by",
 				],
 				# Additional Fields
 				"remarks": ["Remarks", "Comments", "Notes", "remarks"],
@@ -1343,13 +1357,15 @@ Return data as valid JSON:"""
 			"gender": ["Gender", "gender"],
 			"cse_id": ["CSE ID", "CSEID", "cse_id", "CSE_ID"],
 			"rm_id": ["RM ID", "RMID", "rm_id", "RM_ID"],
-			"old_control_number": [
-				"Old Control Number",
-				"OldControlNumber",
-				"old_control_number",
-				"Old_Control_Number",
-			],
+			# "old_control_number": [
+			# 	"Old Control Number",
+			# 	"OldControlNumber",
+			# 	"old_control_number",
+			# 	"Old_Control_Number",
+			# ],
+			"prev_policy_no": ["PrevPolicyNo", "Previous PolicyNo", "Prev Policy No", "prev_policy_no"],
 			# Health policy fields
+
 			"policy_number": ["Policy Number", "PolicyNumber", "Policy No"],
 			"insured_name": ["Insured Name", "InsuredName", "Name of Insured"],
 			"policy_start_date": ["Policy Start Date", "Start Date", "From Date"],

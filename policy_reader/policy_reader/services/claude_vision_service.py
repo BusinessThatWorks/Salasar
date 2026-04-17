@@ -91,6 +91,10 @@ vehicle_no. Do NOT map it to customer_code or any other field.
 customer_code is a separate insurer-assigned identifier and will have
 its own distinct label like "Customer ID" or "Partner Code".
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NCB RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+If the ncb value contains negative or positive sign , do remove that signs and extract only the values
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 INSURANCE COMPANY NAME
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 The field `insurance_company_name` is the name of the insurer that
@@ -350,8 +354,9 @@ IMPORTANT:
 	@staticmethod
 	def _build_payload(settings, content):
 		"""Build payload for Claude API request"""
+		d=getattr(settings,"claude_model","claude-sonnet-4-6")
 		return {
-			"model": getattr(settings, "claude_model", "claude-sonnet-4-20250514"),
+			"model": getattr(settings, "claude_model", "claude-sonnet-4-6"),
 			"max_tokens": 4000,
 			"messages": [{"role": "user", "content": content}],
 		}

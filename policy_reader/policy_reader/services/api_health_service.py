@@ -36,7 +36,8 @@ class APIHealthService:
             
             try:
                 response = client.messages.create(
-                    model=getattr(settings, 'claude_model', 'claude-3-5-sonnet-20241022'),
+                    # model=getattr(settings, 'claude_model', 'claude-sonnet-4-20241022'),
+                    model=getattr(settings, 'claude_model', 'claude-sonnet-4-6'),
                     max_tokens=10,
                     messages=[
                         {"role": "user", "content": "Hi"}
@@ -56,7 +57,8 @@ class APIHealthService:
                     "response_time": response_time,
                     "message": "API is healthy and responsive",
                     "tokens_used": tokens_used,
-                    "model": getattr(settings, 'claude_model', 'claude-3-5-sonnet-20241022')
+                    # "model": getattr(settings, 'claude_model', 'claude-sonnet-4-20241022')
+                    "model": getattr(settings, 'claude_model', 'claude-sonnet-4-6')
                 }
                 
             except Exception as api_error:

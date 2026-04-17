@@ -13,14 +13,21 @@ frappe.ui.form.on("Motor Policy", {
 		if (!frm.doc.variant) {
 			frm.set_value("variant", "NA");
 		}
-		if (!frm.doc.bank_name) {
-			frm.set_value("bank_name", "NONE");
-		}
+		frm.set_value("bank_name", "NONE");
+		frm.set_value("payment_tran_no",0)
 		if (!frm.doc.gst) {
 			frm.set_value("gst", 18);
 		}
+		if (frm.doc.policy_type==="MOTOR PRIVATE CAR" || "MOTOR TWO WHEELER"){
+			frm.set_value("type_of_vehicle","PRIVATE")
+		}else{
+			frm.set_value("type_of_vehicle","COMMERCIAL")
+
+		}
 		frm.set_value("pos_misp_ref", "YES");
-		frm.set_value("policy_enquiry_remarks", "NA");
+		if (!frm.doc.policy_enquiry_remarks){
+			frm.set_value("policy_enquiry_remarks", "NA");}
+
 
 		// Mark AI fields first so indicators are always visible regardless of status
 		if (!frm.doc.__islocal && typeof policy_reader !== "undefined" && policy_reader.saiba) {

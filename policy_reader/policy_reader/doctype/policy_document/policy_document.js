@@ -80,32 +80,6 @@ frappe.ui.form.on("Policy Document", {
 			frm.set_value("checklist_department", frm.doc.policy_type);
 		}
 	},
-
-	// setup_realtime_listener: function (frm) {
-	// 	frappe.realtime.on("policy_processing_complete", function (message) {
-	// 		if (message.doc_name === frm.doc.name) {
-	// 			$(".processing-indicator").remove();
-	// 			const method_text =
-	// 				message.processing_method === "claude_vision"
-	// 					? "Claude AI (Vision)"
-	// 					: "Local OCR";
-	// 			const indicator = message.status === "Completed" ? "green" : "red";
-	// 			// const msg =
-	// 			// 	message.status === "Completed"
-	// 			// 		? __(
-	// 			// 				"Policy processing completed successfully via {0}! Processing time: {1}s",
-	// 			// 				[method_text, message.processing_time]
-	// 			// 		  )
-	// 			// 		: __("Policy processing failed: {0}", [message.message]);
-	// 			const msg =
-	// 				message.status === "Completed"
-	// 					? `${message.message} (via ${method_text}, ${message.processing_time}s)`
-	// 					: __("Policy processing failed: {0}", [message.message]);
-	// 			frappe.show_alert({ message: msg, indicator });
-	// 			frm.reload_doc();
-	// 		}
-	// 	});
-	// },
 	setup_realtime_listener: function (frm) {
 		frappe.realtime.off("policy_processing_complete");
 		frappe.realtime.on("policy_processing_complete", function (message) {
