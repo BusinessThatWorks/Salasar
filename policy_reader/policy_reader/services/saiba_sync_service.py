@@ -416,6 +416,17 @@ class SaibaSyncService:
 				# customer_code=self._parse_customer_code(data.get("result", ""))
 				# customer_code = data.get("response", {}).get("custCode")
 				customer_code=data.get("custCode")
+				if customer_code:
+					try:
+						if policy_doc.name != str(customer_code):
+							frappe.rename_doc("Insurance Customer",policy_doc.name,str(customer_code),force=True)
+							policy_doc = frappe.get_doc("Insurance Customer", str(customer_code))
+					except Exception as e:
+						frappe.log_error(
+							f"Rename failed: {str(e)}",
+							"SAIBA Customer Rename Error"
+						)
+				
 			else:
 				control_no = self._parse_control_number(data.get("result", ""))
 			self._update_sync_status(
