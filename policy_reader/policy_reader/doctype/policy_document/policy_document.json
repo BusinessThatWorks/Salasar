@@ -29,6 +29,10 @@
   "customer_code",
   "checklist_customer_vertical",
   "checklist_customer_pan",
+  "column_break_qxda",
+  "customer_email",
+  "customer_phone_no",
+  "customer_mobile_no",
   "column_break_customer",
   "customer_name",
   "customer_group_name",
@@ -360,7 +364,7 @@
    "fieldname": "checklist_coverage_type",
    "fieldtype": "Select",
    "label": "Coverage Type",
-   "options": "1+1\n1+3\n1+5\n0+1\n1+0\n3+3\n5+5"
+   "options": "1+1\n1+3\n1+5\n0+1\n1+0\n3+3\n5+5\n1\n2\n3\n4\n5"
   },
   {
    "description": "Auto-populated from logged-in user's Insurance Employee record",
@@ -559,12 +563,37 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_qxda",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer_code.email",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_email",
+   "fieldtype": "Data",
+   "label": "Customer Email"
+  },
+  {
+   "fetch_from": "customer_code.phone_no",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_phone_no",
+   "fieldtype": "Data",
+   "label": "Customer Phone No"
+  },
+  {
+   "fetch_from": "customer_code.mobile_no",
+   "fetch_if_empty": 1,
+   "fieldname": "customer_mobile_no",
+   "fieldtype": "Data",
+   "label": "Customer Mobile No"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-13 11:13:05.937093",
+ "modified": "2026-04-20 23:12:03.950692",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

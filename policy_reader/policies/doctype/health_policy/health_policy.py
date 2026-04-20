@@ -233,8 +233,9 @@ class HealthPolicy(Document):
 		self.save()
 
 		for field in ai_extracted_fields:
-			if not self.get(field):
-				frappe.throw(f"{field} is missing")
+			value=self.get(field)
+			if value is None or value == "":
+					frappe.throw(f"{field} is missing")
 		
 		self.approval_status = "Approved"
 		self.save()

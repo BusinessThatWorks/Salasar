@@ -1,8 +1,17 @@
 // Copyright (c) 2025, Clapgrow Software and contributors
 // For license information, please see license.txt
-
 frappe.ui.form.on("Policy Document", {
 	onload: function (frm) {
+		let field = frm.fields_dict.customer_code;
+        if (field) {
+            field.new_doc = function () {
+                let doctype = field.df.options;
+                let route = frappe.router.slug(doctype);
+
+                let url = `/app/${route}/new-${route}`;
+                window.open(url, "_blank");
+            };
+        }
 		// Populate processor info on form load
 		frm.trigger("populate_processor_info");
 		// Sync checklist_department with policy_type if set
@@ -471,7 +480,7 @@ frappe.ui.form.on("Policy Document", {
 			"SUPER TOP UP",
 		];
 
-		const health_coverage_types = ["1 YEAR", "2 YEAR", "3 YEAR", "4 YEAR", "5 YEAR"];
+		const health_coverage_types = ["1", "2", "3", "4", "5"];
 
 		// Set options based on department selection
 		const department = frm.doc.checklist_department;

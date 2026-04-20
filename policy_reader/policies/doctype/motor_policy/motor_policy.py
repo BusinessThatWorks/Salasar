@@ -243,7 +243,7 @@ class MotorPolicy(Document):
 			"tp_premium",
 			"bank_name",
 			"cc",
-			"rto_code",
+			"rto_code"
 		]
 
 		for field in ai_extracted_fields:

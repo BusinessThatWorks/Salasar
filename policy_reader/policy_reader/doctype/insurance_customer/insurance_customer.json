@@ -21,8 +21,8 @@
   "address",
   "country",
   "column_break_vmvm",
-  "city",
   "state",
+  "city",
   "pin",
   "location",
   "contact_information_section",
@@ -80,7 +80,7 @@
    "in_standard_filter": 1,
    "label": "Customer Code",
    "length": 50,
-   "reqd": 1,
+   "read_only": 1,
    "unique": 1
   },
   {
@@ -361,7 +361,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-17 16:15:49.213213",
+ "modified": "2026-04-20 18:21:29.746379",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Insurance Customer",
