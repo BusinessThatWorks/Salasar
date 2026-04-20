@@ -6,10 +6,12 @@ from frappe.model.document import Document
 
 
 class InsuranceCustomer(Document):
+    def before_insert(self):
+        self.random_number_customer_code()
+
     def before_save(self):
         self.check_for_default_values()
         self.check_for_saiba_fields()
-        
         
     def check_for_default_values(self):
         if self.city and not self.location:
@@ -23,7 +25,12 @@ class InsuranceCustomer(Document):
         if not self.industry_segment:
             self.industry_segment="NA"
         if not self.form_of_organization:
-            self.form_of_organization="INDIVIDUAL"    
+            self.form_of_organization="INDIVIDUAL"  
+
+    def random_number_customer_code(self):
+        if not self.customer_code:
+            customer_code=frappe.generate_hash(length=5)
+            self.customer_code = customer_code
            
         
     def check_for_saiba_fields(self):
@@ -59,4 +66,4 @@ class InsuranceCustomer(Document):
         if missing:
             frappe.throw("The following fields are mandatory to sync with saiba:\n" + "\n".join(f"• {f}" for f in missing))
 
-   
+ 

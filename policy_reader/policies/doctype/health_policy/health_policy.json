@@ -232,7 +232,7 @@
    "fieldname": "coverage_type",
    "fieldtype": "Select",
    "label": "Coverage Type",
-   "options": "1 YEAR\n2 YEAR\n3 YEAR\n4 YEAR\n5 YEAR"
+   "options": "1\n2\n3\n4\n5"
   },
   {
    "description": "SAIBA(Insured/Proposer Name)",
@@ -1165,7 +1165,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-07 13:55:58.521799",
+ "modified": "2026-04-20 12:40:14.484664",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",
