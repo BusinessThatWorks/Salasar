@@ -23,6 +23,8 @@ class PolicyDocument(Document):
 				self.title = self.get_filename_from_attachment()
 
 		# Auto-populate processor information
+		if not self.user_logged_in:
+			self.user_logged_in=frappe.session.user
 		self._populate_processor_info()
 		if self.extracted_fields:
 			self._populate_insurance_company_branch()

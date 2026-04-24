@@ -124,6 +124,8 @@
   "processor_employee_code",
   "processor_employee_type",
   "processor_branch_name",
+  "column_break_dmix",
+  "user_logged_in",
   "internal_business_section",
   "brok_rate",
   "tp_rate",
@@ -1081,13 +1083,24 @@
    "fieldtype": "Select",
    "label": "Prev Policy",
    "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "column_break_dmix",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user_logged_in",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "User logged in",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-16 18:08:49.852650",
+ "modified": "2026-04-24 15:50:28.129198",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
