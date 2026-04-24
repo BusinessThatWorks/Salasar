@@ -27,7 +27,7 @@ frappe.ui.form.on("Motor Policy", {
 		frm.set_value("pos_misp_ref", "YES");
 		if (!frm.doc.policy_enquiry_remarks){
 			frm.set_value("policy_enquiry_remarks", "NA");}
-
+		highlight_saiba(frm);
 
 		// Mark AI fields first so indicators are always visible regardless of status
 		if (!frm.doc.__islocal && typeof policy_reader !== "undefined" && policy_reader.saiba) {
@@ -87,6 +87,9 @@ frappe.ui.form.on("Motor Policy", {
 			}
 		}
 	},
+	saiba_control_number(frm) {
+        highlight_saiba(frm);
+    },
 	policy_type(frm) {
 		// Auto-set type_of_vehicle when policy_type changes
 		set_type_of_vehicle(frm);
@@ -146,6 +149,24 @@ frappe.ui.form.on("Motor Policy", {
 		}
 	},
 });
+
+function highlight_saiba(frm) {
+    let field = frm.get_field('saiba_control_number');
+
+    if (frm.doc.saiba_control_number === "Pending") {
+        $(field.$wrapper).find('input, .control-value').css({
+            'background-color': '#ffe6e6',
+            'color': '#cc0000',
+            'font-weight': 'bold'
+        });
+    } else {
+        $(field.$wrapper).find('input, .control-value').css({
+            'background-color': '#e6ffe6',
+            'color': '#008000',
+            'font-weight': 'bold'
+        });
+    }
+}
 
 function set_rto_code(frm) {
 	let source_value = frm.doc.vehicle_no;

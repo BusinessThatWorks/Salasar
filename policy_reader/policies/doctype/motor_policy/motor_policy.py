@@ -22,7 +22,12 @@ class MotorPolicy(Document):
 		self.validate_policy_dates()
 		self.validate_required_fields()
 		self.validate_renewable_policy()
+		self.pending_control_no()
 
+	def pending_control_no(self):
+		if not self.saiba_control_number:
+			self.saiba_control_number="Pending"
+			
 	def validate_policy_dates(self):
 		"""Validate policy date logic"""
 		if self.policy_start_date and self.policy_expiry_date:

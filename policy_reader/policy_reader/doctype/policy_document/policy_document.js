@@ -5,7 +5,7 @@ frappe.ui.form.on("Policy Document", {
 		let field = frm.fields_dict.customer_code;
         if (field) {
             field.new_doc = function () {
-                let doctype = field.df.options;
+                let doctype = field.df.options; 
                 let route = frappe.router.slug(doctype);
 
                 let url = `/app/${route}/new-${route}`;

@@ -303,7 +303,8 @@ class PolicyCreationService:
 				"rm_code": "rm_rm_code",
 				"csc": "csc",
 				"csc_code": "csc_csc_code",
-				"remarks": "policy_enquiry_remarks"
+				"remarks": "policy_enquiry_remarks",
+				"user_logged_in":"user_logged_in"
 			}
 
 			copied_count = 0

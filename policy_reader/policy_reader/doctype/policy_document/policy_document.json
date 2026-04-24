@@ -85,7 +85,9 @@
   "processor_employee_name",
   "processor_employee_code",
   "processor_employee_type",
-  "processor_branch_name"
+  "processor_branch_name",
+  "column_break_vyap",
+  "user_logged_in"
  ],
  "fields": [
   {
@@ -97,7 +99,6 @@
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Document Title",
    "reqd": 1
   },
@@ -227,6 +228,7 @@
    "fetch_from": "customer_code.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Customer Name",
    "read_only": 1
   },
@@ -528,7 +530,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "csc.csc_code",
+   "fetch_from": "customer_code.csc_code",
    "fieldname": "csc_code",
    "fieldtype": "Data",
    "label": "CSC Code",
@@ -544,7 +546,7 @@
    "options": "Insurance Employee"
   },
   {
-   "fetch_from": "rm_code.employee_code",
+   "fetch_from": "customer_code.csc",
    "fetch_if_empty": 1,
    "fieldname": "csc",
    "fieldtype": "Link",
@@ -588,12 +590,23 @@
    "fieldname": "customer_mobile_no",
    "fieldtype": "Data",
    "label": "Customer Mobile No"
+  },
+  {
+   "fieldname": "column_break_vyap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user_logged_in",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "User logged in ",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-20 23:12:03.950692",
+ "modified": "2026-04-22 18:01:30.113556",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",

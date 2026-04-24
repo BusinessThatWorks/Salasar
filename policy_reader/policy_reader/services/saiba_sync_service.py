@@ -279,7 +279,8 @@ class SaibaSyncService:
 			# "customerCode": self._safe_int(policy_doc.customer_code),
 			"CustCode": self._safe_int(policy_doc.customer_code),
 			"posPolicy": self._safe_str(policy_doc.pos_policy) or "No",
-			"policyBizType": self._safe_str(policy_doc.biz_type) or "New",
+			# "policyBizType": self._safe_str(policy_doc.biz_type) or "New",
+			"bizType":self._safe_str(policy_doc.biz_type) or "New",
 			"insurerBranchCode": self._safe_int(policy_doc.insurer_branch_code),
 			# "policyIssuanceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
 			"issuenceDate": self._format_date_for_saiba(policy_doc.policy_issuance_date),
@@ -291,6 +292,7 @@ class SaibaSyncService:
 			"policyNo": self._safe_str(policy_doc.policy_no),
 			"planName": self._safe_str(policy_doc.plan_name),
 			"isRenewable": "Yes" if policy_doc.is_renewable == "Yes" else "No",
+			# "isRenewal":"New",
 			# "newRenewal": "Yes" if policy_doc.is_renewable == "Yes" else "No",
 			# "coverageType": self._safe_str(policy_doc.coverage_type),
 			# "policyVertical": self._safe_str(policy_doc.policy_vertical),
@@ -410,7 +412,7 @@ class SaibaSyncService:
 		except Exception:
 			data = {"error": response.text, "status_code": response.status_code}
 
-		if response.status_code == 200 and data.get("status") in ["Success", "Sucess"]:
+		if response.status_code == 200 and data.get("status")== "Success":
 			customer_code = None
 			control_no = None
 			if policy_doc.doctype == "Insurance Customer":
