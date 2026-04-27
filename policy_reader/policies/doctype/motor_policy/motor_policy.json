@@ -702,7 +702,7 @@
    "fieldname": "category",
    "fieldtype": "Select",
    "label": "Category",
-   "options": "PCV\nGSV\nMISC"
+   "options": "\nPCV\nGSV\nMISC"
   },
   {
    "fieldname": "column_break_registration",
@@ -740,14 +740,14 @@
   {
    "description": "SAIBA(Sum Insured)",
    "fieldname": "sum_insured",
-   "fieldtype": "Int",
+   "fieldtype": "Currency",
    "label": "Sum Insured",
    "precision": "2"
   },
   {
    "description": "SAIBA(Net/OD Premium)",
    "fieldname": "net_od_premium",
-   "fieldtype": "Int",
+   "fieldtype": "Currency",
    "label": "Net/OD Premium",
    "precision": "2"
   },
@@ -758,7 +758,7 @@
   {
    "description": "SAIBA(TP Premium)",
    "fieldname": "tp_premium",
-   "fieldtype": "Int",
+   "fieldtype": "Currency",
    "label": "TP Premium",
    "precision": "2"
   },
@@ -778,14 +778,14 @@
   {
    "description": "SAIBA(GST)",
    "fieldname": "gst",
-   "fieldtype": "Int",
+   "fieldtype": "Float",
    "label": "GST",
    "precision": "2"
   },
   {
    "description": "SAIBA(GST/Tax%) - GST or tax percentage",
    "fieldname": "gst_tax_percent",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "GST/Tax%",
    "precision": "2"
   },
@@ -914,7 +914,7 @@
    "fieldname": "campaign_name",
    "fieldtype": "Select",
    "label": "Campaign Name",
-   "options": "Portability\nNon Portability"
+   "options": "\nPortability\nNon-Portability\nNo Campaign"
   },
   {
    "default": "NA",
@@ -1100,7 +1100,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-24 15:50:28.129198",
+ "modified": "2026-04-27 16:01:12.340773",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",

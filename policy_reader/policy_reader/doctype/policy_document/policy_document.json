@@ -407,8 +407,8 @@
   {
    "fieldname": "checklist_portability",
    "fieldtype": "Select",
-   "label": "Portability",
-   "options": "Yes\nNo"
+   "label": "Campaign Name",
+   "options": "\nPortability\nNon-Portability\nNo Campaign"
   },
   {
    "fieldname": "documents_tab",
@@ -606,7 +606,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-22 18:01:30.113556",
+ "modified": "2026-04-27 15:03:09.852095",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Policy Document",
