@@ -42,7 +42,7 @@
   "csc_code",
   "tc_code",
   "ref_code",
-  "portability",
+  "campaign_name",
   "is_renewable",
   "pos_misp_ref",
   "payment_information_section",
@@ -306,7 +306,7 @@
    "fieldname": "insured_1_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_1_emp_code",
@@ -326,7 +326,7 @@
    "fieldname": "insured_1_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_1_dob",
@@ -347,7 +347,7 @@
    "fieldname": "insured_2_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_2_emp_code",
@@ -367,7 +367,7 @@
    "fieldname": "insured_2_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_2_dob",
@@ -388,7 +388,7 @@
    "fieldname": "insured_3_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_3_emp_code",
@@ -408,7 +408,7 @@
    "fieldname": "insured_3_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_3_dob",
@@ -429,7 +429,7 @@
    "fieldname": "insured_4_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_4_emp_code",
@@ -449,7 +449,7 @@
    "fieldname": "insured_4_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_4_dob",
@@ -470,7 +470,7 @@
    "fieldname": "insured_5_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_5_emp_code",
@@ -490,7 +490,7 @@
    "fieldname": "insured_5_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_5_dob",
@@ -511,7 +511,7 @@
    "fieldname": "insured_6_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_6_emp_code",
@@ -531,7 +531,7 @@
    "fieldname": "insured_6_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_6_dob",
@@ -552,7 +552,7 @@
    "fieldname": "insured_7_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_7_emp_code",
@@ -572,7 +572,7 @@
    "fieldname": "insured_7_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_7_dob",
@@ -593,7 +593,7 @@
    "fieldname": "insured_8_relation",
    "fieldtype": "Select",
    "label": "Relation",
-   "options": "Self\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
+   "options": "\nSelf\nSpouse\nWife\nHusband\nSon\nDaughter\nFather\nMother\nOther"
   },
   {
    "fieldname": "insured_8_emp_code",
@@ -613,7 +613,7 @@
    "fieldname": "insured_8_gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther"
+   "options": "\nMale\nFemale\nOther"
   },
   {
    "fieldname": "insured_8_dob",
@@ -646,12 +646,6 @@
    "fieldname": "policy_enquiry_remarks",
    "fieldtype": "Long Text",
    "label": "Policy/Enquiry Remarks"
-  },
-  {
-   "fieldname": "portability",
-   "fieldtype": "Select",
-   "label": "Portability",
-   "options": "Yes\nNo"
   },
   {
    "default": "No",
@@ -1124,7 +1118,8 @@
    "fieldname": "approval_status",
    "fieldtype": "Select",
    "label": "Approval Status",
-   "options": "Approved\nNot Approved"
+   "options": "Approved\nNot Approved",
+   "read_only": 1
   },
   {
    "fieldname": "policy_status",
@@ -1160,12 +1155,18 @@
    "fieldtype": "Data",
    "label": "Payment Mode ",
    "length": 100
+  },
+  {
+   "fieldname": "campaign_name",
+   "fieldtype": "Select",
+   "label": "Campaign Name",
+   "options": "\nPortability\nNon-Portability\nNo Campaign"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-20 12:40:14.484664",
+ "modified": "2026-04-27 16:01:55.867596",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",

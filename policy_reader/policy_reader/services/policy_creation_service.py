@@ -298,7 +298,7 @@ class PolicyCreationService:
 				"checklist_customer_pan": "customer_pan",
 				"checklist_customer_gst": "customer_gst",
 				"checklist_category": "category",
-				"checklist_portability": "portability",
+				"checklist_portability": "campaign_name",
 				"rm": "rm",
 				"rm_code": "rm_rm_code",
 				"csc": "csc",
