@@ -327,9 +327,7 @@ class SaibaSyncService:
 		return {
 			"title": self._safe_str(customer_doc.title),
 			"name": self._safe_str(customer_doc.customer_name),
-			"groupName": self._safe_str(customer_doc.customer_group)
-			if customer_doc.customer_group
-			else "NO GROUP",
+			"groupName": self._safe_str(customer_doc.customer_group) if customer_doc.customer_group else "NO GROUP",
 			"shortName": self._safe_str(customer_doc.short_name),
 			"gender": self._safe_str(customer_doc.gender),
 			"dob": self._format_date_for_saiba(customer_doc.dob_doi),

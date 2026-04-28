@@ -56,9 +56,8 @@ class InsuranceCustomer(Document):
             "Form Of Organization": self.form_of_organization,
             "Customer Category": self.customer_category,
             "Branch Code": self.branch_code,
-            # "RM Code": self.rm_code,
-            # "CSC Code": self.csc_code,
             "POS/REF/MISP Code": self.posrefmisp_code,
+            "Customer Aadhaar No":self.customer_aadhaar_no
         }
 
         missing = [label for label, value in required_fields_for_saiba.items() if not value]
