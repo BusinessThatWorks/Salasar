@@ -3,9 +3,9 @@
 /* global policy_reader */
 frappe.ui.form.on("Health Policy", {
 	refresh(frm) {
-		if (!frm.remarks) {
-			frm.set_value("remarks", "NA");
-		}
+		// if (!frm.remarks) {
+		// 	frm.set_value("remarks", "NA");
+		// }
 		if (!frm.policy_status){
 			frm.set_value("policy_status","Issued")
 		}

@@ -25,6 +25,7 @@
   "policy_start_date",
   "policy_expiry_date",
   "receive_date",
+  "policy_received_format",
   "is_renewable",
   "prev_policy_no",
   "prev_policy",
@@ -1094,13 +1095,19 @@
    "in_list_view": 1,
    "label": "User logged in",
    "read_only": 1
+  },
+  {
+   "default": "Recd in Soft Copy",
+   "fieldname": "policy_received_format",
+   "fieldtype": "Data",
+   "label": "policy Received Format"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-27 16:01:12.340773",
+ "modified": "2026-04-28 13:58:15.362523",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
