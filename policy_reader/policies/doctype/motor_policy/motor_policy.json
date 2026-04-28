@@ -171,8 +171,7 @@
    "fieldname": "policy_document",
    "fieldtype": "Link",
    "label": "Policy Document",
-   "options": "Policy Document",
-   "read_only": 1
+   "options": "Policy Document"
   },
   {
    "fieldname": "column_break_zchk",
@@ -1107,7 +1106,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-28 13:58:15.362523",
+ "modified": "2026-04-28 17:03:29.727104",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
