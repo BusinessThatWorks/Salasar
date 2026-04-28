@@ -186,8 +186,7 @@ patches = [
 # Ignore links to specified DocTypes when deleting documents
 # -----------------------------------------------------------
 
-# ignore_links_on_delete = ["Communication", "ToDo"]
-
+ignore_links_on_delete = ["Motor Policy", "Health Policy","Policy Document","Insurance Employee","Insurance Company Branch"]
 # Request Events
 # ----------------
 # before_request = ["policy_reader.utils.before_request"]
