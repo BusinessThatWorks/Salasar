@@ -302,6 +302,29 @@ FINAL RULE — WHEN IN DOUBT
   A null variant is always correct.
   A wrong variant is always a data corruption error.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NUMERIC NORMALIZATION (CRITICAL RULE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For ALL numeric fields (e.g., GVW, Passenger GVW, CC, Sum Insured, Premiums):
+
+- Extract ONLY the numeric value
+- REMOVE all units and suffixes such as:
+    KG, KGS, TON, CC, HP, KW, LTR, L, %
+- REMOVE any text attached to numbers
+
+Examples:
+  "671 KG"     → "671"
+  "671KG"      → "671"
+  "1500 CC"    → "1500"
+  "119000/-"   → "119000"
+  "18%"        → "18"
+
+CRITICAL:
+- Output must contain ONLY digits (and decimal if present)
+- No alphabets, no units, no symbols
+
+If value cannot be converted to pure number → return null
+
 RESPOND WITH VALID FLAT JSON ONLY - NO EXPLANATIONS, NO MARKDOWN, NO CODE BLOCKS."""
 
 				# Add health-specific insured persons extraction instructions

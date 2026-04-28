@@ -226,7 +226,7 @@ class SaibaSyncService:
 			"startDate": self._format_date_for_saiba(policy_doc.policy_start_date),
 			"expiryDate": self._format_date_for_saiba(policy_doc.policy_expiry_date),
 			"policyReceivedDate": self._format_date_for_saiba(policy_doc.receive_date),
-			"policyReceivedFormat": "Recd in Hard Copy",
+			"policyReceivedFormat": self._safe_str(policy_doc.policy_received_format),
 			"policyType": self._safe_str(policy_doc.policy_type),
 			"department": self._safe_str(policy_doc.department),
 			"coverageType": self._safe_str(policy_doc.coverage_type) or "1+1",
@@ -306,7 +306,7 @@ class SaibaSyncService:
 			# "paymentTransactionNo": self._safe_str(policy_doc.payment_transaction_no),
 			"paymentTranNo": self._safe_str(policy_doc.payment_transaction_no),
 			"Chq/DD/Trn No": self._safe_str(policy_doc.payment_transaction_no),
-			"remarks": self._safe_str(policy_doc.remarks),
+			"remarks": self._safe_str(policy_doc.policy_enquiry_remarks),
 			"policyStatus": self._safe_str(policy_doc.policy_status),
 		}
 

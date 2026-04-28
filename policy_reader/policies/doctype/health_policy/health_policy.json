@@ -9,6 +9,7 @@
  "field_order": [
   "policy_information_tab",
   "policy_document",
+  "column_break_mxwb",
   "policy_file",
   "policy_information_section",
   "policy_no",
@@ -28,7 +29,6 @@
   "policy_status",
   "business_information_tab",
   "business_information_section",
-  "policy_enquiry_remarks",
   "branch_code",
   "biz_type",
   "old_control_number",
@@ -38,6 +38,10 @@
   "customer_gst",
   "column_break_business_info",
   "policy_type_biz",
+  "rm",
+  "rm_rm_code",
+  "csc",
+  "csc_csc_code",
   "rm_code",
   "csc_code",
   "tc_code",
@@ -140,7 +144,7 @@
   "stamp_duty",
   "prem_rate",
   "column_break_3",
-  "remarks",
+  "policy_enquiry_remarks",
   "internal_information_tab",
   "processor_information_section",
   "insurance_employee",
@@ -642,12 +646,6 @@
    "label": "Old Control Number"
   },
   {
-   "description": "Additional remarks or notes about the policy",
-   "fieldname": "policy_enquiry_remarks",
-   "fieldtype": "Long Text",
-   "label": "Policy/Enquiry Remarks"
-  },
-  {
    "default": "No",
    "fieldname": "is_renewable",
    "fieldtype": "Select",
@@ -694,6 +692,32 @@
    "fieldname": "customer_gst",
    "fieldtype": "Data",
    "label": "Customer GST"
+  },
+  {
+   "fieldname": "rm",
+   "fieldtype": "Link",
+   "label": "RM ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"RM\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "rm.employee_code",
+   "fieldname": "rm_rm_code",
+   "fieldtype": "Data",
+   "label": "RM code"
+  },
+  {
+   "fieldname": "csc",
+   "fieldtype": "Link",
+   "label": "CSC ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"CSC\"]]",
+   "options": "Insurance Employee"
+  },
+  {
+   "fetch_from": "csc.employee_code",
+   "fieldname": "csc_csc_code",
+   "fieldtype": "Data",
+   "label": "CSC code"
   },
   {
    "fieldname": "rm_code",
@@ -878,11 +902,6 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Long Text",
-   "label": "Remarks"
   },
   {
    "fieldname": "internal_information_tab",
@@ -1161,12 +1180,21 @@
    "fieldtype": "Select",
    "label": "Campaign Name",
    "options": "\nPortability\nNon-Portability\nNo Campaign"
+  },
+  {
+   "fieldname": "column_break_mxwb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "policy_enquiry_remarks",
+   "fieldtype": "Long Text",
+   "label": "Remarks"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-27 16:01:55.867596",
+ "modified": "2026-04-27 18:37:26.623876",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Health Policy",
