@@ -34,6 +34,8 @@ class InsuranceCustomer(Document):
            
         
     def check_for_saiba_fields(self):
+        if frappe.flags.in_import:
+            return
         required_fields_for_saiba = {
             "Title": self.title,
             "Customer Name": self.customer_name,
@@ -65,4 +67,4 @@ class InsuranceCustomer(Document):
         if missing:
             frappe.throw("The following fields are mandatory to sync with saiba:\n" + "\n".join(f"• {f}" for f in missing))
 
- 
+    
