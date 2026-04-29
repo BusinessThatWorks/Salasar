@@ -40,7 +40,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Employee Type",
-   "options": "CSC\nRM",
+   "options": "CSC\nRM\nDEO",
    "reqd": 1
   },
   {
@@ -73,22 +73,22 @@
    "read_only": 1
   },
   {
+   "description": "Relationship Manager code (if employee type is RM)",
    "fieldname": "rm_code",
    "fieldtype": "Data",
-   "label": "RM Code",
-   "description": "Relationship Manager code (if employee type is RM)"
+   "label": "RM Code"
   },
   {
+   "description": "Customer Service Center code (if employee type is CSC)",
    "fieldname": "csc_code",
    "fieldtype": "Data",
-   "label": "CSC Code",
-   "description": "Customer Service Center code (if employee type is CSC)"
+   "label": "CSC Code"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-23 16:54:11.347052",
+ "modified": "2026-04-29 17:28:18.258393",
  "modified_by": "Administrator",
  "module": "Policy Reader",
  "name": "Insurance Employee",
