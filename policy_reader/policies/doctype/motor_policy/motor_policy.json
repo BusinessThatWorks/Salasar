@@ -37,6 +37,7 @@
   "customer_vertical",
   "branch_code",
   "branch_name",
+  "deo",
   "column_break_business_info",
   "policy_type_biz",
   "rm",
@@ -142,6 +143,8 @@
   "saiba_sync_status",
   "saiba_sync_datetime",
   "approval_status",
+  "deletion_approval_status",
+  "deletion_requested",
   "column_break_saiba_sync",
   "saiba_control_number",
   "view_the_reqres",
@@ -341,7 +344,7 @@
    "options": "Insurance Employee"
   },
   {
-   "fetch_from": "rm.employee_code",
+   "fetch_from": "rm.rm_code",
    "fieldname": "rm_rm_code",
    "fieldtype": "Data",
    "label": "RM code"
@@ -354,7 +357,7 @@
    "options": "Insurance Employee"
   },
   {
-   "fetch_from": "csc.employee_code",
+   "fetch_from": "csc.csc_code",
    "fieldname": "csc_csc_code",
    "fieldtype": "Data",
    "label": "CSC code"
@@ -1100,13 +1103,35 @@
    "fieldname": "policy_received_format",
    "fieldtype": "Data",
    "label": "policy Received Format"
+  },
+  {
+   "default": "0",
+   "fieldname": "deletion_requested",
+   "fieldtype": "Check",
+   "label": "Deletion_requested",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deletion_approval_status",
+   "fieldtype": "Select",
+   "label": "Deletion Approval Status",
+   "options": "\nPending\nApproved\nRejected",
+   "read_only": 1
+  },
+  {
+   "description": " ",
+   "fieldname": "deo",
+   "fieldtype": "Link",
+   "label": "DEO ",
+   "link_filters": "[[\"Insurance Employee\",\"employee_type\",\"=\",\"DEO\"]]",
+   "options": "Insurance Employee"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-28 17:03:29.727104",
+ "modified": "2026-04-30 12:27:10.324597",
  "modified_by": "Administrator",
  "module": "Policies",
  "name": "Motor Policy",
